@@ -1,0 +1,15 @@
+\name{ContingencyOptions-class}
+\alias{ContingencyOptions-class}
+\title{Contingency input/output options}
+\description{
+  This class contains all the input options as well as the
+  estimated paramters for Contingency data-set.It inherits
+  from base class \code{\linkS4class{CommonOptions}}
+}
+\details{
+  \describe{ \item{classgamma:}{The value of poisson
+  parameter (gamma) for each co-cluster.}
+  \item{datamui:}{Rows effect (if known).}
+  \item{datanuj:}{Columns effect (if known).} }
+}
+

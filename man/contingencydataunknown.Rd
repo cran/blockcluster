@@ -1,0 +1,14 @@
+\docType{data}
+\name{contingencydataunknown}
+\alias{contingencydataunknown}
+\title{Simulated Contingency Data-set}
+\format{A data matrix with 1000 rows and 100 columns.}
+\description{
+  It is a contingency data-set simulated using Poisson distribution. The row and column effects is unknown for 
+  this data-set. It consist of two clusters in rows and three clusters in columns. 
+}
+\examples{
+data(contingencydataunknown)
+}
+\keyword{datasets}
+

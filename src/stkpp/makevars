@@ -1,0 +1,3 @@
+include $(R_HOME)/etc${R_ARCH}/Makeconf
+HASRMATH = f
+LIB_STKPP_A = libSTKpp.a

@@ -1,0 +1,71 @@
+\name{cocluster}
+\alias{cocluster}
+\title{Co-Clustering function.}
+\usage{
+  cocluster(data, datatype, model, nbcocluster,
+    strategy = cocluststrategy())
+}
+\arguments{
+  \item{data}{Input data as matrix (or list containing data
+  matrix, numeric vector for row effects and numeric vector
+  column effects in case of contingency data with known row
+  and column effects.)}
+
+  \item{datatype}{This is the type of data which can be
+  "binary" , "contingency" or "continuous".}
+
+  \item{model}{This is the name of model. The following
+  models exists for various kinds of datasets:
+  \tabular{rlll}{ Model \tab Datatype \tab Proportions \tab
+  Dispersion/Variance \cr pik_rhol_epsilonkl(Default) \tab
+  binary \tab unequal \tab unequal \cr pik_rhol_epsilon
+  \tab binary \tab unequal \tab equal \cr pi_rho_epsilonkl
+  \tab binary \tab equal \tab unequal \cr pi_rho_epsilon
+  \tab binary \tab equal \tab equal \cr pik_rhol_sigma2kl
+  \tab continuous \tab unequal \tab unequal \cr
+  pik_rhol_sigma \tab continuous \tab unequal \tab equal
+  \cr pi_rho_sigma2kl \tab continuous \tab equal \tab
+  unequal \cr pi_rho_sigma2 \tab continuous \tab equal \tab
+  equal \cr pik_rhol_unknown(default) \tab contingency \tab
+  unequal \tab N.A \cr pi_rho_unknown \tab contingency \tab
+  equal \tab N.A \cr pik_rhol_known \tab contingency \tab
+  unequal \tab N.A \cr pi_rho_known \tab contingency \tab
+  equal \tab N.A \cr }}
+
+  \item{nbcocluster}{Interger vector specifying the number
+  of row and column clusters respectively.}
+
+  \item{strategy}{Object of class
+  \code{\linkS4class{strategy}}.}
+}
+\value{
+  Return an object of \code{\linkS4class{BinaryOptions}} or
+  \code{\linkS4class{ContingencyOptions}} or
+  \code{\linkS4class{ContinuousOptions}} depending of
+  whether the datatype is Bianry, Contingency or Continuous
+  respectively.
+}
+\description{
+  This function performs Co-Clustering (simultanuous
+  clustering of rows and columns ) for Binary, Contingency
+  and Continuous datasets using latent block models.
+}
+\examples{
+# Simple example with simulated binary data
+#load data
+data(binarydata)
+#usage of cocluster function in its most simplest form
+out<-cocluster(binarydata,datatype="binary",nbcocluster=c(2,3))
+#Summarize the output results
+summary(out)
+#Plot the original and co-clustered data
+plot(out)
+
+# A little advanced example with simulated gaussian data
+data(gaussiandata)
+#set strategy , see documentation for "cocluststrategy" function for more details.
+newstrategy<-cocluststrategy(nbxem=5,nbtry=2,algo="XEMStrategy")
+# calling cocluster function with newstrategy and default model
+out<-cocluster(gaussiandata,datatype="continuous",nbcocluster=c(2,3),strategy=newstrategy)
+}
+
