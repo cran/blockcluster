@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------------*/
-/*     Copyright (C) 2011-2011  Parmeet Singh Bhatia
+/*     Copyright (C) 2011-2013  Parmeet Singh Bhatia
 
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as
@@ -21,13 +21,6 @@
 
  Contact : parmeet.bhatia@inria.fr , bhatia.parmeet@gmail.com
  */
-
-/*
- * Project:  cocluster
- * created on: Dec 19, 2011
- * Author: Parmeet Singh Bhatia
- *
- **/
 
 /** @file IInit.h
  *  @brief Declares abstract class IInit for Initializations.

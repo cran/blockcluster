@@ -11,17 +11,16 @@
   \item{y}{Ignored}
 
   \item{...}{Additional argument(s) . Currently we support
-  two additional argument. "asp": If this is set to FALSE
-  the original aspect ratio is not conserved. In this case,
-  R graphics will display the data in a way that fits the
-  screen and is suitable for viewing. By default "asp" is
-  TRUE. "type" : This is the type of plot which is either
-  "cocluster" or "distribution". The corresponding plots
-  are colcustered data and distributions and mixtire
-  densitities for coclusters resplectively. Default is
+  two additional argument. "asp": If this is set to TRUE
+  the original aspect ratio is conserved. By default "asp"
+  is FALSE. "type" : This is the type of plot which is
+  either "cocluster" or "distribution". The corresponding
+  plots are Co-clustered data and distributions and mixture
+  densities for Co-clusters respectively. Default is
   "cocluster" plot.}
 }
 \description{
-  This funtion plot the original and co-clustered datasets.
+  This function plot the original and Co-clustered
+  data-sets.
 }
 

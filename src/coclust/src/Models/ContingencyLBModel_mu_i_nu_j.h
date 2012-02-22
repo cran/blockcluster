@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------------*/
-/*     Copyright (C) 2011-2012  Parmeet Singh Bhatia
+/*     Copyright (C) 2011-2013  Parmeet Singh Bhatia
 
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as
@@ -22,12 +22,6 @@
  Contact : parmeet.bhatia@inria.fr , bhatia.parmeet@gmail.com
  */
 
-/*
- * Project:  cocluster
- * created on: Jan 30, 2012
- * Author: Parmeet Singh Bhatia
- *
- **/
 
 /** @file ContingencyLBModel_mu_i_nu_j.h
  *  @brief Declares concrete model class ContingencyLBModel_mu_i_nu_j for Contingency Data.
@@ -52,31 +46,42 @@ class ContingencyLBModel_mu_i_nu_j: public ICoClustModel
      * @param v_Nuj Constant reference to Known column effects.
      * @return
      */
-    ContingencyLBModel_mu_i_nu_j(MatrixInteger const& m_Dataij,VectorReal const& v_Mui,VectorReal const& v_Nuj,ModelParameters const& Mparam);
-    virtual bool Estep();
-    virtual bool CEstep();
-    virtual void Mstep();
+    ContingencyLBModel_mu_i_nu_j(MatrixInteger const& m_Dataij,VectorReal const& v_Mui,
+                                 VectorReal const& v_Nuj,ModelParameters const& Mparam);
+    ContingencyLBModel_mu_i_nu_j(MatrixInteger const& m_Dataij,VectorInteger const & rowlabels,VectorInteger const & collabels,
+                                 VectorReal const& v_Mui,VectorReal const& v_Nuj,ModelParameters const& Mparam);
+    /** cloning */
+    virtual ContingencyLBModel_mu_i_nu_j* Clone(){return new ContingencyLBModel_mu_i_nu_j(*this);}
+    virtual void LogSumRows(MatrixReal & _m_sum);
+    virtual void LogSumCols(MatrixReal & _m_sum);
+    virtual void MStepFull();
+    virtual bool EMRows();
+    virtual bool CEMRows();
+    virtual bool EMCols();
+    virtual bool CEMCols();
+    virtual bool SEMRows();
+    virtual bool SEMCols();
     virtual void likelihoodStopCriteria();
     virtual void ParameterStopCriteria();
-    float EstimateLikelihood();
-    virtual bool CEMInit();
-    virtual bool FuzzyCEMInit();
+    virtual float EstimateLikelihood();
     virtual bool RandomInit();
     virtual void FinalizeOutput();
     virtual void ConsoleOut();
+    //virtual void UpdateAllUsingConditionalProbabilities();
     virtual void Modify_theta_start();
     virtual void Copy_theta_start();
     virtual void Copy_theta_max();
     virtual void Modify_theta_max();
-    MatrixInteger GetArrangedDataClusters();
+    const MatrixInteger& GetArrangedDataClusters();
     /**Return Poisson Parameters ContingencyLBModel_mu_i_nu_j::m_Gammakl_*/
-    MatrixReal GetGamma();
+    const MatrixReal& GetGamma() const;
     /**Destructor*/
     inline virtual ~ContingencyLBModel_mu_i_nu_j(){};
 
   protected:
     //Variables involved in Bernoulli model
     MatrixInteger const& m_Dataij_;
+    MatrixInteger m_ClusterDataij_;
     VectorReal const& v_Mui_;
     VectorReal const& v_Nuj_;
     float DataSum_;
@@ -86,71 +91,40 @@ class ContingencyLBModel_mu_i_nu_j: public ICoClustModel
     VectorReal v_nul_;
     VectorReal v_muk_;
     MatrixReal m_Ykl_;
-
     float Likelihood_old;
 
-    // Functions to be used for internal computations
-    void PoissonLogsumRows(MatrixReal & m);
-    void PoissonLogsumCols(MatrixReal & m);
-    bool EMRows();
-    bool CEMRows();
-    bool EMCols();
-    bool CEMCols();
-
-
-  private:
+    //M-steps
+    void MStepRows();
+    void MStepCols();
     //Utility functions
     VectorInteger PartRnd(int n,VectorReal proba);
     VectorReal Cumsum(VectorReal proba);
     MatrixReal Unifrnd(float a, float b, int row, int col);
 };
 
-inline MatrixReal ContingencyLBModel_mu_i_nu_j::GetGamma()
+inline const MatrixReal& ContingencyLBModel_mu_i_nu_j::GetGamma() const
 {
   return m_Gammakl_;
 }
 
-inline void ContingencyLBModel_mu_i_nu_j::Modify_theta_start()
+inline void ContingencyLBModel_mu_i_nu_j::MStepRows()
 {
-	m_Gammaklstart_ = m_Gammakl_;
-  v_logPiekstart_ = v_logPiek_;
-  v_logRholstart_ = v_logRhol_;
+  if(!Mparam_.fixedproportions_) {
+    v_logPiek_=(v_Tk_.array()/nbSample_).log();
+  }
 
-  m_Rjlstart_ = m_Rjl_;
+  m_Ykl_ = m_Tik_.transpose()*m_Uil_;
+  m_Gammakl_ = m_Ykl_.array()/(m_Tik_.transpose()*v_Mui_*v_nul_.transpose()).array();
 }
 
-inline void ContingencyLBModel_mu_i_nu_j::Copy_theta_start()
+inline void ContingencyLBModel_mu_i_nu_j::MStepCols()
 {
-	m_Gammakl_ = m_Gammaklstart_;
-  v_logPiek_ = v_logPiekstart_;
-  v_logRhol_ = v_logRholstart_;
+  if(!Mparam_.fixedproportions_) {
+    v_logRhol_=(v_Rl_.array()/nbVar_).log();
+  }
 
-  m_Rjl_ = m_Rjlstart_;
-
-  //initialization
-  v_Rl_ = m_Rjl_.colwise().sum();
-  m_Gammakl1_ = m_Gammakl_;
+  m_Ykl_ = m_Vjk_.transpose()*m_Rjl_;
+  m_Gammakl_ = m_Ykl_.array()/(v_muk_*v_Nuj_.transpose()*m_Rjl_).array();
 }
 
-inline void ContingencyLBModel_mu_i_nu_j::Copy_theta_max()
-{
-	m_Gammakl_ = m_Gammaklmax_;
-  v_logPiek_ = v_logPiekmax_;
-  v_logRhol_ = v_logRholmax_;
-
-  m_Tik_ = m_Tikmax_;
-  m_Rjl_ = m_Rjlmax_;
-  Likelihood_ = Lmax_;
-}
-
-inline void ContingencyLBModel_mu_i_nu_j::Modify_theta_max()
-{
-	m_Gammaklmax_ = m_Gammakl_;
-  v_logPiekmax_ = v_logPiek_;
-  v_logRholmax_ = v_logRhol_;
-
-  m_Rjlmax_ = m_Rjl_;
-  m_Tikmax_ = m_Tik_;
-  Lmax_ = Likelihood_;
-}
 #endif /* CONTINGENCYLBMODEL_MU_I_NU_J_H_ */

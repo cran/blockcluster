@@ -1,6 +1,6 @@
 
 /*--------------------------------------------------------------------*/
-/*     Copyright (C) 2011-2011  Parmeet Singh Bhatia
+/*     Copyright (C) 2011-2013  Parmeet Singh Bhatia
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as
@@ -23,12 +23,6 @@
     Contact : parmeet.bhatia@inria.fr , bhatia.parmeet@gmail.com
 */
 
-/*
- * Project:  cocluster
- * created on: Dec 26, 2011
- * Author: Parmeet Singh Bhatia
- *
- **/
 
 /** @file enumerations.h
  *  @brief Defines all the enumerations used in CoClust Project.
@@ -53,10 +47,9 @@ enum DataType
  */
 enum Algorithm
 {
-    BEM2 = 1,
+    BEM = 1,
     BCEM = 2,
-    XEMStrategy = 3,
-    XCEMStrategy = 4
+    BSEM  = 3
 };
 
 /**

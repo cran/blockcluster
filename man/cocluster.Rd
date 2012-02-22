@@ -2,8 +2,11 @@
 \alias{cocluster}
 \title{Co-Clustering function.}
 \usage{
-  cocluster(data, datatype, model, nbcocluster,
-    strategy = cocluststrategy())
+  cocluster(data, datatype, semisupervised = FALSE,
+    rowlabels = numeric(0), collabels = numeric(0),
+    model = character(0), nbcocluster,
+    strategy = cocluststrategy(), openmp = TRUE,
+    nbthreads = NULL)
 }
 \arguments{
   \item{data}{Input data as matrix (or list containing data
@@ -14,9 +17,22 @@
   \item{datatype}{This is the type of data which can be
   "binary" , "contingency" or "continuous".}
 
+  \item{semisupervised}{Boolean value specifying whether to
+  perform semi-supervised co-clustering or not. Make sure
+  to provide row and/or column labels if specified value is
+  true. The default value is false.}
+
+  \item{rowlabels}{Vector specifying the class of rows. The
+  class number starts from zero. Provide -1 for unknown row
+  class.}
+
+  \item{collabels}{Vector specifying the class of columns.
+  The class number starts from zero. Provide -1 for unknown
+  column class.}
+
   \item{model}{This is the name of model. The following
-  models exists for various kinds of datasets:
-  \tabular{rlll}{ Model \tab Datatype \tab Proportions \tab
+  models exists for various types of data: \tabular{rlll}{
+  Model \tab Data-type \tab Proportions \tab
   Dispersion/Variance \cr pik_rhol_epsilonkl(Default) \tab
   binary \tab unequal \tab unequal \cr pik_rhol_epsilon
   \tab binary \tab unequal \tab equal \cr pi_rho_epsilonkl
@@ -32,23 +48,31 @@
   contingency \tab unequal \tab N.A \cr pi_rho_known \tab
   contingency \tab equal \tab N.A \cr }}
 
-  \item{nbcocluster}{Interger vector specifying the number
+  \item{nbcocluster}{Integer vector specifying the number
   of row and column clusters respectively.}
 
   \item{strategy}{Object of class
   \code{\linkS4class{strategy}}.}
+
+  \item{openmp}{Boolean value specifying if OpenMP should
+  be enabled or not. Default value is TRUE.}
+
+  \item{nbthreads}{Number of threads used by OpenMP. By
+  default the number of thread is automatically set by
+  OpenMP.}
 }
 \value{
   Return an object of \code{\linkS4class{BinaryOptions}} or
   \code{\linkS4class{ContingencyOptions}} or
   \code{\linkS4class{ContinuousOptions}} depending on
-  whether the datatype is Binary, Contingency or Continuous
-  respectively.
+  whether the data-type is Binary, Contingency or
+  Continuous respectively.
 }
 \description{
-  This function performs Co-Clustering (simultanuous
+  This function performs Co-Clustering (simultaneous
   clustering of rows and columns ) for Binary, Contingency
-  and Continuous datasets using latent block models.
+  and Continuous data-sets using latent block models.It can
+  also be used to perform semi-supervised co-clustering.
 }
 \examples{
 # Simple example with simulated binary data
@@ -58,7 +82,7 @@ data(binarydata)
 out<-cocluster(binarydata,datatype="binary",nbcocluster=c(2,3))
 #Summarize the output results
 summary(out)
-#Plot the original and co-clustered data
+#Plot the original and Co-clustered data
 plot(out)
 }
 

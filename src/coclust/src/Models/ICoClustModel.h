@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------------*/
-/*     Copyright (C) 2011-2011  Parmeet Singh Bhatia
+/*     Copyright (C) 2011-2013  Parmeet Singh Bhatia
 
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as
@@ -22,52 +22,61 @@
  Contact : parmeet.bhatia@inria.fr , bhatia.parmeet@gmail.com
  */
 
-/*
- * Project:  coclust
- * created on: Nov 25, 2011
- * Author: Parmeet Singh Bhatia
- *
- **/
-
-/** @file ICoClustModel.h
- *  @brief This file declares the ICoClustModel abstract model class.
- **/
 
 #ifndef ICOCLUSTMODEL_H_
 #define ICOCLUSTMODEL_H_
+/** @file ICoClustModel.h
+ *  @brief This file declares the ICoClustModel abstract model class. All the concrete models
+ *  classes are derived from this abstract class.
+ **/
 
 #include <time.h>
+#include <vector>
 #include "../typedefs/typedef.h"
 #include "../InputParameters/InputParameters.h"
-#include "../../../stkpp/include/Model.h"
-//only need to declare initialization abstract class
-class IInit;
-/** @brief ICoClustModel is an abstract class which provides interface for various models.
- *  It provides interface for the most common
- *  functions in EM and CEM algorithms.
- */
-class ICoClustModel : public STK::IModel
-{
-  protected:
-    /** constructor*/
-    ICoClustModel(ModelParameters const& Mparam)
-    {
-      Mparam_ = Mparam;
-    }
 
-  public:
+/** @brief ICoClustModel is an abstract class which provides interface for various models.
+ *  It provides interfaces for the most common functions in EM, CEM  and SEM algorithms as well
+ *  as provide implementation for common functionalities.
+ */
+class ICoClustModel
+{
+    public:
+    /**Constructor
+     * @param Mparam ModelParameters
+     * */
+    ICoClustModel(ModelParameters const& Mparam);
+    /** Constructor
+     * @param Mparam ModelParameters
+     * @param rowlabels Row clusters for each row (-1 for unknown cluster for each row)
+     * @param collabels Column clusters for each column (-1 unknown cluster for each column)
+     * */
+    ICoClustModel(ModelParameters const& Mparam,VectorInteger const & rowlabels,
+                  VectorInteger const & collabels);
     /** Destructor*/
     virtual ~ICoClustModel(){};
 
-    /**Interface for Expectation step.*/
-    virtual bool Estep() = 0;
-    /**
-     * Interface for Expectation and classification step. The model implementing CEM algorithm, must implement this
-     * function. The Expectation and classification step is performed in the same function.
-     */
-    virtual bool CEstep() = 0;
-    /**Interface for Maximization step.*/
-    virtual void Mstep() = 0;
+    //various interface functions
+    /** Cloning interface*/
+    virtual ICoClustModel* Clone() = 0;
+    /** FUll M-step interface*/
+    virtual  void MStepFull() = 0;
+    /**Interface for EM Algorithm for rows*/
+    virtual bool EMRows() = 0;
+    /** Interface for calculating log sum for rows*/
+    virtual void LogSumRows(MatrixReal&) = 0;
+    /** Interface for calculating log sum for columns*/
+    virtual void LogSumCols(MatrixReal&) = 0;
+    /**Interface for EM Algorithm for Columns*/
+    virtual bool EMCols() = 0;
+    /**Interface for CEM Algorithm for rows*/
+    virtual bool CEMRows() = 0;
+    /**Interface for CEM Algorithm for Columns*/
+    virtual bool CEMCols() = 0;
+    /**Interface for SEM Algorithm for rows*/
+    virtual bool SEMRows() = 0;
+    /**Interface for SEM Algorithm for columns*/
+    virtual bool SEMCols() = 0;
     /**
      * Interface for calculating Stopping condition using percentage Change in Likelihood. This function will set the
      * ICoClustModel::StopAlgo parameter to either true or false depending on whether the change
@@ -75,31 +84,37 @@ class ICoClustModel : public STK::IModel
      */
     virtual void likelihoodStopCriteria() = 0;
     /**
-     * Interface for calculating Stopping condition using percentage Change in Parameter. This function will set the
+     * Interface for calculating Stopping condition using percentage Change in Parameter values. This function will set the
      * ICoClustModel::StopAlgo parameter to either true or false depending on whether the change in Likelihood is less than
      * Mparam_.epsilon_ or not respectively.
      */
     virtual void ParameterStopCriteria() = 0;
     /**
-     * Interface function for CEM initialization . It should initialize model parameters
+     * Interface function for CEM initialization . It will initialize model parameters
      * using CEM algorithm.
+     * @return boolean value representing success or failure. By default, it will return
+     * false if the derived class does not overwrite this method.
      */
-    virtual bool CEMInit() = 0;
+    virtual bool CEMInit();
     /**
-     * Interface function for Random Initialization.It should initialize model parameters
+     * Interface function for Random Initialization. It will initialize model parameters
      * using Random initialization.
+     * @return boolean value representing success or failure. By default, it will return
+     * false if the derived class does not overwrite this method.
      */
-    virtual bool RandomInit() = 0;
+    virtual bool RandomInit();
     /**
-     * Interface function for CEM initialization . It should initialize model parameters
+     * Interface function for CEM initialization . It will initialize model parameters
      * using Fuzzy CEM algorithm.
+     * @return boolean value representing success or failure. By default, it will return
+     * false if the derived class does not overwrite this method.
      */
-    virtual bool FuzzyCEMInit() = 0;
+    virtual bool FuzzyCEMInit();
     /** This function will provide the current status of ICoClustModel::StopAlgo parameter.*/
     bool stopAlgo();
     /**
-     * Interface for finalizing the output. This function will allow the model to finalize all the output parameters
-     * after the stopping condition is reached.
+     * Interface for finalizing the output. This function will allow the model to finalize
+     * all the output parameters after the algorithm terminates.
      */
     virtual void FinalizeOutput() = 0;
     /**
@@ -107,152 +122,246 @@ class ICoClustModel : public STK::IModel
      */
     virtual void ConsoleOut() = 0;
     /**
+     * @return ModelParameters
+     */
+    ModelParameters const& GetModelParameters() const;
+    /**
+     * @param Mparam ModelParameters
+     */
+    void SetModelParameters(ModelParameters& Mparam);
+    /**
+     *
+     * @param Epsilon Value to be set as Mparam_.epsilon_
+     */
+    void SetEpsilon(float Epsilon);
+    /**Get Error message*/
+    std::string GetErrormsg(){return Error_msg_;}
+    /**Set Error message*/
+    void SetErrormsg(const std::string& s){Error_msg_ = s;}
+    /**Get status of empty cluster*/
+    bool isEmptyCluster() const {return empty_cluster;}
+    /**set the value for Empty Cluster*/
+    void SetEmptyCluster(bool val){empty_cluster = val;}
+    /** Modify the value of parameters during xem step if better parameters are found.*/
+    virtual void Modify_theta_start() = 0;
+    /** Copy the value of parameters after xem step to be used during XEM step.*/
+    virtual void Copy_theta_start() = 0;
+    /** Copy the value of parameters after XEM step to be set as final extimated parameters.*/
+    virtual void Copy_theta_max() = 0;
+    /** Modify the value of parameters during XEM step if better parameters are found.*/
+    virtual void Modify_theta_max() = 0;
+    /** Estimate likelihood value*/
+    virtual float EstimateLikelihood() = 0;
+
+
+    //common computation functions
+    /** E-step for rows*/
+    bool ERows();
+    /** E-step for columns*/
+    bool ECols();
+    /** CE-step for Rows*/
+    bool CERows();
+    /** CE-step for columns*/
+    bool CECols();
+    /** SE-step for Rows*/
+    bool SERows();
+    /** SE-step for columns*/
+    bool SECols();
+    /** Draw conditional Row classification vector*/
+    void RowClassMatrixdraw();
+    /** Draw conditional column classification vector*/
+    void ColClassMatrixdraw();
+
+
+    //common setter functions
+    /**Set the known and unknown row labels for semi-supervised coclustering*/
+    void SetRowLabels(const VectorInteger&);
+    /**Set the known  and unknown column labels for semi-supervised coclustering*/
+    void SetColLabels(const VectorInteger&);
+
+    //common getter functions
+    /** Get the likelihood value*/
+    float GetLikelihood() const;
+    /**
      * This function will return the row classification vector.
      * @return Row classification vector
      */
-    VectorInteger& GetRowClassificationVector();
+    const VectorInteger& GetRowClassificationVector() const;
     /**
      * This function will return the column classification vector.
      * @return COlumn classification vector
      */
-    VectorInteger& GetColumnClassificationVector();
-
+    const VectorInteger& GetColumnClassificationVector() const;
     /**
      * This function will return the row proportions of mixtures models.
      * @return Row proportions of mixing models.
      */
-    VectorReal & GetRowProportions();
+    const VectorReal& GetRowProportions() const;
     /**
      * This function will return the column proportions of mixtures models.
      * @return column proportions of mixing models.
      */
-    VectorReal & GetColProportions();
+    const VectorReal & GetColProportions() const;
     /**
      * This function will return the posterior probabilities for each row.
      * @return Row posterior probabilities (Rows represent original rows and columns represent class probabilities)
      */
-    MatrixReal & GetRowPosteriorprob();
+    const MatrixReal & GetRowPosteriorprob() const;
     /**
      * This function will return the posterior probabilities for each column.
      * @return Column posterior probabilities ((Rows represent original columns and columns represent class probabilities))
      */
-    MatrixReal & GetColPosteriorprob();
-    /**Set Epsilon*/
-    void SetEpsilon(int phase);
-    /**Get Rmessage*/
-    std::string Rmessage(){return R_errormsg;}
-    /**Set Rmessage*/
-    void SetRmessage(std::string s){R_errormsg = s;}
-    /**Get status of empty cluster*/
-    bool isEmptyCluster(){return empty_cluster;}
-    /**set the value for Empty Cluster*/
-    void SetEmptyCluster(bool val){empty_cluster = val;}
-    virtual void Modify_theta_start() = 0;
-    virtual void Copy_theta_start() = 0;
-    virtual void Copy_theta_max() = 0;
-    virtual void Modify_theta_max() = 0;
-    float GetLikelihood();
-    virtual float EstimateLikelihood() = 0;
-    /*
-     * This will set reference for IInit::p_Init_ to the instantiated Initialization inside CoClustermain.cpp
-     */
-    void SetInitAlgo(IInit*& init);
-
+    const MatrixReal & GetColPosteriorprob() const;
 
   protected:
-    std::string  R_errormsg;
+    std::string  Error_msg_;
+    int nbSample_,nbVar_;
+
+    //variables use in case of semi-supervised co-clustering
+    std::vector<int> UnknownLabelsRows_, UnknownLabelsCols_ ;
+    std::vector<std::pair<int,int> > knownLabelsRows_, knownLabelsCols_;
+    VectorInteger v_nbRowClusterMembers_,v_nbColClusterMembers_;
+
     bool empty_cluster;
     ModelParameters Mparam_;
     float Likelihood_,Lmax_;
     VectorInteger v_Zi_;/**<Row classification vector*/
     VectorInteger v_Wj_;/**<Column classification vector*/
-    MatrixReal m_Tik_,m_Rjl_,m_Rjlstart_,m_Rjlmax_,m_Tikmax_;
+    MatrixReal m_Tik_,m_Rjl_,m_Rjlstart_,m_Tikstart_,m_Rjlmax_,m_Tikmax_;
     VectorReal v_Tk_,v_Rl_;
     VectorReal v_Piek_,v_logPiek_,v_logPiekstart_,v_logPiekmax_,v_logRhol_,v_Rhol_,v_logRholstart_,v_logRholmax_;
-    MatrixInteger m_Zik_,m_Wjl_;
+    MatrixInteger m_Zik_,m_Wjl_;/**Row and column classification matrices respectively*/
     bool StopAlgo;/**<Boolean Variable used to identify whether the stopping condition is reached or not*/
-    //IInit * p_Init_;
 
     // Utility Functions
-
     /**
-     * Generate Random intergers
+     * Generate k Random integers in the range 0 to n-1
      * @param n Max integer value
      * @param k Number of random integers to be generated (should not exceed n)
      */
     VectorInteger RandSample(int n,int k);
+    /** Parameter finalization common for all models*/
+    void CommonFinalizeOutput();
 
   private:
-    /** a CoClustModel should never be able to run
-     * (it' s a kitchen without chef)
-     * @return false in all case
-     **/
-    inline bool run() { return false;}
+    //make assignment operator private
+    ICoClustModel& operator=(const ICoClustModel&);
+
 };
 
-inline void ICoClustModel::SetEpsilon(int phase)
+inline ModelParameters const& ICoClustModel::GetModelParameters() const
 {
-  if(phase== 0 )
-    Mparam_.epsilon_ = Mparam_.eps_xem_;
-  else {
-    Mparam_.epsilon_ = Mparam_.eps_XEM_;
-  }
+  return Mparam_;
 }
+
+inline void ICoClustModel::SetModelParameters(ModelParameters& Mparam)
+{
+  Mparam_ = Mparam;
+}
+
+inline void ICoClustModel::SetEpsilon(float Epsilon)
+{
+  Mparam_.epsilon_ = Epsilon;
+}
+
 inline bool ICoClustModel::stopAlgo()
 {
   return StopAlgo;
 }
 
-inline VectorInteger & ICoClustModel::GetRowClassificationVector()
+inline const VectorInteger & ICoClustModel::GetRowClassificationVector() const
 {
-  // Calculate classification vector for rows
-  VectorReal::Index maxIndex;
-  for (int i = 0; i < nbSample_; ++i) {
-	m_Tik_.row(i).maxCoeff(&maxIndex);
-	v_Zi_(i) = maxIndex;
-  }
   return v_Zi_;
 }
 
-inline VectorInteger & ICoClustModel::GetColumnClassificationVector()
+inline const VectorInteger & ICoClustModel::GetColumnClassificationVector() const
 {
-  // Calculate classification vector for columns
-  VectorReal::Index maxIndex;
-  for (int j = 0; j < nbVar_; ++j) {
-	m_Rjl_.row(j).maxCoeff(&maxIndex);
-	v_Wj_(j) = maxIndex;
-  }
   return v_Wj_;
 }
 
-inline VectorReal& ICoClustModel::GetRowProportions()
+inline const VectorReal& ICoClustModel::GetRowProportions() const
 {
   return v_Piek_;
 }
 
-inline VectorReal& ICoClustModel::GetColProportions()
+inline const VectorReal& ICoClustModel::GetColProportions() const
 {
   return v_Rhol_;
 }
 
-inline MatrixReal& ICoClustModel::GetRowPosteriorprob()
+inline const MatrixReal& ICoClustModel::GetRowPosteriorprob() const
 {
 	return m_Tik_;
 }
 
-inline MatrixReal& ICoClustModel::GetColPosteriorprob()
+inline const MatrixReal& ICoClustModel::GetColPosteriorprob() const
 {
 	return m_Rjl_;
 }
 
-/*inline void ICoClustModel::SetInitAlgo(IInit*& init)
-{
-  p_Init_ = init;
-}*/
-
-inline float ICoClustModel::GetLikelihood()
+inline float ICoClustModel::GetLikelihood() const
 {
 	return Likelihood_;
+}
+
+inline void ICoClustModel::SetRowLabels(const VectorInteger & rowlabels)
+{
+  int cluster, length = rowlabels.size();
+  for ( int i = 0; i < length; ++i) {
+    cluster = rowlabels(i);
+    if (cluster<0) {
+      UnknownLabelsRows_.push_back(i);
+    } else {
+      knownLabelsRows_.push_back(std::pair<int,int>(i,cluster));
+      v_nbRowClusterMembers_(cluster)+=v_nbRowClusterMembers_(cluster);
+      v_Zi_(i) = 1;
+      m_Zik_(i,cluster) = 1;
+    }
+  }
+}
+
+inline void ICoClustModel::SetColLabels(const VectorInteger & collabels)
+{
+  int cluster , length = collabels.size();
+  for ( int j = 0; j < length; ++j) {
+    cluster = collabels(j);
+    if (cluster<0) {
+      UnknownLabelsCols_.push_back(j);
+    } else {
+      knownLabelsCols_.push_back(std::pair<int,int>(j,cluster));
+      v_nbColClusterMembers_(cluster)+=v_nbColClusterMembers_(cluster);
+      v_Wj_(j) = 1;
+      m_Wjl_(j,cluster) = 1;
+    }
+  }
+}
+
+inline void ICoClustModel::CommonFinalizeOutput()
+{
+  // Calculate row and column proportions
+  if(!Mparam_.fixedproportions_){
+    v_Piek_ = v_logPiek_.array().exp();
+    v_Rhol_ = v_logRhol_.array().exp();
+  }
+  else
+  {
+    v_Piek_ = (1.0/Mparam_.nbrowclust_)*MatrixReal::Ones(Mparam_.nbrowclust_,1);
+    v_Rhol_ = (1.0/Mparam_.nbcolclust_)*MatrixReal::Ones(Mparam_.nbcolclust_,1);
+  }
+
+  VectorReal::Index maxIndex;
+  // Calculate classification vector for rows
+  for ( int i = 0; i < nbSample_; ++i) {
+  m_Tik_.row(i).maxCoeff(&maxIndex);
+  v_Zi_(i) = maxIndex;
+  }
+
+  // Calculate classification vector for columns
+  for ( int j = 0; j < nbVar_; ++j) {
+  m_Rjl_.row(j).maxCoeff(&maxIndex);
+  v_Wj_(j) = maxIndex;
+  }
+
 }
 
 #endif /* ICOCLUSTMODEL_H_ */

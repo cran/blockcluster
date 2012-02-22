@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------------*/
-/*     Copyright (C) 2011-2012  Parmeet Singh Bhatia
+/*     Copyright (C) 2011-2013  Parmeet Singh Bhatia
 
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as
@@ -22,12 +22,6 @@
  Contact : parmeet.bhatia@inria.fr , bhatia.parmeet@gmail.com
  */
 
-/*
- * Project:  cocluster
- * created on: Feb 3, 2012
- * Author: Parmeet Singh Bhatia
- *
- **/
 
 /** @file RandomInit.h
  *  @brief Declares Random initialization class RandomInit derived from IInit.

@@ -1,17 +1,14 @@
 
 #' Strategy function
 #' 
-#' This function is used to set all the parameters for coclustering. It returns an object of class  \code{\linkS4class{strategy}}
+#' This function is used to set all the parameters for Co-clustering. It returns an object of class  \code{\linkS4class{strategy}}
 #' which can be given as input to \code{\link{cocluster}} function. 
 #' 
-#' @param algo  The valid values for this parameter are "XEMStrategy" (Default) and "XCEMStrategy".This parameter sets the algorithm/strategy to run the model. The algorithms used are BEM (Block EM algorithm) for "XEMStrategy" and BCEM (Block
-#' classification EM algorithm) for "XCEMStrategy". In order to find good optimum, we have applied strategy to run these algorithms. Please refer
-#' to the documention for XEMStrategy for more details (You may also have to refer to its  documentation in order to understand
-#' the parameters like "nbtry" and "nbxem" which plays critical role in obtaining good optimum). 
+#' @param algo  The valid values for this parameter are "BEM" (Default), "BCEM" and "BSEM".
 #' @param stopcriteria It specifies the stopping criteria. It can be based on either relative change in parameters
-#' vaule or relative change in log-likelihood. Valid criterian values are "Parameter" and "Likelihood". Default criteria is 
+#' value or relative change in log-likelihood. Valid criterion values are "Parameter" and "Likelihood". Default criteria is 
 #' "Parameter".
-#' @param initmethod Method to initialize model paramteres. The valid values are "CEMInit", "FuzzyCEMInit" and "RandomInit". 
+#' @param initmethod Method to initialize model parameters. The valid values are "CEMInit", "FuzzyCEMInit" and "RandomInit". 
 #' For now only one kind of initialization exist for every model currently available in the package. Hence default value for initialization is set according to the model.
 #' @param nbinititerations Number of Global iterations used in initialization step. Default value is 10.
 #' @param initepsilon Tolerance value used while initialization. Default value is 1e-2.
@@ -20,7 +17,7 @@
 #' @param nbtry Number of tries (XEM steps). Default value is 2.
 #' @param nbxem Number of xem steps. Default value is 5.
 #' @param nbiterationsxem Number of EM iterations used during xem step. Default value is 50.
-#' @param nbiterationsXEM Number of EM iterations used during XEM step. Deafault value is 500.
+#' @param nbiterationsXEM Number of EM iterations used during XEM step. Default value is 500.
 #' @param epsilonxem Tolerance value used during xem step. Default value is 1e-4.
 #' @param epsilonXEM Tolerance value used during XEM step. Default value is 1e-10
 #' 
@@ -37,10 +34,10 @@
 
 
 
-cocluststrategy<-function(algo = "XEMStrategy",initmethod=character(),stopcriteria = "Parameter",  
+cocluststrategy<-function(algo = "BEM",initmethod=character(),stopcriteria = "Parameter",  
 		nbiterationsxem = 50, nbiterationsXEM = 500,nbinititerations = 10, initepsilon = 1e-2, nbiterations_int = 5,
 		epsilon_int = 1e-2, epsilonxem = 1e-4,epsilonXEM =1e-10, nbtry = 2,nbxem = 5) { 
-	
+  
 	#create and return object of class strategy
 	new("strategy",algo = algo,initmethod = initmethod,stopcriteria = stopcriteria, 
 			nbinititerations = nbinititerations,initepsilon = initepsilon, nbiterations_int = nbiterations_int, 
@@ -55,7 +52,7 @@ cocluststrategy<-function(algo = "XEMStrategy",initmethod=character(),stopcriter
 #' \describe{
 #' \item{algo: }{Algorithm to be use for co-clustering.}
 #' \item{stopcriteria: }{Stopping criteria used to stop the algorithm.}
-#' \item{initmethod: }{Method to initialize model paramteres.}
+#' \item{initmethod: }{Method to initialize model parameters.}
 #' \item{nbinititerations: }{Number of global iterations while running initialization.}
 #' \item{initepsilon: }{Tolerance value used while initialization.}
 #' \item{nbiterations_int: }{Number of iterations for internal E-step.}

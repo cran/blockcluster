@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------------*/
-/*     Copyright (C) 2011-2011  Parmeet Singh Bhatia
+/*     Copyright (C) 2011-2013  Parmeet Singh Bhatia
 
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as
@@ -22,12 +22,6 @@
  Contact : parmeet.bhatia@inria.fr , bhatia.parmeet@gmail.com
  */
 
-/*
- * Project:  coclust
- * created on: Nov 25, 2011
- * Author: Parmeet Singh Bhatia
- *
- **/
 
 /** @file BinaryLBModel.h
  *  @brief Declares concrete model class BinaryLBModel derived from ICoClustModel.
@@ -50,31 +44,47 @@
 class BinaryLBModel : public ICoClustModel
 {
   public:
-    /**Constructor
-     * @param m_Dataij a constant reference on the data set
+    /**Constructor for unsupervised co-clustering
+     * @param m_Dataij a constant reference on the data set.
+     * @param Mparam A constant reference to various ModelParameters.
      * */
     BinaryLBModel(MatrixBinary const& m_Dataij,ModelParameters const& Mparam);
+    /**Constructor for unsupervised co-clustering
+     * @param m_Dataij a constant reference on the data set.
+     * @param rowlabels various labels for rows (-1  for unknown row label)
+     * @param collabels various labels for columns (-1 for unknown column label)
+     * @param Mparam A constant reference to various ModelParameters.
+     * */
+    BinaryLBModel(MatrixBinary const& m_Dataij,VectorInteger const & rowlabels,
+                  VectorInteger const & collabels,ModelParameters const& Mparam);
 
-    virtual bool Estep();
-    virtual bool CEstep();
-    virtual void Mstep();
+    /** cloning */
+    virtual BinaryLBModel* Clone(){return new BinaryLBModel(*this);}
+    virtual void LogSumRows(MatrixReal & _m_sum);
+    virtual void LogSumCols(MatrixReal & _m_sum);
+    virtual void MStepFull();
+    virtual bool EMRows();
+    virtual bool CEMRows();
+    virtual bool EMCols();
+    virtual bool CEMCols();
+    virtual bool SEMRows();
+    virtual bool SEMCols();
     virtual void likelihoodStopCriteria();
     virtual void ParameterStopCriteria();
     virtual bool CEMInit();
-    virtual bool FuzzyCEMInit();
-    virtual bool RandomInit();
     virtual void FinalizeOutput();
     virtual void ConsoleOut();
+    //virtual void UpdateAllUsingConditionalProbabilities();
     virtual void Modify_theta_start();
     virtual void Copy_theta_start();
     virtual void Copy_theta_max();
     virtual void Modify_theta_max();
     float EstimateLikelihood();
-    MatrixBinary GetArrangedDataClusters();
+    const MatrixBinary& GetArrangedDataClusters();
     /**Return class mean BinaryLBModel::m_akl_ for all the blocks (co-clusters)*/
-    MatrixBinary& Getmean();
+    const MatrixBinary& Getmean() const;
     /**Return Class despersion BinaryLBModel::m_epsilonkl_ for all the blocks (co-clusters) */
-    MatrixReal& Getdispersion();
+    const MatrixReal& Getdispersion() const;
     /**Destructor*/
     inline virtual ~BinaryLBModel(){};
 
@@ -87,6 +97,7 @@ class BinaryLBModel : public ICoClustModel
   protected:
     //Variables involved in Bernoulli model
     MatrixBinary const& m_Dataij_;
+    MatrixBinary m_ClusterDataij_;
     float dimprod_;
     MatrixReal m_Vjk_;
     MatrixReal m_Uil_;
@@ -95,88 +106,48 @@ class BinaryLBModel : public ICoClustModel
     MatrixReal m_epsilonkl_,m_epsilonklstart_,m_epsilonklmax_;
     float Likelihood_old;
 
-  private:
-    // Functions used to operate on data in intermediate steps when running the model
-    void BernoulliLogsumRows(MatrixReal & _m_sum);
-    void BernoulliLogsumCols(MatrixReal & _m_sum);
-    bool EMRows();
-    bool CEMRows();
-    bool EMCols();
-    bool CEMCols();
-    void Compute_FuzzyStoppingCriteria();
-    void Compute_ChangeinAlpha();
-    bool TerminateEEstep();
+
+    //M-steps
+    void MStepRows();
+    void MStepCols();
 
     // Functions used to operate on data in intermediate steps when running the Initialization
     bool InitCEMRows();
     bool InitCEMCols();
-    void InitBernoulliLogsumRows(MatrixReal & _m_sum);
-    void InitBernoulliLogsumCols(MatrixReal & _m_sum);
+    void InitBernoulliLogsumRows(MatrixReal & m_sum);
+    void InitBernoulliLogsumCols(MatrixReal & m_sum);
     void SelectRandomColsfromdata(MatrixReal& m,int col);
     void GenerateRandomBernoulliParameterRows(MatrixReal& m,int col);
     void GenerateRandomBernoulliParameterCols(MatrixReal& m);
 };
 
 
-inline MatrixBinary& BinaryLBModel::Getmean()
+inline const MatrixBinary& BinaryLBModel::Getmean() const
 {
   return m_akl_;
 }
 
-inline MatrixReal& BinaryLBModel::Getdispersion()
+inline const MatrixReal& BinaryLBModel::Getdispersion() const
 {
   return m_epsilonkl_;
 }
 
-inline void BinaryLBModel::Modify_theta_start()
+inline void BinaryLBModel::MStepRows()
 {
-	m_Alphaklstart_ = m_Alphakl_;
-	//m_aklstart_ = m_akl_;
-	m_epsilonklstart_ = m_epsilonkl_;
-	v_logPiekstart_ = v_logPiek_;
-	v_logRholstart_ = v_logRhol_;
+  if(!Mparam_.fixedproportions_) {
+    v_logPiek_=(v_Tk_.array()/nbSample_).log();
+  }
 
-	m_Rjlstart_ = m_Rjl_;
+  m_Alphakl_ = ((m_Tik_.transpose())*m_Uil_).array()/(v_Tk_*(v_Rl_.transpose())).array();
 }
 
-inline void BinaryLBModel::Copy_theta_start()
+inline void BinaryLBModel::MStepCols()
 {
-	m_Alphakl_ = m_Alphaklstart_;
-	//m_akl_ = m_aklstart_;
-	m_epsilonkl_ = m_epsilonklstart_;
-	v_logPiek_ = v_logPiekstart_;
-	v_logRhol_ = v_logRholstart_;
+  if(!Mparam_.fixedproportions_) {
+    v_logRhol_=(v_Rl_.array()/nbVar_).log();
+  }
 
-	m_Rjl_ = m_Rjlstart_;
-
-	//initialization
-	v_Rl_ = m_Rjl_.colwise().sum();
-	m_Alphakl1_ = m_Alphakl_;
-}
-
-inline void BinaryLBModel::Copy_theta_max()
-{
-	m_Alphakl_ = m_Alphaklmax_;
-	//m_akl_ = m_aklmax_;
-	m_epsilonkl_ = m_epsilonklmax_;
-	v_logPiek_ = v_logPiekmax_;
-	v_logRhol_ = v_logRholmax_;
-
-	m_Tik_ = m_Tikmax_;
-	m_Rjl_ = m_Rjlmax_;
-	Likelihood_ = Lmax_;
-}
-inline void BinaryLBModel::Modify_theta_max()
-{
-	m_Alphaklmax_ = m_Alphakl_;
-	//m_aklmax_ = m_akl_;
-	m_epsilonklmax_ = m_epsilonkl_;
-	v_logPiekmax_ = v_logPiek_;
-	v_logRholmax_ = v_logRhol_;
-
-	m_Rjlmax_ = m_Rjl_;
-	m_Tikmax_ = m_Tik_;
-	Lmax_ = Likelihood_;
+  m_Alphakl_ = (m_Vjk_.transpose()*m_Rjl_).array()/(v_Tk_*v_Rl_.transpose()).array();
 }
 
 #endif /* BinaryLBModel_H_ */

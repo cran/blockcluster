@@ -2,35 +2,24 @@
 \alias{cocluststrategy}
 \title{Strategy function}
 \usage{
-  cocluststrategy(algo = "XEMStrategy",
-    initmethod = character(), stopcriteria = "Parameter",
-    nbiterationsxem = 50, nbiterationsXEM = 500,
-    nbinititerations = 10, initepsilon = 0.01,
-    nbiterations_int = 5, epsilon_int = 0.01,
-    epsilonxem = 1e-04, epsilonXEM = 1e-10, nbtry = 2,
-    nbxem = 5)
+  cocluststrategy(algo = "BEM", initmethod = character(),
+    stopcriteria = "Parameter", nbiterationsxem = 50,
+    nbiterationsXEM = 500, nbinititerations = 10,
+    initepsilon = 0.01, nbiterations_int = 5,
+    epsilon_int = 0.01, epsilonxem = 1e-04,
+    epsilonXEM = 1e-10, nbtry = 2, nbxem = 5)
 }
 \arguments{
-  \item{algo}{The valid values for this parameter are
-  "XEMStrategy" (Default) and "XCEMStrategy".This parameter
-  sets the algorithm/strategy to run the model. The
-  algorithms used are BEM (Block EM algorithm) for
-  "XEMStrategy" and BCEM (Block classification EM
-  algorithm) for "XCEMStrategy". In order to find good
-  optimum, we have applied strategy to run these
-  algorithms. Please refer to the documention for
-  XEMStrategy for more details (You may also have to refer
-  to its documentation in order to understand the
-  parameters like "nbtry" and "nbxem" which plays critical
-  role in obtaining good optimum).}
+  \item{algo}{The valid values for this parameter are "BEM"
+  (Default), "BCEM" and "BSEM".}
 
   \item{stopcriteria}{It specifies the stopping criteria.
   It can be based on either relative change in parameters
-  vaule or relative change in log-likelihood. Valid
-  criterian values are "Parameter" and "Likelihood".
+  value or relative change in log-likelihood. Valid
+  criterion values are "Parameter" and "Likelihood".
   Default criteria is "Parameter".}
 
-  \item{initmethod}{Method to initialize model paramteres.
+  \item{initmethod}{Method to initialize model parameters.
   The valid values are "CEMInit", "FuzzyCEMInit" and
   "RandomInit". For now only one kind of initialization
   exist for every model currently available in the package.
@@ -59,7 +48,7 @@
   during xem step. Default value is 50.}
 
   \item{nbiterationsXEM}{Number of EM iterations used
-  during XEM step. Deafault value is 500.}
+  during XEM step. Default value is 500.}
 
   \item{epsilonxem}{Tolerance value used during xem step.
   Default value is 1e-4.}
@@ -72,7 +61,7 @@
 }
 \description{
   This function is used to set all the parameters for
-  coclustering. It returns an object of class
+  Co-clustering. It returns an object of class
   \code{\linkS4class{strategy}} which can be given as input
   to \code{\link{cocluster}} function.
 }

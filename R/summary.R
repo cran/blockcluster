@@ -1,7 +1,7 @@
 #'
 #' Summary function.
 #' 
-#' This funtion gives the summary of output from \code{cocluster}.
+#' This function gives the summary of output from \code{cocluster}.
 #' 
 #' @param object output object from \code{\link{cocluster}}.
 #' 
@@ -25,6 +25,10 @@ setMethod(
 				cat("******************************************************************\n")
 				cat("Model Family : Bernoulli Latent block model\n")
 				cat("Model Name :",object@model)
+        if(object@semisupervised)
+          cat("\nCo-Clustering Type : Semi-Supervised")
+        else
+          cat("\nCo-Clustering Type : Unsupervised")
 				cat("\n\nModel Parameters..")
 				cat("\n\nClass Mean:\n")
 				print(object@classmean)
@@ -32,7 +36,7 @@ setMethod(
 				print(object@classdispersion)
 				cat("\nRow proportions: ",object@rowproportions)
 				cat("\nColumn proportions: ",object@columnproportions)
-				cat("\nLikelihood: ",object@likelihood)
+				cat("\nPseudo-likelihood: ",object@likelihood)
 				cat("\n******************************************************************\n")
 			} else {
 				cat("Co-Clustering was not successful.\n")
@@ -53,12 +57,16 @@ setMethod(
 				cat("******************************************************************\n")
 				cat("Model Family : Poisson Latent block model\n")
 				cat("Model Name :",object@model)
+				if(object@semisupervised)
+				  cat("\nCo-Clustering Type : Semi-Supervised")
+				else
+				  cat("\nCo-Clustering Type : Unsupervised")
 				cat("\n\nModel Parameters..")
 				cat("\n\nClass Gamma:\n")
 				print(object@classgamma)
 				cat("\nRow proportions: ",object@rowproportions)
 				cat("\nColumn proportions: ",object@columnproportions)
-				cat("\nLikelihood: ",object@likelihood)
+				cat("\nPseudo-likelihood: ",object@likelihood)
 				cat("\n******************************************************************\n")
 			} else {
 				cat("Co-Clustering was not successful.\n")
@@ -81,6 +89,10 @@ setMethod(
 				cat("******************************************************************\n")
 				cat("Model Family : Gaussian Latent block model\n")
 				cat("Model Name :",object@model)
+				if(object@semisupervised)
+				  cat("\nCo-Clustering Type : Semi-Supervised")
+				else
+				  cat("\nCo-Clustering Type : Unsupervised")
 				cat("\n\nModel Parameters..")
 				cat("\n\nClass Mean:\n")
 				print(object@classmean)
@@ -88,7 +100,7 @@ setMethod(
 				print(object@classvariance)
 				cat("\nRow proportions: ",object@rowproportions)
 				cat("\nColumn proportions: ",object@columnproportions)
-				cat("\nLikelihood: ",object@likelihood)
+				cat("\nPseudo-likelihood: ",object@likelihood)
 				cat("\n******************************************************************\n")
 			} else {
 				cat("Co-Clustering was not successful.\n")

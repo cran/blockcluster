@@ -9,7 +9,7 @@
   \describe{ \item{algo: }{Algorithm to be use for
   co-clustering.} \item{stopcriteria: }{Stopping criteria
   used to stop the algorithm.} \item{initmethod: }{Method
-  to initialize model paramteres.} \item{nbinititerations:
+  to initialize model parameters.} \item{nbinititerations:
   }{Number of global iterations while running
   initialization.} \item{initepsilon: }{Tolerance value
   used while initialization.} \item{nbiterations_int:

@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------------*/
-/*     Copyright (C) 2011-2011  Parmeet Singh Bhatia
+/*     Copyright (C) 2011-2013  Parmeet Singh Bhatia
 
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as
@@ -22,13 +22,6 @@
  Contact : parmeet.bhatia@inria.fr , bhatia.parmeet@gmail.com
  */
 
-/*
- * Project:  cocluster
- * created on: Dec 22, 2011
- * Author: Parmeet Singh Bhatia
- *
- **/
-
 /** @file InputParameters.h
  *  @brief This file declares InputParameters class.
  **/
@@ -50,13 +43,15 @@
 #endif
 #include "../enumerations/enumerations.h"
 
-struct AlgoParameters
+struct StrategyParameters
 {
-    //iterations for various stages of XEMStrategy and between EM algo for Rows and Columns
+    //iterations for various stages of XStrategy and between EM algo for Rows and Columns
     int nbtry_;
     int nbxem_;
     int nbiter_xem_;
     int nbiter_XEM_;
+    //member function pointers
+    StopCriteria_poiter Stop_Criteria;
 };
 
 struct ModelParameters
@@ -71,7 +66,7 @@ struct ModelParameters
     int nbinititerations_;
     float initepsilon_;
 
-    //espilon set either to eps_xem_ or esp_XEM_ depending on where we are in XEMstrategy
+    //epsilon set either to eps_xem_ or esp_XEM_ depending on where we are in XEMstrategy
     float epsilon_;
 
     //other input options, self explanatory
@@ -91,6 +86,7 @@ struct Strategy
     Initialization Init_;
     Model Model_;
     DataType DataType_;
+    bool SemiSupervised;
 };
 #ifdef STK_DMANAGER
 class InputParameters : public STK::IPage
@@ -98,16 +94,19 @@ class InputParameters : public STK::IPage
   public:
     /**Constructor*/
     InputParameters(STK::Integer const& level);
-    /** This function reads the value of various parameters from text file.
-     * @param optionfilename Path to the input option file.
-    */
+    /**
+     * function that must be called to initialize various enumeration mappings
+     */
+    void InitializeParamEnum();
+    /**
+     * This function read various input parameters from text file
+     * @param optionfilename path to text file with input parameters
+     */
     void ReadFromOptionFile(std::string optionfilename);
-    /**This function initializes enumerations*/
-    void InitializeEnum();
     /**Get Model parameters*/
-    const ModelParameters& GetModelparameters();
+    const ModelParameters& GetModelparameters() const;
     /**Get Algorithm parameters*/
-    const AlgoParameters& GetAlgoparameters();
+    const StrategyParameters& GetStrategyparameters() const;
     /**Get Strategy*/
     const Strategy& GetStrategy();
     /**Get filename*/
@@ -116,7 +115,7 @@ class InputParameters : public STK::IPage
     std::list<std::string>& GetOptionalfilenames(){return optionalfilenames_;}
     void SetModelparameters(ModelParameters const&);
     /**Set Algorithm parameters*/
-    void SetAlgoparameters(AlgoParameters const&);
+    void SetAlgoparameters(StrategyParameters const&);
     /**Set strategy*/
     void SetStrategy(Strategy const&);
     /**Destructor*/
@@ -124,15 +123,16 @@ class InputParameters : public STK::IPage
 
   protected:
     ModelParameters Mparam_;
-    AlgoParameters Aparam_;
+    StrategyParameters Stratparam_;
     Strategy strategy_;
+    std::string datafilename_;
+    std::list<std::string> optionalfilenames_;
+    /**String to enumeration mappings*/
     std::map<std::string,Algorithm> S_Algorithm;
     std::map<std::string,StopCriteria> S_StopCriteria;
     std::map<std::string,DataType> S_DataType;
     std::map<std::string,Initialization> S_Init;
     std::map<std::string,Model> S_Model;
-    std::string datafilename_;
-    std::list<std::string> optionalfilenames_;
 
 };
 #else
@@ -140,13 +140,15 @@ class InputParameters
 {
   public:
     /**Constructor*/
-    InputParameters(){};
-    /**This function initializes enumerations*/
-    void InitializeEnum();
+    InputParameters(){InitializeParamEnum();}
     /**Get Model parameters*/
-    const ModelParameters& GetModelparameters();
+    const ModelParameters& GetModelparameters() const;
+    /**
+     * function that must be called to initialize various enumeration mappings
+     */
+    void InitializeParamEnum();
     /**Get Algorithm parameters*/
-    const AlgoParameters& GetAlgoparameters();
+    const StrategyParameters& GetStrategyparameters() const;
     /**Get Strategy*/
     const Strategy& GetStrategy();
     /**Get filename*/
@@ -156,7 +158,7 @@ class InputParameters
     /**Set Model parameters*/
     void SetModelparameters(ModelParameters const&);
     /**Set Algorithm parameters*/
-    void SetAlgoparameters(AlgoParameters const&);
+    void SetAlgoparameters(StrategyParameters const&);
     /**Set strategy*/
     void SetStrategy(Strategy const&);
     /**Destructor*/
@@ -164,64 +166,28 @@ class InputParameters
 
   protected:
     ModelParameters Mparam_;
-    AlgoParameters Aparam_;
+    StrategyParameters Stratparam_;
     Strategy strategy_;
+    std::string datafilename_;
+    std::list<std::string> optionalfilenames_;
     std::map<std::string,Algorithm> S_Algorithm;
     std::map<std::string,StopCriteria> S_StopCriteria;
     std::map<std::string,DataType> S_DataType;
     std::map<std::string,Initialization> S_Init;
     std::map<std::string,Model> S_Model;
-    std::string datafilename_;
-    std::list<std::string> optionalfilenames_;
 
 };
 #endif
 
-inline void InputParameters::InitializeEnum()
-{
-  //Datatype
-  S_DataType["Binary"] = Binary;
-  S_DataType["Contingency"] = Contingency;
-  S_DataType["Continuous"] = Continuous;
 
-  //Algorithm
-  S_Algorithm["XEMStrategy"] = XEMStrategy;
-  S_Algorithm["BEM2"] = BEM2;
-  S_Algorithm["XCEMStrategy"] = XCEMStrategy;
-  S_Algorithm["BCEM"] = BCEM;
-
-  //StopCriteria
-  S_StopCriteria["Parameter"] = Parameter;
-  S_StopCriteria["Likelihood"] = Likelihood;
-
-  //Initialization
-  S_Init["CEMInit"] = e_CEMInit;
-  S_Init["FuzzyCEMInit"] = e_FuzzyCEMInit;
-  S_Init["RandomInit"] = e_RandomInit;
-
-  //Models
-  S_Model["pi_rho_epsilon"] = pi_rho_epsilon;
-  S_Model["pik_rhol_epsilon"] = pik_rhol_epsilon;
-  S_Model["pi_rho_epsilonkl"] = pi_rho_epsilonkl;
-  S_Model["pik_rhol_epsilonkl"] = pik_rhol_epsilonkl;
-  S_Model["pi_rho_unknown"] = pi_rho_unknown;
-  S_Model["pik_rhol_unknown"] = pik_rhol_unknown;
-  S_Model["pi_rho_known"] = pi_rho_known;
-  S_Model["pik_rhol_known"] = pik_rhol_known;
-  S_Model["pi_rho_sigma2"] = pi_rho_sigma2;
-  S_Model["pik_rhol_sigma2"] = pik_rhol_sigma2;
-  S_Model["pi_rho_sigma2kl"] = pi_rho_sigma2kl;
-  S_Model["pik_rhol_sigma2kl"] = pik_rhol_sigma2kl;
-}
-
-inline const ModelParameters& InputParameters::GetModelparameters()
+inline const ModelParameters& InputParameters::GetModelparameters() const
 {
   return Mparam_;
 }
 
-inline const AlgoParameters& InputParameters::GetAlgoparameters()
+inline const StrategyParameters& InputParameters::GetStrategyparameters() const
 {
-  return Aparam_;
+  return Stratparam_;
 }
 
 inline const Strategy& InputParameters::GetStrategy()
@@ -229,9 +195,9 @@ inline const Strategy& InputParameters::GetStrategy()
   return strategy_;
 }
 
-inline void InputParameters::SetAlgoparameters(AlgoParameters const& Aparam)
+inline void InputParameters::SetAlgoparameters(StrategyParameters const& Aparam)
 {
-  Aparam_ = Aparam;
+  Stratparam_ = Aparam;
 }
 
 inline void InputParameters::SetModelparameters(ModelParameters const& Mparam)

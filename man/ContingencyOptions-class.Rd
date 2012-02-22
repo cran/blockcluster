@@ -4,7 +4,9 @@
 \description{
   This class contains all the input options as well as the
   estimated paramters for Contingency data-set.It inherits
-  from base class \code{\linkS4class{CommonOptions}}
+  from base class \code{\linkS4class{CommonOptions}}. The
+  class contains following output parameters given in
+  'Details' along with the parameters in base class.
 }
 \details{
   \describe{ \item{classgamma:}{The value of poisson

@@ -1,15 +1,8 @@
-COCLUSTSRCDIR = ./coclust/src/
-ALGODIR = $(COCLUSTSRCDIR)Algorithms
-COCLUSTDIR = $(COCLUSTSRCDIR)CoClustlibrary
-IPDIR = $(COCLUSTSRCDIR)InputParameters
-MODELDIR = $(COCLUSTSRCDIR)Models
-COCLUSTLIB = $(COCLUSTSRCDIR)libcoclust.a
-STKPPDIR = ./stkpp/
-STKPPLIB = $(STKPPDIR)libSTKpp.a
-#PKG_CXXFLAGS =-I./ -DNDEBUG -DEIGENCONTAINERS -DRPACKAGE 
-PKG_CPPFLAGS = -I./ -DNDEBUG -DEIGENCONTAINERS -DRPACKAGE 
+COCLUSTDIR = ./coclust/
+COCLUSTLIB = $(COCLUSTDIR)libcoclust.a
+PKG_CPPFLAGS = -DRPACKAGE $(SHLIB_OPENMP_CXXFLAGS)
 ## Use the R_HOME indirection to support installations of multiple R version
-PKG_LIBS = `$(R_HOME)/bin/Rscript -e "Rcpp:::LdFlags()"` -L$(ALGODIR) -L$(COCLUSTSRCDIR) -lcoclust -L$(STKPPDIR) -lSTKpp
+PKG_LIBS = `$(R_HOME)/bin/Rscript -e "Rcpp:::LdFlags()"` $(SHLIB_OPENMP_CXXFLAGS) -L$(COCLUSTDIR) -lcoclust
 
 .PHONY: all coclust
 
@@ -18,10 +11,5 @@ $(SHLIB): coclust
 
 
 coclust:
-	mkdir $(STKPPDIR)/bin 
-	(cd $(ALGODIR) && $(MAKE) -f algo.mk)
-	(cd $(COCLUSTDIR) && $(MAKE) -f coclust.mk)
-	(cd $(IPDIR) && $(MAKE) -f ip.mk)
-	(cd $(MODELDIR) && $(MAKE) -f model.mk)
-	(cd $(STKPPDIR) && $(MAKE) all)
-	$(RANLIB) $(COCLUSTLIB) $(STKPPLIB)
+	(cd $(COCLUSTDIR) && $(MAKE))
+	$(RANLIB) $(COCLUSTLIB)

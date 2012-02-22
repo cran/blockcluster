@@ -11,7 +11,7 @@
   \code{\link{cocluster}}.}
 }
 \description{
-  This funtion gives the summary of output from
+  This function gives the summary of output from
   \code{cocluster}.
 }
 

@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------------*/
-/*     Copyright (C) 2011-2012  Parmeet Singh Bhatia
+/*     Copyright (C) 2011-2013  Parmeet Singh Bhatia
 
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as
@@ -22,12 +22,6 @@
  Contact : parmeet.bhatia@inria.fr , bhatia.parmeet@gmail.com
  */
 
-/*
- * Project:  cocluster
- * created on: Mar 1, 2012
- * Author: Parmeet Singh Bhatia
- *
- **/
 
 /** @file ContinuousLBModelequalsigma.h
  *  @brief Declares concrete model class ContinuousLBModelequalsigma derived from ICoClustModel.
@@ -45,30 +39,40 @@ class ContinuousLBModelequalsigma: public ICoClustModel
 {
   public:
     ContinuousLBModelequalsigma( MatrixReal const& m_Dataij,ModelParameters const& Mparam);
-    virtual bool Estep();
-    virtual bool CEstep();
-    virtual void Mstep();
+    ContinuousLBModelequalsigma(MatrixReal const& m_Dataij,VectorInteger const & rowlabels,
+                       VectorInteger const & collabels,ModelParameters const& Mparam);
+    /** cloning */
+    virtual ContinuousLBModelequalsigma* Clone(){return new ContinuousLBModelequalsigma(*this);}
+    virtual void LogSumRows(MatrixReal & _m_sum);
+    virtual void LogSumCols(MatrixReal & _m_sum);
+    virtual void MStepFull();
+    virtual bool EMRows();
+    virtual bool CEMRows();
+    virtual bool EMCols();
+    virtual bool CEMCols();
+    virtual bool SEMRows();
+    virtual bool SEMCols();
     virtual void likelihoodStopCriteria();
     virtual void ParameterStopCriteria();
-    float EstimateLikelihood();
+    virtual float EstimateLikelihood();
     virtual bool CEMInit();
-    virtual bool FuzzyCEMInit();
-    virtual bool RandomInit();
     virtual void FinalizeOutput();
     virtual void ConsoleOut();
+    //virtual void UpdateAllUsingConditionalProbabilities();
     virtual void Modify_theta_start();
     virtual void Copy_theta_start();
     virtual void Copy_theta_max();
     virtual void Modify_theta_max();
-    MatrixReal GetArrangedDataClusters();
+    const MatrixReal& GetArrangedDataClusters();
     virtual ~ContinuousLBModelequalsigma(){};
 
     /**Return means ContinuousLBModelequalsigma::m_Mukl_*/
-    MatrixReal GetMean();
+    const MatrixReal& GetMean() const;
     /**Return Sigma ContinuousLBModelequalsigma::m_Sigma2kl_*/
-    float GetSigma();
+    float GetSigma() const;
   protected:
     MatrixReal const& m_Dataij_;
+    MatrixReal m_ClusterDataij_;
     float dimprod_;
     MatrixReal m_Dataij2_;
     MatrixReal m_Mukl_,m_Mukl2_;
@@ -78,73 +82,45 @@ class ContinuousLBModelequalsigma: public ICoClustModel
     MatrixReal m_Uil1_,m_Uil2_;
     float Likelihood_old;
 
-  private:
-    // Functions used to operate on data in intermediate steps when running the model
-    bool EMRows();
-    bool EMCols();
-    bool CEMRows();
-    bool CEMCols();
+    //M-steps
+    void MStepRows();
+    void MStepCols();
 
     // Functions used to operate on data in intermediate steps when running the Initialization
-    bool InitCEMRows();
+    bool InitCEMCols();
     void SelectRandomRowsfromdata(MatrixReal &);
     void GenerateRandomMean(const MatrixReal & , MatrixReal &);
 };
 
-inline MatrixReal ContinuousLBModelequalsigma::GetMean()
+inline const MatrixReal& ContinuousLBModelequalsigma::GetMean() const
 {
   return m_Mukl_;
 }
 
-inline float ContinuousLBModelequalsigma::GetSigma()
+inline float ContinuousLBModelequalsigma::GetSigma() const
 {
   return Sigma2_;
 }
 
-inline void ContinuousLBModelequalsigma::Modify_theta_start()
+inline void ContinuousLBModelequalsigma::MStepRows()
 {
-	m_Muklstart_ = m_Mukl_;
-	Sigma2start_ = Sigma2_;
-  v_logPiekstart_ = v_logPiek_;
-  v_logRholstart_ = v_logRhol_;
+  if(!Mparam_.fixedproportions_) {
+    v_logPiek_=(v_Tk_.array()/nbSample_).log();
+  }
 
-  m_Rjlstart_ = m_Rjl_;
+  m_Mukl_ = (m_Tik_.transpose()*m_Uil1_).array()/(v_Tk_*(v_Rl_.transpose())).array();
+  m_Mukl2_ = m_Mukl_.array().square();
+  Sigma2_ = ((m_Tik_.transpose()*m_Uil2_).array().sum()-v_Tk_.transpose()*m_Mukl2_*v_Rl_)/dimprod_;
 }
 
-inline void ContinuousLBModelequalsigma::Copy_theta_start()
+inline void ContinuousLBModelequalsigma::MStepCols()
 {
-	m_Mukl_ = m_Muklstart_;
-	Sigma2_ = Sigma2start_;
-  v_logPiek_ = v_logPiekstart_;
-  v_logRhol_ = v_logRholstart_;
+  if(!Mparam_.fixedproportions_) {
+    v_logRhol_=(v_Rl_.array()/nbVar_).log();
+  }
 
-  m_Rjl_ = m_Rjlstart_;
-
-  //initialization
-  v_Rl_ = m_Rjl_.colwise().sum();
-}
-
-inline void ContinuousLBModelequalsigma::Copy_theta_max()
-{
-	m_Mukl_ = m_Muklmax_;
-	Sigma2_ = Sigma2max_;
-  v_logPiek_ = v_logPiekmax_;
-  v_logRhol_ = v_logRholmax_;
-
-  m_Tik_ = m_Tikmax_;
-  m_Rjl_ = m_Rjlmax_;
-  Likelihood_ = Lmax_;
-}
-
-inline void ContinuousLBModelequalsigma::Modify_theta_max()
-{
-	m_Muklmax_ = m_Mukl_;
-	Sigma2max_ = Sigma2_;
-  v_logPiekmax_ = v_logPiek_;
-  v_logRholmax_ = v_logRhol_;
-
-  m_Rjlmax_ = m_Rjl_;
-  m_Tikmax_ = m_Tik_;
-  Lmax_ = Likelihood_;
+  m_Mukl_ = (m_Vjk1_.transpose()*m_Rjl_).array()/(v_Tk_*(v_Rl_.transpose())).array();
+  m_Mukl2_ = m_Mukl_.array().square();
+  Sigma2_ = ((m_Vjk2_.transpose()*m_Rjl_).array().sum()-v_Tk_.transpose()*m_Mukl2_*v_Rl_)/dimprod_;
 }
 #endif /* CONTINUOUSLBMODELEQUALSIGMA_H_ */

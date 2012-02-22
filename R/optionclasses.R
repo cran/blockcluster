@@ -5,19 +5,19 @@
 NULL
 #' Common Input/Output options.
 #' 
-#' This class contains all the input options and common output options for all kinds of datasets (Binary, 
+#' This class contains all the input options and common output options for all kinds of data-sets (Binary, 
 #' Contingency and Continuous).
 #' 
 #' \describe{
 #' \item{The following are the various input options:}{}
 #' \item{data: }{Input data.}
 #' \item{datatype: }{Type of data.}
+#' \item{semisupervised: }{Boolean value specifying if Co-clustering is semi-supervised or not.}
 #' \item{model: }{Model to be run for co-clustering.}
-#' \item{nbcocluster: }{Number of row and colunm clusters.}
+#' \item{nbcocluster: }{Number of row and column clusters.}
 #' \item{strategy: }{Input strategy.}
 #' \item{The following are the various common output options:}{}
 #' \item{message: }{Status returned.}
-#' \item{time: }{Time consumed.}
 #' \item{rowproportions: }{Vector of row proportions.}
 #' \item{colproportions: }{Vector of column proportions.}
 #' \item{rowclass: }{Vector of assigned row cluster to each row.}
@@ -35,13 +35,15 @@ setClass(
 		Class = "CommonOptions",
 		representation = representation(
 				data = "matrix",
+        rowlabels = "numeric",
+        collabels = "numeric",
 				datatype = "character",
 				model = "character",
 				nbcocluster = "numeric",
+        semisupervised = "logical",
 				strategy = "strategy",
 				message = "character",
 				successful = "logical",
-				time = "numeric",
 				rowproportions = "numeric",
 				columnproportions = "numeric",
 				rowclass = "numeric",
@@ -53,12 +55,14 @@ setClass(
 		),
 		prototype = prototype(
 				data = matrix(nrow=0,ncol=0),
+        rowlabels = numeric(0),
+        collabels = numeric(0),
 				datatype = character(0),
 				model = character(0),
 				nbcocluster = numeric(0),
+        semisupervised = logical(0),
 				message = character(0),
 				successful = logical(0),
-				time = numeric(0),
 				rowproportions = numeric(0),
 				columnproportions = numeric(0),
 				rowclass = numeric(0),
@@ -74,7 +78,8 @@ setClass(
 #' Binary input/output options
 #' 
 #' This class contains all the input options as well as the estimated paramters for Binary data-set. It inherits
-#' from base class \code{\linkS4class{CommonOptions}}
+#' from base class \code{\linkS4class{CommonOptions}}. The class contains following output parameters given in 'Details' along
+#' with the parameters in base class. 
 #' 
 #' \describe{
 #' \item{classmean:}{The mean value of each co-cluster.}
@@ -103,7 +108,8 @@ setClass(
 #' Contingency input/output options
 #' 
 #' This class contains all the input options as well as the estimated paramters for Contingency data-set.It inherits
-#' from base class \code{\linkS4class{CommonOptions}}
+#' from base class \code{\linkS4class{CommonOptions}}. The class contains following output parameters given in 'Details' along
+#' with the parameters in base class.
 #' 
 #' \describe{
 #' \item{classgamma:}{The value of poisson parameter (gamma) for each co-cluster.}  
@@ -132,7 +138,8 @@ setClass(
 #' Continuous input/output options
 #' 
 #' This class contains all the input options as well as the estimated paramters for Continuous data-sets. It inherits
-#' from base class \code{\linkS4class{CommonOptions}}
+#' from base class \code{\linkS4class{CommonOptions}}. The class contains following output parameters given in 'Details' along
+#' with the parameters in base class.
 #' 
 #' \describe{
 #' \item{classmean:}{The mean value of each co-cluster.}  
@@ -179,7 +186,9 @@ setMethod(
 		definition = function(x,i,j,drop) {
 			switch(EXPR=i,
 					"data"={return (x@data)},
-					"datatype"={return (x@datatype)} ,
+          "coclusterdata"={return (x@coclusterdata)},
+					"datatype"={return (x@datatype)},
+          "semisupervised"={return (x@semisupervised)},
 					"model"={return (x@model)}, 
 					"strategy"={return (x@strategy)},
 					"message"={return (x@message)}, 
@@ -208,7 +217,9 @@ setMethod(
 		definition = function(x,i,j,drop) {
 			switch(EXPR=i,
 					"data"={return (x@data)},
-					"datatype"={return (x@datatype)} ,
+			    "coclusterdata"={return (x@coclusterdata)},
+          "datatype"={return (x@datatype)},
+			    "semisupervised"={return (x@semisupervised)},
 					"model"={return (x@model)}, 
 					"strategy"={return (x@strategy)},
 					"message"={return (x@message)}, 
@@ -237,7 +248,9 @@ setMethod(
 		definition = function(x,i,j,drop) {
 			switch(EXPR=i,
 					"data"={return (x@data)},
-					"datatype"={return (x@datatype)} ,
+			    "coclusterdata"={return (x@coclusterdata)},
+					"datatype"={return (x@datatype)},
+			    "semisupervised"={return (x@semisupervised)},
 					"model"={return (x@model)}, 
 					"strategy"={return (x@strategy)},
 					"message"={return (x@message)}, 

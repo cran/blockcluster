@@ -1,6 +1,6 @@
 
 /*--------------------------------------------------------------------*/
-/*     Copyright (C) 2011-2011  Parmeet Singh Bhatia
+/*     Copyright (C) 2011-2013  Parmeet Singh Bhatia
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as
@@ -23,12 +23,6 @@
     Contact : parmeet.bhatia@inria.fr , bhatia.parmeet@gmail.com
 */
 
-/*
- * Project:  cocluster
- * created on: Dec 14, 2011
- * Author: Parmeet Singh Bhatia
- *
- **/
 
 /** @file typedef.h
  *  @brief This file define all the typedefs used in cocluster project.
@@ -38,18 +32,19 @@
 #ifndef TYPEDEF_H_
 #define TYPEDEF_H_
 
+#define EIGENCONTAINERS 1
 #include <limits>
 
-#ifdef EIGENCONTAINERS
+#if EIGENCONTAINERS==1
 #include "../../../Eigen/Dense"
 #else
 #include "../../../stkpp/include/Arrays.h"
 #endif
 
 class InputParameters;
-
+class ICoClustModel;
 /*
- * definition for numeric limits
+ * Macro definition for numeric limits
  */
 #define RealMax std::numeric_limits<float>::max()
 #define RealMin std::numeric_limits<float>::min()
@@ -69,10 +64,10 @@ typedef Eigen::Matrix<bool,Eigen::Dynamic,1> VectorBinary;
 //2D array containers
 typedef Eigen::ArrayXXf Array2DReal;
 
-/*
- * Alias for some classes
+/**
+ * Member Function pointers
  */
 
-typedef InputParameters IP;
+typedef void(ICoClustModel::*StopCriteria_poiter)();
 
 #endif /* TYPEDEF_H_ */
