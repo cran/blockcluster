@@ -24,14 +24,18 @@
 
 
 /** @file XStrategyAlgo.h
- *  @brief In this file .
+ *  @brief Declares XStrategyAlgo class.
  **/
 
 #ifndef XSTRATEGYALGO_H_
 #define XSTRATEGYALGO_H_
 
+
 #include "IStrategy.h"
 
+/** @brief This class provides functionality to run various algorithms except SEMGibbsAlgo.
+ *
+ */
 class XStrategyAlgo: public IStrategy
 {
   public:

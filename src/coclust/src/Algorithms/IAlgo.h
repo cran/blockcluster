@@ -23,12 +23,16 @@
  */
 
 /** @file IAlgo.h
- *  @brief In this file .
+ *  @brief Declares interface class for various algorithms.
  **/
 
 #ifndef IALGO_H_
 #define IALGO_H_
 #include "../Models/ICoClustModel.h"
+
+/** @brief This is an interface class for various algorithms available in the package.
+ *
+ */
 class IAlgo
 {
   public:

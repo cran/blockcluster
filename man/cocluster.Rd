@@ -5,8 +5,7 @@
   cocluster(data, datatype, semisupervised = FALSE,
     rowlabels = numeric(0), collabels = numeric(0),
     model = character(0), nbcocluster,
-    strategy = cocluststrategy(), openmp = TRUE,
-    nbthreads = NULL)
+    strategy = cocluststrategy())
 }
 \arguments{
   \item{data}{Input data as matrix (or list containing data
@@ -53,13 +52,6 @@
 
   \item{strategy}{Object of class
   \code{\linkS4class{strategy}}.}
-
-  \item{openmp}{Boolean value specifying if OpenMP should
-  be enabled or not. Default value is TRUE.}
-
-  \item{nbthreads}{Number of threads used by OpenMP. By
-  default the number of thread is automatically set by
-  OpenMP.}
 }
 \value{
   Return an object of \code{\linkS4class{BinaryOptions}} or

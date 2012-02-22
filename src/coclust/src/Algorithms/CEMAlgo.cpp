@@ -23,7 +23,7 @@
  */
 
 /** @file CEMAlgo.cpp
- *  @brief In this file .
+ *  @brief Implements CEMAlgo class.
  **/
 
 #include "CEMAlgo.h"

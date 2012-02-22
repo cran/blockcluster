@@ -40,8 +40,6 @@ NULL
 #' 
 #' @param nbcocluster Integer vector specifying the number of row and column clusters respectively.
 #' @param strategy Object of class \code{\linkS4class{strategy}}.
-#' @param openmp Boolean value specifying if OpenMP should be enabled or not. Default value is TRUE. 
-#' @param nbthreads Number of threads used by OpenMP. By default the number of thread is automatically set by OpenMP.
 #' @return Return an object of \code{\linkS4class{BinaryOptions}} or \code{\linkS4class{ContingencyOptions}}
 #' or \code{\linkS4class{ContinuousOptions}} depending on whether the data-type is Binary, Contingency or Continuous
 #' respectively.
@@ -67,7 +65,7 @@ NULL
 
 
 cocluster<-function(data, datatype, semisupervised = FALSE, rowlabels = numeric(0), collabels = numeric(0),
-                    model = character(0), nbcocluster, strategy = cocluststrategy(), openmp = TRUE, nbthreads = NULL ) 
+                    model = character(0), nbcocluster, strategy = cocluststrategy()) 
 {
 	#Check for data
 	if(missing(data)){
@@ -242,18 +240,8 @@ cocluster<-function(data, datatype, semisupervised = FALSE, rowlabels = numeric(
 	}
 	
 
-	if(!openmp)
-	{
    .Call("CoClustmain",inpobj,PACKAGE = "blockcluster")
-	}
-  else
-  {
-    if(missing(nbthreads))
-      {nbthreads = 0}
-    
-    .Call("CoClustmainOpenMP",inpobj,nbthreads,PACKAGE = "blockcluster")
-  }
-    
+
 	
    cat(inpobj@message,"\n")
    

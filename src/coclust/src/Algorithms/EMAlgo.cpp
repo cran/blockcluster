@@ -23,7 +23,7 @@
  */
 
 /** @file EMAlgo.cpp
- *  @brief In this file .
+ *  @brief Implements EMAlgo class.
  **/
 
 #include "EMAlgo.h"

@@ -35,7 +35,7 @@
 #include "../typedefs/typedef.h"
 #include "../InputParameters/InputParameters.h"
 
-/** @brief ICoClustModel is an abstract class which provides interface for various models.
+/** @brief This is an abstract class which provides interface for various models.
  *  It provides interfaces for the most common functions in EM, CEM  and SEM algorithms as well
  *  as provide implementation for common functionalities.
  */

@@ -23,13 +23,17 @@
  */
 
 /** @file SEMAlgo.h
- *  @brief In this file .
+ *  @brief Declares SEMAlgo class.
  **/
 
 #ifndef SEMALGO_H_
 #define SEMALGO_H_
 
 #include "IAlgo.h"
+
+/**
+ * @brief Provides method to run SEM based algorithm on various models.
+ */
 
 class SEMAlgo: public IAlgo
 {

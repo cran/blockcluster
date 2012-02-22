@@ -24,13 +24,17 @@
 
 
 /** @file CEMAlgo.h
- *  @brief In this file .
+ *  @brief Declares CEMAlgo class.
  **/
 
 #ifndef CEMALGO_H_
 #define CEMALGO_H_
 
 #include "IAlgo.h"
+
+/**
+ * @brief Provides method to run CEM based algorithm on various models.
+ */
 
 class CEMAlgo: public IAlgo
 {

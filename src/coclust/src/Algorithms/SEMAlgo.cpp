@@ -23,7 +23,7 @@
  */
 
 /** @file SEMAlgo.cpp
- *  @brief In this file .
+ *  @brief Implements SEMAlgo class.
  **/
 
 #include "SEMAlgo.h"

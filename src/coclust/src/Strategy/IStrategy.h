@@ -34,9 +34,7 @@
 #include "../Initialization/IInit.h"
 #include "../Algorithms/IAlgo.h"
 
-/** @brief This is is interface(abstract) class for Strategy. This class provides
- * interface function for running the algorithm, for setting the model and stopping
- * criteria.
+/** @brief This is is interface(abstract) class for running various algorithms.
  */
 class IStrategy
 {

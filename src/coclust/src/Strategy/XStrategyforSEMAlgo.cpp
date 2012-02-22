@@ -24,7 +24,7 @@
 
 
 /** @file XStrategyforSEMAlgo.cpp
- *  @brief In this file .
+ *  @brief Implements XStrategyAlgo class.
  **/
 
 #include "XStrategyforSEMAlgo.h"

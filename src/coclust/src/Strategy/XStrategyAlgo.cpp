@@ -24,7 +24,7 @@
 
 
 /** @file XStrategyAlgo.cpp
- *  @brief In this file .
+ *  @brief Implements XStrategyAlgo class.
  **/
 
 #include "XStrategyAlgo.h"

@@ -29,11 +29,6 @@
 #ifndef INPUTPARAMETERS_H_
 #define INPUTPARAMETERS_H_
 
-/** @brief InputParameters contains all the parameters common between all the types of models. All the members in this class
- * are declared static and hence they are global. This class publically inherits IPage class defined in STKpp
- * project http://www.stkpp.org/html/classSTK_1_1IPage.html which allow easy access to reading and writing option values
- * from text file provided by the user.
- */
 #include <string>
 #include <map>
 #include <list>
@@ -43,6 +38,9 @@
 #endif
 #include "../enumerations/enumerations.h"
 
+/**
+ * @brief Structure to store various Strategy parameters.
+ */
 struct StrategyParameters
 {
     //iterations for various stages of XStrategy and between EM algo for Rows and Columns
@@ -54,6 +52,9 @@ struct StrategyParameters
     StopCriteria_poiter Stop_Criteria;
 };
 
+/**
+ * @brief Structure to store various model parameters.
+ */
 struct ModelParameters
 {
     //iterations and epsilon inside model
@@ -78,7 +79,9 @@ struct ModelParameters
     //proportion
     bool fixedproportions_;
 };
-
+/**
+ * @brief Structure to store various Strategy options.
+ */
 struct Strategy
 {
     Algorithm Algo_;
@@ -88,6 +91,11 @@ struct Strategy
     DataType DataType_;
     bool SemiSupervised;
 };
+
+/** @brief This class contains all the parameters that are required to run various algorithms. This class publicly inherits IPage class defined in STKpp
+ * project http://www.stkpp.org/html/classSTK_1_1IPage.html which allow easy access to reading and writing option values
+ * from text file provided by the user.
+ */
 #ifdef STK_DMANAGER
 class InputParameters : public STK::IPage
 {

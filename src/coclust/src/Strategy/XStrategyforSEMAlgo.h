@@ -23,7 +23,7 @@
  */
 
 /** @file XStrategyforSEMAlgo.h
- *  @brief In this file .
+ *  @brief IDeclares XStrategyforSEMAlgo class.
  **/
 
 #ifndef XSTRATEGYFORSEMALGO_H_
@@ -31,6 +31,9 @@
 
 #include "IStrategy.h"
 
+/** @brief This class provides functionality to run SEMGibbsAlgo.
+ *
+ */
 class XStrategyforSEMAlgo: public IStrategy
 {
   public:

@@ -24,13 +24,17 @@
 
 
 /** @file EMAlgo.h
- *  @brief In this file .
+ *  @brief Declares EMAlgo class.
  **/
 
 #ifndef EMALGO_H_
 #define EMALGO_H_
 
 #include "IAlgo.h"
+
+/**
+ * @brief Provides method to run EM based algorithm on various models.
+ */
 
 class EMAlgo: public IAlgo
 {

@@ -66,297 +66,18 @@
 #include "ContingencyDataExchange.h"
 
 
+
+#ifdef SUPPORT_OPENMP
+#include <omp.h>
+
 RcppExport SEXP CoClustmain(SEXP robj)
 {
   BEGIN_RCPP
   //Initialize Rcpp object
   Rcpp::S4 CoClustobj(robj);
 
-  std::map<std::string,DataType> S_DataType;
-  S_DataType["binary"] = Binary;
-  S_DataType["contingency"] = Contingency;
-  S_DataType["continuous"] = Continuous;
-
-  DataType datatype = S_DataType[Rcpp::as<std::string>(CoClustobj.slot("datatype"))];
-
-  //Various pointers declarations
-  IStrategy * p_Strategy_ = NULL;
-  IAlgo * p_Algo_ = NULL;
-  ICoClustModel * p_Model_ = NULL;
-  IInit * p_Init_ = NULL;
-  CoCluster* p_CoCluster_ = NULL;
-  IDataExchange * p_DataExchange_ = NULL;
-
-  //set p_DataExchange_ to required case
-  switch (datatype) {
-    case Binary:
-      p_DataExchange_ = new BinaryDataExchange();
-      break;
-    case Contingency:
-      p_DataExchange_ = new ContingencyDataExchange();
-      break;
-    case Continuous:
-      p_DataExchange_ = new ContinuousDataExchange();
-      break;
-    default:
-      break;
-  }
-
-  //Get input parameters
-  p_DataExchange_->SetInput(CoClustobj);
-  //Get data
-  p_DataExchange_->DataInput(CoClustobj);
-  // set Initialization method
-  switch (p_DataExchange_->GetStrategy().Init_) {
-    case e_CEMInit:
-      p_Init_ = new CEMInit();
-      break;
-    case e_FuzzyCEMInit:
-      p_Init_ = new FuzzyCEMInit();
-      break;
-    case e_RandomInit:
-      p_Init_ = new RandomInit();
-      break;
-    default:
-      p_Init_ = new CEMInit();
-      break;
-  }
-  // Set Strategy to be used to run algorithm method
-  StrategyParameters Sparam_ = p_DataExchange_->GetStrategyParameters();
-
-  // Set p_Algo_ and corresponding strategy p_Strategy_
-  switch (p_DataExchange_->GetStrategy().Algo_)
-  {
-    case BEM:
-      p_Algo_ = new EMAlgo();
-      p_Strategy_ = new XStrategyAlgo(Sparam_);
-      break;
-    case BCEM:
-      p_Algo_ = new CEMAlgo();
-      p_Strategy_ = new XStrategyAlgo(Sparam_);
-      break;
-    case BSEM:
-      p_Algo_ = new SEMAlgo();
-      p_Strategy_ = new XStrategyforSEMAlgo(Sparam_);
-      break;
-    default:
-      p_Algo_ = new EMAlgo();
-      p_Strategy_ = new XStrategyAlgo(Sparam_);
-      break;
-  }
-
-  //set Model
-  ModelParameters Mparam_ = p_DataExchange_->GetModelParameters();
-  if(!p_DataExchange_->GetStrategy().SemiSupervised){
-    switch (datatype) {
-      case Binary:{
-        BinaryDataExchange * p_tempBinary_ = dynamic_cast<BinaryDataExchange*>(p_DataExchange_);
-        switch (p_DataExchange_->GetStrategy().Model_)
-        {
-          case pik_rhol_epsilonkl:
-            Mparam_.fixedproportions_ = false;
-            p_Model_ = new BinaryLBModel(p_tempBinary_->GetData(),Mparam_);
-            break;
-          case pik_rhol_epsilon:
-            Mparam_.fixedproportions_ = false;
-            p_Model_ = new BinaryLBModelequalepsilon(p_tempBinary_->GetData(),Mparam_);
-            break;
-          case pi_rho_epsilonkl:
-            Mparam_.fixedproportions_ = true;
-            p_Model_ = new BinaryLBModel(p_tempBinary_->GetData(),Mparam_);
-            break;
-          case pi_rho_epsilon:
-            Mparam_.fixedproportions_ =true;
-            p_Model_ = new BinaryLBModelequalepsilon(p_tempBinary_->GetData(),Mparam_);
-            break;
-        }
-      }
-        break;
-      case Contingency:{
-        ContingencyDataExchange * p_tempContingency_ = dynamic_cast<ContingencyDataExchange*>(p_DataExchange_);
-        switch (p_DataExchange_->GetStrategy().Model_)
-        {
-          case pik_rhol_unknown:
-            Mparam_.fixedproportions_ = false;
-            p_Model_ = new ContingencyLBModel(p_tempContingency_->GetData(),Mparam_);
-            break;
-          case pik_rhol_known:
-            Mparam_.fixedproportions_ = false;
-            p_Model_ = new ContingencyLBModel_mu_i_nu_j(p_tempContingency_->GetData(),p_tempContingency_->GetMui()
-                                                        ,p_tempContingency_->GetNuj(),Mparam_);
-            break;
-          case pi_rho_unknown:
-            Mparam_.fixedproportions_ = true;
-            p_Model_ = new ContingencyLBModel(p_tempContingency_->GetData(),Mparam_);
-            break;
-          case pi_rho_known:
-            Mparam_.fixedproportions_ = true;
-            p_Model_ = new ContingencyLBModel_mu_i_nu_j(p_tempContingency_->GetData(),p_tempContingency_->GetMui()
-                                                        ,p_tempContingency_->GetNuj(),Mparam_);
-            break;
-        }
-      }
-        break;
-      case  Continuous:{
-        ContinuousDataExchange * p_tempContinuous_ = dynamic_cast<ContinuousDataExchange *>(p_DataExchange_);
-        switch (p_DataExchange_->GetStrategy().Model_)
-        {
-          case pik_rhol_sigma2kl:
-            Mparam_.fixedproportions_ = false;
-            p_Model_ = new ContinuousLBModel(p_tempContinuous_->GetData(),Mparam_);
-            break;
-          case pik_rhol_sigma2:
-            Mparam_.fixedproportions_ = false;
-            p_Model_ = new ContinuousLBModelequalsigma(p_tempContinuous_->GetData(),Mparam_);
-            break;
-          case pi_rho_sigma2kl:
-            Mparam_.fixedproportions_ =true;
-            p_Model_ = new ContinuousLBModel(p_tempContinuous_->GetData(),Mparam_);
-            break;
-          case pi_rho_sigma2:
-            Mparam_.fixedproportions_ =true;
-            p_Model_ = new ContinuousLBModelequalsigma(p_tempContinuous_->GetData(),Mparam_);
-            break;
-        }
-      }
-        break;
-      default:
-        break;
-    }
-  }else{
-    switch (datatype) {
-      case Binary:{
-        BinaryDataExchange * p_tempBinary_ = dynamic_cast<BinaryDataExchange*>(p_DataExchange_);
-        switch (p_DataExchange_->GetStrategy().Model_)
-        {
-          case pik_rhol_epsilonkl:
-            Mparam_.fixedproportions_ = false;
-            p_Model_ = new BinaryLBModel(p_tempBinary_->GetData(),p_DataExchange_->GetRowLabels(),
-                                         p_DataExchange_->GetColLabels(),Mparam_);
-            break;
-          case pik_rhol_epsilon:
-            Mparam_.fixedproportions_ = false;
-            p_Model_ = new BinaryLBModelequalepsilon(p_tempBinary_->GetData(),p_DataExchange_->GetRowLabels(),
-                                                     p_DataExchange_->GetColLabels(),Mparam_);
-            break;
-          case pi_rho_epsilonkl:
-            Mparam_.fixedproportions_ = true;
-            p_Model_ = new BinaryLBModel(p_tempBinary_->GetData(),p_DataExchange_->GetRowLabels(),
-                                         p_DataExchange_->GetColLabels(),Mparam_);
-            break;
-          case pi_rho_epsilon:
-            Mparam_.fixedproportions_ =true;
-            p_Model_ = new BinaryLBModelequalepsilon(p_tempBinary_->GetData(),p_DataExchange_->GetRowLabels(),
-                                                     p_DataExchange_->GetColLabels(),Mparam_);
-            break;
-        }
-      }
-        break;
-      case Contingency:{
-        ContingencyDataExchange * p_tempContingency_ = dynamic_cast<ContingencyDataExchange*>(p_DataExchange_);
-        switch (p_DataExchange_->GetStrategy().Model_)
-        {
-          case pik_rhol_unknown:
-            Mparam_.fixedproportions_ = false;
-            p_Model_ = new ContingencyLBModel(p_tempContingency_->GetData(),p_DataExchange_->GetRowLabels(),
-                                              p_DataExchange_->GetColLabels(),Mparam_);
-            break;
-          case pik_rhol_known:
-            Mparam_.fixedproportions_ = false;
-            p_Model_ = new ContingencyLBModel_mu_i_nu_j(p_tempContingency_->GetData(),p_DataExchange_->GetRowLabels(),
-                                                        p_DataExchange_->GetColLabels(),p_tempContingency_->GetMui()
-                                                        ,p_tempContingency_->GetNuj(),Mparam_);
-            break;
-          case pi_rho_unknown:
-            Mparam_.fixedproportions_ = true;
-            p_Model_ = new ContingencyLBModel(p_tempContingency_->GetData(),p_DataExchange_->GetRowLabels(),
-                                              p_DataExchange_->GetColLabels(),Mparam_);
-            break;
-          case pi_rho_known:
-            Mparam_.fixedproportions_ = true;
-            p_Model_ = new ContingencyLBModel_mu_i_nu_j(p_tempContingency_->GetData(),p_DataExchange_->GetRowLabels(),
-                                                        p_DataExchange_->GetColLabels(),p_tempContingency_->GetMui()
-                                                        ,p_tempContingency_->GetNuj(),Mparam_);
-            break;
-        }
-      }
-        break;
-      case  Continuous:{
-        ContinuousDataExchange * p_tempContinuous_ = dynamic_cast<ContinuousDataExchange *>(p_DataExchange_);
-        switch (p_DataExchange_->GetStrategy().Model_)
-        {
-          case pik_rhol_sigma2kl:
-            Mparam_.fixedproportions_ = false;
-            p_Model_ = new ContinuousLBModel(p_tempContinuous_->GetData(),p_DataExchange_->GetRowLabels(),
-                                             p_DataExchange_->GetColLabels(),Mparam_);
-            break;
-          case pik_rhol_sigma2:
-            Mparam_.fixedproportions_ = false;
-            p_Model_ = new ContinuousLBModelequalsigma(p_tempContinuous_->GetData(),p_DataExchange_->GetRowLabels(),
-                                                       p_DataExchange_->GetColLabels(),Mparam_);
-            break;
-          case pi_rho_sigma2kl:
-            Mparam_.fixedproportions_ =true;
-            p_Model_ = new ContinuousLBModel(p_tempContinuous_->GetData(),p_DataExchange_->GetRowLabels(),
-                                             p_DataExchange_->GetColLabels(),Mparam_);
-            break;
-          case pi_rho_sigma2:
-            Mparam_.fixedproportions_ =true;
-            p_Model_ = new ContinuousLBModelequalsigma(p_tempContinuous_->GetData(),p_DataExchange_->GetRowLabels(),
-                                                       p_DataExchange_->GetColLabels(),Mparam_);
-            break;
-        }
-      }
-        break;
-      default:
-        break;
-    }
-  }
-
-  //create cocluster object and run coclustering
-  double begin =clock();
-  p_CoCluster_ = new CoCluster();
-  p_CoCluster_->SetStrategy(p_Strategy_);
-  p_CoCluster_->SetAlgo(p_Algo_);
-  p_CoCluster_->SetModel(p_Model_);
-  p_CoCluster_->SetInit(p_Init_);
-  bool success = p_CoCluster_->run();
-  p_DataExchange_->Output(CoClustobj,p_Model_,success);
-  //CoClustobj.slot("time") = double(clock()-begin)/CLOCKS_PER_SEC;
-
-  //release memory
-  delete p_DataExchange_;
-  delete p_Init_;
-  delete p_Algo_;
-  delete p_Model_;
-  delete p_CoCluster_;
-
-  return CoClustobj;
-  END_RCPP
-}
-
-#include <omp.h>
-
-RcppExport SEXP CoClustmainOpenMP(SEXP robj,SEXP nbthreads)
-{
-  BEGIN_RCPP
-  //Initialize Rcpp object
-  Rcpp::S4 CoClustobj(robj);
-
-  //check for number of threads
-  int threads = Rcpp::as<int>(nbthreads);
-  if(threads == 0)
-    omp_set_num_threads(omp_get_num_procs());
-  else
-  {
-    int maxthreads = omp_get_num_procs();
-    if(threads>maxthreads){
-      CoClustobj.slot("successful") = false;
-      CoClustobj.slot("message") = "Do not enter threads greater than number of processors which is:  " + static_cast<std::ostringstream*>( &(std::ostringstream() << maxthreads) )->str();
-      return CoClustobj;
-    }
-    omp_set_num_threads(threads);
-  }
+  //set number of threads equal to number of processors
+  omp_set_num_threads(omp_get_num_procs());
 
   std::map<std::string,DataType> S_DataType;
   S_DataType["binary"] = Binary;
@@ -653,3 +374,273 @@ RcppExport SEXP CoClustmainOpenMP(SEXP robj,SEXP nbthreads)
   return CoClustobj;
   END_RCPP
 }
+#else
+RcppExport SEXP CoClustmain(SEXP robj)
+{
+  BEGIN_RCPP
+  //Initialize Rcpp object
+  Rcpp::S4 CoClustobj(robj);
+
+  std::map<std::string,DataType> S_DataType;
+  S_DataType["binary"] = Binary;
+  S_DataType["contingency"] = Contingency;
+  S_DataType["continuous"] = Continuous;
+
+  DataType datatype = S_DataType[Rcpp::as<std::string>(CoClustobj.slot("datatype"))];
+
+  //Various pointers declarations
+  IStrategy * p_Strategy_ = NULL;
+  IAlgo * p_Algo_ = NULL;
+  ICoClustModel * p_Model_ = NULL;
+  IInit * p_Init_ = NULL;
+  CoCluster* p_CoCluster_ = NULL;
+  IDataExchange * p_DataExchange_ = NULL;
+
+  //set p_DataExchange_ to required case
+  switch (datatype) {
+    case Binary:
+      p_DataExchange_ = new BinaryDataExchange();
+      break;
+    case Contingency:
+      p_DataExchange_ = new ContingencyDataExchange();
+      break;
+    case Continuous:
+      p_DataExchange_ = new ContinuousDataExchange();
+      break;
+    default:
+      break;
+  }
+
+  //Get input parameters
+  p_DataExchange_->SetInput(CoClustobj);
+  //Get data
+  p_DataExchange_->DataInput(CoClustobj);
+  // set Initialization method
+  switch (p_DataExchange_->GetStrategy().Init_) {
+    case e_CEMInit:
+      p_Init_ = new CEMInit();
+      break;
+    case e_FuzzyCEMInit:
+      p_Init_ = new FuzzyCEMInit();
+      break;
+    case e_RandomInit:
+      p_Init_ = new RandomInit();
+      break;
+    default:
+      p_Init_ = new CEMInit();
+      break;
+  }
+  // Set Strategy to be used to run algorithm method
+  StrategyParameters Sparam_ = p_DataExchange_->GetStrategyParameters();
+
+  // Set p_Algo_ and corresponding strategy p_Strategy_
+  switch (p_DataExchange_->GetStrategy().Algo_)
+  {
+    case BEM:
+      p_Algo_ = new EMAlgo();
+      p_Strategy_ = new XStrategyAlgo(Sparam_);
+      break;
+    case BCEM:
+      p_Algo_ = new CEMAlgo();
+      p_Strategy_ = new XStrategyAlgo(Sparam_);
+      break;
+    case BSEM:
+      p_Algo_ = new SEMAlgo();
+      p_Strategy_ = new XStrategyforSEMAlgo(Sparam_);
+      break;
+    default:
+      p_Algo_ = new EMAlgo();
+      p_Strategy_ = new XStrategyAlgo(Sparam_);
+      break;
+  }
+
+  //set Model
+  ModelParameters Mparam_ = p_DataExchange_->GetModelParameters();
+  if(!p_DataExchange_->GetStrategy().SemiSupervised){
+    switch (datatype) {
+      case Binary:{
+        BinaryDataExchange * p_tempBinary_ = dynamic_cast<BinaryDataExchange*>(p_DataExchange_);
+        switch (p_DataExchange_->GetStrategy().Model_)
+        {
+          case pik_rhol_epsilonkl:
+            Mparam_.fixedproportions_ = false;
+            p_Model_ = new BinaryLBModel(p_tempBinary_->GetData(),Mparam_);
+            break;
+          case pik_rhol_epsilon:
+            Mparam_.fixedproportions_ = false;
+            p_Model_ = new BinaryLBModelequalepsilon(p_tempBinary_->GetData(),Mparam_);
+            break;
+          case pi_rho_epsilonkl:
+            Mparam_.fixedproportions_ = true;
+            p_Model_ = new BinaryLBModel(p_tempBinary_->GetData(),Mparam_);
+            break;
+          case pi_rho_epsilon:
+            Mparam_.fixedproportions_ =true;
+            p_Model_ = new BinaryLBModelequalepsilon(p_tempBinary_->GetData(),Mparam_);
+            break;
+        }
+      }
+        break;
+      case Contingency:{
+        ContingencyDataExchange * p_tempContingency_ = dynamic_cast<ContingencyDataExchange*>(p_DataExchange_);
+        switch (p_DataExchange_->GetStrategy().Model_)
+        {
+          case pik_rhol_unknown:
+            Mparam_.fixedproportions_ = false;
+            p_Model_ = new ContingencyLBModel(p_tempContingency_->GetData(),Mparam_);
+            break;
+          case pik_rhol_known:
+            Mparam_.fixedproportions_ = false;
+            p_Model_ = new ContingencyLBModel_mu_i_nu_j(p_tempContingency_->GetData(),p_tempContingency_->GetMui()
+                                                        ,p_tempContingency_->GetNuj(),Mparam_);
+            break;
+          case pi_rho_unknown:
+            Mparam_.fixedproportions_ = true;
+            p_Model_ = new ContingencyLBModel(p_tempContingency_->GetData(),Mparam_);
+            break;
+          case pi_rho_known:
+            Mparam_.fixedproportions_ = true;
+            p_Model_ = new ContingencyLBModel_mu_i_nu_j(p_tempContingency_->GetData(),p_tempContingency_->GetMui()
+                                                        ,p_tempContingency_->GetNuj(),Mparam_);
+            break;
+        }
+      }
+        break;
+      case  Continuous:{
+        ContinuousDataExchange * p_tempContinuous_ = dynamic_cast<ContinuousDataExchange *>(p_DataExchange_);
+        switch (p_DataExchange_->GetStrategy().Model_)
+        {
+          case pik_rhol_sigma2kl:
+            Mparam_.fixedproportions_ = false;
+            p_Model_ = new ContinuousLBModel(p_tempContinuous_->GetData(),Mparam_);
+            break;
+          case pik_rhol_sigma2:
+            Mparam_.fixedproportions_ = false;
+            p_Model_ = new ContinuousLBModelequalsigma(p_tempContinuous_->GetData(),Mparam_);
+            break;
+          case pi_rho_sigma2kl:
+            Mparam_.fixedproportions_ =true;
+            p_Model_ = new ContinuousLBModel(p_tempContinuous_->GetData(),Mparam_);
+            break;
+          case pi_rho_sigma2:
+            Mparam_.fixedproportions_ =true;
+            p_Model_ = new ContinuousLBModelequalsigma(p_tempContinuous_->GetData(),Mparam_);
+            break;
+        }
+      }
+        break;
+      default:
+        break;
+    }
+  }else{
+    switch (datatype) {
+      case Binary:{
+        BinaryDataExchange * p_tempBinary_ = dynamic_cast<BinaryDataExchange*>(p_DataExchange_);
+        switch (p_DataExchange_->GetStrategy().Model_)
+        {
+          case pik_rhol_epsilonkl:
+            Mparam_.fixedproportions_ = false;
+            p_Model_ = new BinaryLBModel(p_tempBinary_->GetData(),p_DataExchange_->GetRowLabels(),
+                                         p_DataExchange_->GetColLabels(),Mparam_);
+            break;
+          case pik_rhol_epsilon:
+            Mparam_.fixedproportions_ = false;
+            p_Model_ = new BinaryLBModelequalepsilon(p_tempBinary_->GetData(),p_DataExchange_->GetRowLabels(),
+                                                     p_DataExchange_->GetColLabels(),Mparam_);
+            break;
+          case pi_rho_epsilonkl:
+            Mparam_.fixedproportions_ = true;
+            p_Model_ = new BinaryLBModel(p_tempBinary_->GetData(),p_DataExchange_->GetRowLabels(),
+                                         p_DataExchange_->GetColLabels(),Mparam_);
+            break;
+          case pi_rho_epsilon:
+            Mparam_.fixedproportions_ =true;
+            p_Model_ = new BinaryLBModelequalepsilon(p_tempBinary_->GetData(),p_DataExchange_->GetRowLabels(),
+                                                     p_DataExchange_->GetColLabels(),Mparam_);
+            break;
+        }
+      }
+        break;
+      case Contingency:{
+        ContingencyDataExchange * p_tempContingency_ = dynamic_cast<ContingencyDataExchange*>(p_DataExchange_);
+        switch (p_DataExchange_->GetStrategy().Model_)
+        {
+          case pik_rhol_unknown:
+            Mparam_.fixedproportions_ = false;
+            p_Model_ = new ContingencyLBModel(p_tempContingency_->GetData(),p_DataExchange_->GetRowLabels(),
+                                              p_DataExchange_->GetColLabels(),Mparam_);
+            break;
+          case pik_rhol_known:
+            Mparam_.fixedproportions_ = false;
+            p_Model_ = new ContingencyLBModel_mu_i_nu_j(p_tempContingency_->GetData(),p_DataExchange_->GetRowLabels(),
+                                                        p_DataExchange_->GetColLabels(),p_tempContingency_->GetMui()
+                                                        ,p_tempContingency_->GetNuj(),Mparam_);
+            break;
+          case pi_rho_unknown:
+            Mparam_.fixedproportions_ = true;
+            p_Model_ = new ContingencyLBModel(p_tempContingency_->GetData(),p_DataExchange_->GetRowLabels(),
+                                              p_DataExchange_->GetColLabels(),Mparam_);
+            break;
+          case pi_rho_known:
+            Mparam_.fixedproportions_ = true;
+            p_Model_ = new ContingencyLBModel_mu_i_nu_j(p_tempContingency_->GetData(),p_DataExchange_->GetRowLabels(),
+                                                        p_DataExchange_->GetColLabels(),p_tempContingency_->GetMui()
+                                                        ,p_tempContingency_->GetNuj(),Mparam_);
+            break;
+        }
+      }
+        break;
+      case  Continuous:{
+        ContinuousDataExchange * p_tempContinuous_ = dynamic_cast<ContinuousDataExchange *>(p_DataExchange_);
+        switch (p_DataExchange_->GetStrategy().Model_)
+        {
+          case pik_rhol_sigma2kl:
+            Mparam_.fixedproportions_ = false;
+            p_Model_ = new ContinuousLBModel(p_tempContinuous_->GetData(),p_DataExchange_->GetRowLabels(),
+                                             p_DataExchange_->GetColLabels(),Mparam_);
+            break;
+          case pik_rhol_sigma2:
+            Mparam_.fixedproportions_ = false;
+            p_Model_ = new ContinuousLBModelequalsigma(p_tempContinuous_->GetData(),p_DataExchange_->GetRowLabels(),
+                                                       p_DataExchange_->GetColLabels(),Mparam_);
+            break;
+          case pi_rho_sigma2kl:
+            Mparam_.fixedproportions_ =true;
+            p_Model_ = new ContinuousLBModel(p_tempContinuous_->GetData(),p_DataExchange_->GetRowLabels(),
+                                             p_DataExchange_->GetColLabels(),Mparam_);
+            break;
+          case pi_rho_sigma2:
+            Mparam_.fixedproportions_ =true;
+            p_Model_ = new ContinuousLBModelequalsigma(p_tempContinuous_->GetData(),p_DataExchange_->GetRowLabels(),
+                                                       p_DataExchange_->GetColLabels(),Mparam_);
+            break;
+        }
+      }
+        break;
+      default:
+        break;
+    }
+  }
+
+  //create cocluster object and run coclustering
+  double begin =clock();
+  p_CoCluster_ = new CoCluster();
+  p_CoCluster_->SetStrategy(p_Strategy_);
+  p_CoCluster_->SetAlgo(p_Algo_);
+  p_CoCluster_->SetModel(p_Model_);
+  p_CoCluster_->SetInit(p_Init_);
+  bool success = p_CoCluster_->run();
+  p_DataExchange_->Output(CoClustobj,p_Model_,success);
+  //CoClustobj.slot("time") = double(clock()-begin)/CLOCKS_PER_SEC;
+
+  //release memory
+  delete p_DataExchange_;
+  delete p_Init_;
+  delete p_Algo_;
+  delete p_Model_;
+  delete p_CoCluster_;
+
+  return CoClustobj;
+  END_RCPP
+}
+#endif
