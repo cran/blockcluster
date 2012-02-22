@@ -13,3 +13,4 @@ $(SHLIB): coclust
 coclust:
 	(cd $(COCLUSTDIR) && $(MAKE))
 	$(RANLIB) $(COCLUSTLIB)
+	

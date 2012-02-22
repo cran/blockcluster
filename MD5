@@ -1,4 +1,4 @@
-a7d683b0816f79d4fb43017a3a31cb28 *DESCRIPTION
+0981d41c972a9a29c0529e9317030f3d *DESCRIPTION
 062a7fdea9c450b296a09029a3ef6f62 *Makefile
 c88fa0737ef06b9ea272d2ff80500acd *NAMESPACE
 22cd11241b60b59590dacd1444c7f996 *R/Rcoclust.R
@@ -283,8 +283,8 @@ cf54d86706d06634562a9a7703f28a15 *src/Eigen/src/plugins/ArrayCwiseUnaryOps.h
 2a144a9762689e606358b8f376387f2f *src/Eigen/src/plugins/MatrixCwiseUnaryOps.h
 d98e69d218cf8a156138ef382a05cb65 *src/IDataExchange.cpp
 1d3dfebfc2f5c2f233aff3a1aad85a60 *src/IDataExchange.h
-6bc4ab2ff1833e9b90765eecae612930 *src/Makevars
-2790acf18195ca4220f9acbfc6d88d8d *src/Makevars.win
+dac9a5d819146dafa6bc5da05b1616a7 *src/Makevars
+dac9a5d819146dafa6bc5da05b1616a7 *src/Makevars.win
 3ac7877680d3836eebb2a0a8f1efd0b2 *src/Rcoclustmain.cpp
 3e4d8dc9595993a4c9f4af809002bdb0 *src/coclust/get_symbolic_link.sh
 7575b18facc16572ddfcda96bedf9b1e *src/coclust/makefile
