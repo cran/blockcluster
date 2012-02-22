@@ -35,19 +35,10 @@ bool CoCluster::run()
   std::cout<<"Starting Co-Clustering.."<<std::endl;
 #endif
 
-  if (!p_Strategy_){
-    return false;
-  }
-
-  if(!p_Algo_){
-    return false;
-  }
-
-  if(!p_Init_){
-    return false;
-  }
-
-  if(!p_Model_){
+  if (!p_Strategy_||!p_Algo_||!p_Model_||!p_Init_){
+#ifdef COVERBOSE
+  std::cout<<"Invalid pointer(s).."<<std::endl;
+#endif
     return false;
   }
 

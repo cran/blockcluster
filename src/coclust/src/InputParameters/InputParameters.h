@@ -84,12 +84,16 @@ struct ModelParameters
  */
 struct Strategy
 {
+    Strategy(){
+      Bayesianform_ = false;
+    }
     Algorithm Algo_;
     StopCriteria stopcriteria_;
     Initialization Init_;
     Model Model_;
     DataType DataType_;
     bool SemiSupervised;
+    bool Bayesianform_;
 };
 
 /** @brief This class contains all the parameters that are required to run various algorithms. This class publicly inherits IPage class defined in STKpp

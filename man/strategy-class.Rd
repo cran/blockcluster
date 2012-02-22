@@ -21,6 +21,10 @@
   \item{nbiterationsXEM: }{Number of EM iterations used
   during XEM.} \item{epsilonxem: }{Tolerance value used
   during xem.} \item{epsilonXEM: }{Tolerance value used
-  during XEM.} }
+  during XEM.} \item{bayesianform: }{Boolean parameter to
+  indicate whether to run algorithms in bayesian settings
+  or not.Default value is false.} \item{hyperparam:
+  }{Hyper-parameters ("a" and "b") in case of Bayesian
+  settings.} }
 }
 

@@ -16,7 +16,7 @@ NULL
 #' 
 #' @param data Input data as matrix (or list containing data matrix, numeric vector for row effects and numeric 
 #'        vector column effects in case of contingency data with known row and column effects.)
-#' @param datatype This is the type of data which can be "binary" , "contingency" or "continuous".
+#' @param datatype This is the type of data which can be "binary" , "contingency", "continuous" or "categorical".
 #' @param semisupervised Boolean value specifying whether to perform semi-supervised co-clustering or not. Make sure to provide row and/or
 #' column labels if specified value is true. The default value is false.
 #' @param rowlabels Vector specifying the class of rows. The class number starts from zero. Provide -1 for unknown row class. 
@@ -36,6 +36,8 @@ NULL
 #'     pi_rho_unknown \tab contingency \tab equal \tab N.A \cr
 #'     pik_rhol_known \tab contingency \tab unequal \tab N.A \cr
 #'     pi_rho_known \tab contingency \tab equal \tab N.A \cr
+#'     pik_rhol_multi \tab categorical \tab unequal \tab unequal \cr
+#'     pi_rho_multi \tab categorical \tab equal \tab unequal \cr
 #' }
 #' 
 #' @param nbcocluster Integer vector specifying the number of row and column clusters respectively.
@@ -235,8 +237,27 @@ cocluster<-function(data, datatype, semisupervised = FALSE, rowlabels = numeric(
                       datatype = datatype, model = model, nbcocluster = nbcocluster, strategy = strategy,datamui=data[[2]],datanuj=data[[3]])
         
 	}
+		else if(datatype == "categorical"){
+		  if(missing(model)){
+		    model = "pik_rhol_multi"
+		  }
+		  else 
+		  {
+		    if(model!="pi_rho_multi" && model!="pik_rhol_multi")
+		    {
+		      stop("Incorrect Model, Valid categorical models are:pik_rhol_multi, pi_rho_multi")
+				}
+		  }
+		  
+		  if(length(strategy@initmethod)==0){
+		    strategy@initmethod = "RandomInit"
+		  }
+		  
+		  inpobj<-new("CategoricalOptions",data = data, rowlabels = rowlabels, collabels = collabels, semisupervised = semisupervised,
+		              datatype = datatype, model = model,nbcocluster = nbcocluster, strategy = strategy)
+		}
 		else
-		{stop("Invalid datatype, Valid types are: binary , contingency and continuous")}
+		{stop("Invalid datatype, Valid types are: binary , contingency, continuous and categorical")}
 	}
 	
 

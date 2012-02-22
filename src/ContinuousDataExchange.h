@@ -49,7 +49,8 @@ class ContinuousDataExchange: public IDataExchange
     ContinuousDataExchange(){};
     virtual void Output(Rcpp::S4 & obj,ICoClustModel*,bool);
     virtual void DataInput(Rcpp::S4 & obj);
-    const MatrixReal & GetData(){return m_Dataij_;}
+    virtual void instantiateModel(ICoClustModel*& model);
+    inline const MatrixReal & GetData(){return m_Dataij_;}
     ~ContinuousDataExchange(){};
   protected:
     MatrixReal m_Dataij_;

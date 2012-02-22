@@ -1,6 +1,7 @@
 \name{[}
 \alias{[}
 \alias{[,BinaryOptions-method}
+\alias{[,CategoricalOptions-method}
 \alias{[,ContingencyOptions-method}
 \alias{[,ContinuousOptions-method}
 \alias{[,strategy-method}

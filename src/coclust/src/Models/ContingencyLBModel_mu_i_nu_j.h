@@ -67,7 +67,6 @@ class ContingencyLBModel_mu_i_nu_j: public ICoClustModel
     virtual bool RandomInit();
     virtual void FinalizeOutput();
     virtual void ConsoleOut();
-    //virtual void UpdateAllUsingConditionalProbabilities();
     virtual void Modify_theta_start();
     virtual void Copy_theta_start();
     virtual void Copy_theta_max();
@@ -76,7 +75,7 @@ class ContingencyLBModel_mu_i_nu_j: public ICoClustModel
     /**Return Poisson Parameters ContingencyLBModel_mu_i_nu_j::m_Gammakl_*/
     const MatrixReal& GetGamma() const;
     /**Destructor*/
-    inline virtual ~ContingencyLBModel_mu_i_nu_j(){};
+    virtual ~ContingencyLBModel_mu_i_nu_j(){};
 
   protected:
     //Variables involved in Bernoulli model
@@ -96,10 +95,6 @@ class ContingencyLBModel_mu_i_nu_j: public ICoClustModel
     //M-steps
     void MStepRows();
     void MStepCols();
-    //Utility functions
-    VectorInteger PartRnd(int n,VectorReal proba);
-    VectorReal Cumsum(VectorReal proba);
-    MatrixReal Unifrnd(float a, float b, int row, int col);
 };
 
 inline const MatrixReal& ContingencyLBModel_mu_i_nu_j::GetGamma() const

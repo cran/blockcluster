@@ -30,13 +30,12 @@
 #include "ICoClustModel.h"
 
 
-ICoClustModel::ICoClustModel(ModelParameters const& Mparam)
+ICoClustModel::ICoClustModel(ModelParameters const& Mparam):Mparam_(Mparam)
 {
-  Mparam_ = Mparam;
-  v_nbRowClusterMembers_ = VectorInteger::Zero(Mparam.nbrowclust_);
-  v_nbColClusterMembers_ = VectorInteger::Zero(Mparam.nbcolclust_);
   nbSample_ = Mparam.nbrowdata_;
   nbVar_ = Mparam.nbcoldata_;
+  v_nbRowClusterMembers_ = VectorInteger::Zero(Mparam.nbrowclust_);
+  v_nbColClusterMembers_ = VectorInteger::Zero(Mparam.nbcolclust_);
   v_Zi_ = VectorInteger::Zero(nbSample_);
   v_Wj_ = VectorInteger::Zero(nbVar_);
   m_Zik_ = MatrixInteger::Zero(nbSample_,Mparam_.nbrowclust_);
@@ -51,13 +50,12 @@ ICoClustModel::ICoClustModel(ModelParameters const& Mparam)
 }
 
 ICoClustModel::ICoClustModel(ModelParameters const& Mparam,VectorInteger const & rowlabels,
-              VectorInteger const & collabels)
+              VectorInteger const & collabels):  Mparam_(Mparam)
 {
-  Mparam_ = Mparam;
-  v_nbRowClusterMembers_ = VectorInteger::Zero(Mparam.nbrowclust_);
-  v_nbColClusterMembers_ = VectorInteger::Zero(Mparam.nbcolclust_);
   nbSample_ = Mparam.nbrowdata_;
   nbVar_ = Mparam.nbcoldata_;
+  v_nbRowClusterMembers_ = VectorInteger::Zero(Mparam.nbrowclust_);
+  v_nbColClusterMembers_ = VectorInteger::Zero(Mparam.nbcolclust_);
   v_Zi_ = VectorInteger::Zero(nbSample_);
   v_Wj_ = VectorInteger::Zero(nbVar_);
   m_Zik_ = MatrixInteger::Zero(nbSample_,Mparam_.nbrowclust_);
@@ -440,5 +438,53 @@ bool ICoClustModel::RandomInit()
   std::cout<<Error_msg_<<"\n";
 #endif
   return false;
+}
+
+float ICoClustModel::ICLCriteriaValue(){
+  Error_msg_ = "ICL creteria is not yet implemented for this model.";
+#ifdef COVERBOSE
+  std::cout<<Error_msg_<<"\n";
+#endif
+  return -RealMax;
+}
+VectorInteger ICoClustModel::PartRnd(int n,VectorReal proba)
+{
+  int clusters = proba.rows();
+  VectorInteger v_Z = VectorInteger::Zero(n);
+  VectorInteger v_Randperm = RandSample(n,n);
+  VectorInteger remainingclusters(n-clusters);
+
+  for ( int ind = 0; ind < clusters; ++ind) {
+    v_Z(v_Randperm(ind)) = ind+1;
+  }
+  remainingclusters = (clusters+1)*MatrixInteger::Ones(n-clusters,1) - ((MatrixReal::Ones(clusters,1)*(Unifrnd(0,1,1,n-clusters))).array() < (Cumsum(proba)*MatrixReal::Ones(1,n-clusters)).array()).matrix().cast<int>().colwise().sum().transpose();
+
+  for ( int ind = clusters; ind < n; ++ind) {
+    v_Z(v_Randperm(ind)) = remainingclusters(ind-clusters)==(clusters+1)?clusters:remainingclusters(ind-clusters);
+  }
+  return v_Z;
+
+}
+
+VectorReal ICoClustModel::Cumsum(VectorReal proba)
+{
+  int size = proba.rows();
+  VectorReal v_temp = VectorReal::Zero(size);
+  v_temp(0) = proba(0);
+  for ( int itr = 1; itr < size; ++itr) {
+    v_temp(itr) = v_temp(itr-1) + proba(itr);
+  }
+  return v_temp;
+}
+
+MatrixReal ICoClustModel::Unifrnd(float a,float b, int row, int col)
+{
+  MatrixReal m_temp(row,col);
+  for ( int r = 0; r < row; ++r) {
+    for ( int c = 0; c < col; ++c) {
+      m_temp(r,c) = (b-a)*(std::rand()/float(RAND_MAX)) + a;
+    }
+  }
+  return m_temp;
 }
 

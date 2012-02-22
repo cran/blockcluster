@@ -276,47 +276,6 @@ bool ContingencyLBModel_mu_i_nu_j::RandomInit()
   return true;
 }
 
-VectorInteger ContingencyLBModel_mu_i_nu_j::PartRnd(int n,VectorReal proba)
-{
-  int clusters = proba.rows();
-  VectorInteger v_Z = VectorInteger::Zero(n);
-  VectorInteger v_Randperm = RandSample(n,n);
-  VectorInteger remainingclusters(n-clusters);
-
-  for ( int ind = 0; ind < clusters; ++ind) {
-    v_Z(v_Randperm(ind)) = ind+1;
-  }
-  remainingclusters = (clusters+1)*MatrixInteger::Ones(n-clusters,1) - ((MatrixReal::Ones(clusters,1)*(Unifrnd(0,1,1,n-clusters))).array() < (Cumsum(proba)*MatrixReal::Ones(1,n-clusters)).array()).matrix().cast<int>().colwise().sum().transpose();
-
-  for ( int ind = clusters; ind < n; ++ind) {
-    v_Z(v_Randperm(ind)) = remainingclusters(ind-clusters)==(clusters+1)?clusters:remainingclusters(ind-clusters);
-  }
-  return v_Z;
-
-}
-
-VectorReal ContingencyLBModel_mu_i_nu_j::Cumsum(VectorReal proba)
-{
-  int size = proba.rows();
-  VectorReal v_temp = VectorReal::Zero(size);
-  v_temp(0) = proba(0);
-  for ( int itr = 1; itr < size; ++itr) {
-    v_temp(itr) = v_temp(itr-1) + proba(itr);
-  }
-  return v_temp;
-}
-
-MatrixReal ContingencyLBModel_mu_i_nu_j::Unifrnd(float a,float b, int row, int col)
-{
-  MatrixReal m_temp(row,col);
-  for ( int r = 0; r < row; ++r) {
-    for ( int c = 0; c < col; ++c) {
-      m_temp(r,c) = (b-a)*(std::rand()/float(RAND_MAX)) + a;
-    }
-  }
-  return m_temp;
-}
-
 void ContingencyLBModel_mu_i_nu_j::FinalizeOutput()
 {
   CommonFinalizeOutput();
@@ -332,39 +291,8 @@ void ContingencyLBModel_mu_i_nu_j::ConsoleOut()
 
 const MatrixInteger& ContingencyLBModel_mu_i_nu_j::GetArrangedDataClusters()
 {
-  Eigen::ArrayXi v_Zi = (GetRowClassificationVector()).array();
-  Eigen::ArrayXi v_Wj = (GetColumnClassificationVector()).array();
-  m_ClusterDataij_ = MatrixInteger::Zero(nbSample_,nbVar_);
-
-  //Rearrange data into clusters
-
-  VectorInteger rowincrement = MatrixInteger::Zero(Mparam_.nbrowclust_,1);
-
-  VectorInteger nbindrows = MatrixInteger::Zero(Mparam_.nbrowclust_,1);
-  for ( int k = 1; k < Mparam_.nbrowclust_; ++k) {
-    nbindrows(k) = (v_Zi==(k-1)).count()+nbindrows(k-1);
-  }
-
-  VectorInteger colincrement = MatrixInteger::Zero(Mparam_.nbcolclust_,1);
-
-  VectorInteger nbindcols = MatrixInteger::Zero(Mparam_.nbcolclust_,1);
-  for ( int l = 1; l < Mparam_.nbcolclust_; ++l) {
-    nbindcols(l)=(v_Wj==(l-1)).count()+nbindcols(l-1);
-  }
-
-  for ( int j = 0; j < nbVar_; ++j) {
-    m_ClusterDataij_.col(colincrement(v_Wj(j)) + nbindcols(v_Wj(j))) = m_Dataij_.col(j);
-    colincrement(v_Wj(j))+=1;
-  }
-  MatrixInteger temp = m_ClusterDataij_;
-
-  for ( int i = 0; i < nbSample_; ++i) {
-    m_ClusterDataij_.row( rowincrement(v_Zi(i)) + nbindrows(v_Zi(i))) = temp.row(i);
-    rowincrement(v_Zi(i))+=1;
-  }
-
+  ArrangedDataCluster<MatrixInteger>(m_ClusterDataij_,m_Dataij_);
   return m_ClusterDataij_;
-
 }
 
 void ContingencyLBModel_mu_i_nu_j::Modify_theta_start()

@@ -1,9 +1,9 @@
 #'
 #' Co-Clustering Package	
 #' 
-#' This package performs Co-clustering of Binary, Contingency and Continuous data-sets. 
+#' This package performs Co-clustering of binary, contingency, continuous and categorical data-sets. 
 #' 
-#' This package performs Co-clustering of Binary, Contingency and Continuous data-sets with utility functions to
+#' This package performs Co-clustering of binary, contingency, continuous and categorical data-sets with utility functions to
 #' visualize the Co-clustered data. The package contains a function \code{\link{cocluster}} which perform Co-clustering
 #' on various kinds of data-sets and returns object of appropriate class (refer to documentation of \code{\link{cocluster}}).
 #' The package also contains function \code{\link{cocluststrategy}} (see documentation of function to know various slots)
@@ -27,7 +27,8 @@
 #' #Plot the original and Co-clustered data 
 #' plot(out)
 #' 
-#' 
+#' @import methods
+#' @import Rcpp
 #' 
 #' @name blockcluster
 #' @rdname blockcluster

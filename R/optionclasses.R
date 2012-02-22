@@ -22,9 +22,10 @@ NULL
 #' \item{colproportions: }{Vector of column proportions.}
 #' \item{rowclass: }{Vector of assigned row cluster to each row.}
 #' \item{colclass: }{Vector of assigned column cluster to each column.}
-#' \item{likelihood: }{Final log-likelihood.}
+#' \item{likelihood: }{Final pseudo log-likelihood.}
 #' \item{rowposteriorprob: }{Final posterior probabilities for rows.}
 #' \item{colposteriorprob: }{Final posterior probabilities for columns.}
+#' 
 #' }
 #' 
 #' @name CommonOptions-class
@@ -84,6 +85,7 @@ setClass(
 #' \describe{
 #' \item{classmean:}{The mean value of each co-cluster.}
 #' \item{classdispersion:}{The dispersion of each co-cluster.}
+#' \item{ICLvalue: }{Integrated complete likelihood}
 #' }
 #' 
 #' @name BinaryOptions-class
@@ -95,12 +97,14 @@ setClass(
 		contains = "CommonOptions",
 		representation = representation(
 				classmean = "matrix",
-				classdispersion = "matrix"
+				classdispersion = "matrix",
+        ICLvalue = "numeric"
 		),
 		
 		prototype = prototype(
 				classmean = matrix(nrow=0,ncol=0),
-				classdispersion = matrix(nrow=0,ncol=0)
+				classdispersion = matrix(nrow=0,ncol=0),
+        ICLvalue = numeric(0)
 		)
 )
 
@@ -162,6 +166,37 @@ setClass(
 		)
 )
 
+#'
+#' Categorical input/output options
+#' 
+#' This class contains all the input options as well as the estimated paramters for categorical data-set. It inherits
+#' from base class \code{\linkS4class{CommonOptions}}. The class contains following output parameters given in 'Details' along
+#' with the parameters in base class. 
+#' 
+#' \describe{
+#' \item{classmean:}{The categorical distribution of each co-cluster}
+#' \item{ICLvalue: }{Integrated complete likelihood}
+#' }
+#' 
+#' @name CategoricalOptions-class
+#' @exportClass CategoricalOptions
+#' 
+#' 
+setClass(
+  Class = "CategoricalOptions",
+  contains = "CommonOptions",
+  representation = representation(
+    classmean = "list",
+    ICLvalue = "numeric"
+    ),
+  
+  prototype = prototype(
+    classmean = list(0),
+    ICLvalue = numeric(0)
+  )
+)
+
+
 #' Getter method for Rcoclust output
 #' 
 #' This is overloading of square braces to extract values of various slots of the output from \code{\link{cocluster}}.
@@ -201,6 +236,7 @@ setMethod(
 					"colposteriorprob"={return (x@colposteriorprob)},
 					"classmean"={return (x@classmean)},
 					"classdispersion"={return (x@classdispersion)},
+			    "ICLvalue"={return (x@ICLvalue)},
 					stop("Invalid slot name.")
 			)
 		}
@@ -267,4 +303,35 @@ setMethod(
 			)
 			
 		}
+)
+
+
+#' @rdname getter-methods
+#' @aliases [,CategoricalOptions-method
+#' 
+
+setMethod(
+  f = "[",
+  signature = "CategoricalOptions",
+  definition = function(x,i,j,drop) {
+    switch(EXPR=i,
+           "data"={return (x@data)},
+           "coclusterdata"={return (x@coclusterdata)},
+           "datatype"={return (x@datatype)},
+           "semisupervised"={return (x@semisupervised)},
+           "model"={return (x@model)}, 
+           "strategy"={return (x@strategy)},
+           "message"={return (x@message)}, 
+           "rowproportions"={return (x@rowproportions)},
+           "colproportions"={return (x@colproportions)},
+           "rowclass"={return (x@rowclass)},
+           "colclass"={return (x@colclass)},
+           "likelihood"={return (x@likelihood)},
+           "rowposteriorprob"={return (x@rowposteriorprob)},
+           "colposteriorprob"={return (x@colposteriorprob)},
+           "classmean"={return (x@classmean)},
+           "ICLvalue"={return (x@ICLvalue)},
+           stop("Invalid slot name.")
+    )
+  }
 )

@@ -39,7 +39,8 @@ enum DataType
 {
     Binary = 1,
     Contingency = 2,
-    Continuous = 3
+    Continuous = 3,
+    Categorical = 4
 };
 
 /*
@@ -87,7 +88,9 @@ enum Model
     pi_rho_sigma2 = 9,
     pik_rhol_sigma2 = 10,
     pi_rho_sigma2kl = 11,
-    pik_rhol_sigma2kl = 12
+    pik_rhol_sigma2kl = 12,
+    pi_rho_multi = 13,
+    pik_rhol_multi = 14
 };
 
 #endif /* ENUMERATIONS_H_ */

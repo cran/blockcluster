@@ -42,6 +42,10 @@
 class ICoClustModel
 {
     public:
+    /**
+     * Default constructor
+     */
+    ICoClustModel(){};
     /**Constructor
      * @param Mparam ModelParameters
      * */
@@ -110,6 +114,11 @@ class ICoClustModel
      * false if the derived class does not overwrite this method.
      */
     virtual bool FuzzyCEMInit();
+    /**
+     * Interface function for calculating ICL criteria value.
+     * @return ICL criteria.
+     */
+    virtual float ICLCriteriaValue();
     /** This function will provide the current status of ICoClustModel::StopAlgo parameter.*/
     bool stopAlgo();
     /**
@@ -213,10 +222,12 @@ class ICoClustModel
      */
     const MatrixReal & GetColPosteriorprob() const;
 
+    template<class T>
+    void ArrangedDataCluster(T&,const T&);
+
   protected:
     std::string  Error_msg_;
     int nbSample_,nbVar_;
-
     //variables use in case of semi-supervised co-clustering
     std::vector<int> UnknownLabelsRows_, UnknownLabelsCols_ ;
     std::vector<std::pair<int,int> > knownLabelsRows_, knownLabelsCols_;
@@ -242,6 +253,9 @@ class ICoClustModel
     VectorInteger RandSample(int n,int k);
     /** Parameter finalization common for all models*/
     void CommonFinalizeOutput();
+    VectorInteger PartRnd(int n,VectorReal proba);
+    VectorReal Cumsum(VectorReal proba);
+    MatrixReal Unifrnd(float a, float b, int row, int col);
 
   private:
     //make assignment operator private
@@ -351,15 +365,55 @@ inline void ICoClustModel::CommonFinalizeOutput()
 
   VectorReal::Index maxIndex;
   // Calculate classification vector for rows
+  m_Zik_.setZero();
+  m_Wjl_.setZero();
   for ( int i = 0; i < nbSample_; ++i) {
   m_Tik_.row(i).maxCoeff(&maxIndex);
   v_Zi_(i) = maxIndex;
+  m_Zik_(i,maxIndex) = 1;
   }
 
   // Calculate classification vector for columns
   for ( int j = 0; j < nbVar_; ++j) {
   m_Rjl_.row(j).maxCoeff(&maxIndex);
   v_Wj_(j) = maxIndex;
+  m_Wjl_(j,maxIndex) = 1;
+  }
+
+}
+
+template<class T>
+void ICoClustModel::ArrangedDataCluster(T& m_ClusterDataij_,const T& m_Dataij_)
+{
+  Eigen::ArrayXi v_Zi = v_Zi_.array();
+  Eigen::ArrayXi v_Wj = v_Wj_.array();
+  m_ClusterDataij_ = T::Zero(nbSample_,nbVar_);
+
+  //Rearrange data into clusters
+
+  VectorInteger rowincrement = MatrixInteger::Zero(Mparam_.nbrowclust_,1);
+
+  VectorInteger nbindrows = MatrixInteger::Zero(Mparam_.nbrowclust_+1,1);
+  for ( int k = 1; k < Mparam_.nbrowclust_; ++k) {
+    nbindrows(k) = (v_Zi==(k-1)).count()+nbindrows(k-1);
+  }
+
+  VectorInteger colincrement = MatrixInteger::Zero(Mparam_.nbcolclust_,1);
+
+  VectorInteger nbindcols = MatrixInteger::Zero(Mparam_.nbcolclust_+1,1);
+  for ( int l = 1; l < Mparam_.nbcolclust_; ++l) {
+    nbindcols(l)=(v_Wj==(l-1)).count()+nbindcols(l-1);
+  }
+
+  for ( int j = 0; j < nbVar_; ++j) {
+    m_ClusterDataij_.col(colincrement(v_Wj(j)) + nbindcols(v_Wj(j))) = m_Dataij_.col(j);
+    colincrement(v_Wj(j))+=1;
+  }
+  T temp = m_ClusterDataij_;
+
+  for ( int i = 0; i < nbSample_; ++i) {
+    m_ClusterDataij_.row( rowincrement(v_Zi(i)) + nbindrows(v_Zi(i))) = temp.row(i);
+    rowincrement(v_Zi(i))+=1;
   }
 
 }

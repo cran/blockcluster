@@ -34,13 +34,15 @@
  **/
 
 #include "ContinuousDataExchange.h"
+#include "coclust/src/Models/ContinuousLBModel.h"
+#include "coclust/src/Models/ContinuousLBModelequalsigma.h"
 
-void ContinuousDataExchange::Output(Rcpp::S4& obj,ICoClustModel* p_Model_,bool successful)
+void ContinuousDataExchange::Output(Rcpp::S4& obj,ICoClustModel* model,bool successful)
 {
   if(!successful)
   {
     obj.slot("successful") = false;
-    obj.slot("message") = p_Model_->GetErrormsg();
+    obj.slot("message") = model->GetErrormsg();
   }
   else
   {
@@ -52,26 +54,26 @@ void ContinuousDataExchange::Output(Rcpp::S4& obj,ICoClustModel* p_Model_,bool s
     switch (strategy_.Model_)
     {
       case pik_rhol_sigma2kl:
-         ptrLBM = dynamic_cast<ContinuousLBModel*>(p_Model_);
+         ptrLBM = dynamic_cast<ContinuousLBModel*>(model);
         obj.slot("classmean") = convertMatrix<Rcpp::NumericMatrix,MatrixReal>(ptrLBM->GetMean());
         obj.slot("classvariance") = convertMatrix<Rcpp::NumericMatrix,MatrixReal>(ptrLBM->GetSigma());
         obj.slot("coclusterdata") = convertMatrix<Rcpp::NumericMatrix,MatrixReal>(ptrLBM->GetArrangedDataClusters());
         break;
       case pik_rhol_sigma2:
-        ptrLBMeq = dynamic_cast<ContinuousLBModelequalsigma*>(p_Model_);
+        ptrLBMeq = dynamic_cast<ContinuousLBModelequalsigma*>(model);
         variance = ptrLBMeq->GetSigma()*MatrixReal::Ones(Mparam_.nbrowclust_,Mparam_.nbcolclust_);
         obj.slot("classmean") = convertMatrix<Rcpp::NumericMatrix,MatrixReal>(ptrLBMeq->GetMean());
         obj.slot("classvariance") = convertMatrix<Rcpp::NumericMatrix,MatrixReal>(variance);
         obj.slot("coclusterdata") = convertMatrix<Rcpp::NumericMatrix,MatrixReal>(ptrLBMeq->GetArrangedDataClusters());
         break;
       case pi_rho_sigma2kl:
-        ptrLBM = dynamic_cast<ContinuousLBModel*>(p_Model_);
+        ptrLBM = dynamic_cast<ContinuousLBModel*>(model);
         obj.slot("classmean") = convertMatrix<Rcpp::NumericMatrix,MatrixReal>(ptrLBM->GetMean());
         obj.slot("classvariance") = convertMatrix<Rcpp::NumericMatrix,MatrixReal>(ptrLBM->GetSigma());
         obj.slot("coclusterdata") = convertMatrix<Rcpp::NumericMatrix,MatrixReal>(ptrLBM->GetArrangedDataClusters());
         break;
       case pi_rho_sigma2:
-        ptrLBMeq = dynamic_cast<ContinuousLBModelequalsigma*>(p_Model_);
+        ptrLBMeq = dynamic_cast<ContinuousLBModelequalsigma*>(model);
         variance = ptrLBMeq->GetSigma()*MatrixReal::Ones(Mparam_.nbrowclust_,Mparam_.nbcolclust_);
         obj.slot("classmean") = convertMatrix<Rcpp::NumericMatrix,MatrixReal>(ptrLBMeq->GetMean());
         obj.slot("classvariance") = convertMatrix<Rcpp::NumericMatrix,MatrixReal>(variance);
@@ -79,13 +81,13 @@ void ContinuousDataExchange::Output(Rcpp::S4& obj,ICoClustModel* p_Model_,bool s
         break;
     }
 
-    obj.slot("rowclass") = convertvector<Rcpp::IntegerVector,VectorInteger>(p_Model_->GetRowClassificationVector());
-    obj.slot("colclass") = convertvector<Rcpp::IntegerVector,VectorInteger>(p_Model_->GetColumnClassificationVector());
-    obj.slot("rowproportions") = convertvector<Rcpp::NumericVector,VectorReal>(p_Model_->GetRowProportions());
-    obj.slot("columnproportions") = convertvector<Rcpp::NumericVector,VectorReal>(p_Model_->GetColProportions());
-    obj.slot("rowposteriorprob") = convertMatrix<Rcpp::NumericMatrix,MatrixReal>(p_Model_->GetRowPosteriorprob());
-    obj.slot("colposteriorprob") = convertMatrix<Rcpp::NumericMatrix,MatrixReal>(p_Model_->GetColPosteriorprob());
-    obj.slot("likelihood") = p_Model_->GetLikelihood();
+    obj.slot("rowclass") = convertvector<Rcpp::IntegerVector,VectorInteger>(model->GetRowClassificationVector());
+    obj.slot("colclass") = convertvector<Rcpp::IntegerVector,VectorInteger>(model->GetColumnClassificationVector());
+    obj.slot("rowproportions") = convertvector<Rcpp::NumericVector,VectorReal>(model->GetRowProportions());
+    obj.slot("columnproportions") = convertvector<Rcpp::NumericVector,VectorReal>(model->GetColProportions());
+    obj.slot("rowposteriorprob") = convertMatrix<Rcpp::NumericMatrix,MatrixReal>(model->GetRowPosteriorprob());
+    obj.slot("colposteriorprob") = convertMatrix<Rcpp::NumericMatrix,MatrixReal>(model->GetColPosteriorprob());
+    obj.slot("likelihood") = model->GetLikelihood();
   }
 }
 
@@ -95,4 +97,48 @@ void ContinuousDataExchange::DataInput(Rcpp::S4 & obj)
   convertMatrix<Rcpp::NumericMatrix,MatrixReal>(data,m_Dataij_);
   Mparam_.nbrowdata_ = m_Dataij_.rows();
   Mparam_.nbcoldata_ = m_Dataij_.cols();
+}
+
+void ContinuousDataExchange::instantiateModel(ICoClustModel*& model){
+  if(!strategy_.SemiSupervised){
+    switch (strategy_.Model_)
+    {
+      case pik_rhol_sigma2kl:
+        Mparam_.fixedproportions_ = false;
+        model = new ContinuousLBModel(m_Dataij_,Mparam_);
+        break;
+      case pik_rhol_sigma2:
+        Mparam_.fixedproportions_ = false;
+        model = new ContinuousLBModelequalsigma(m_Dataij_,Mparam_);
+        break;
+      case pi_rho_sigma2kl:
+        Mparam_.fixedproportions_ =true;
+        model = new ContinuousLBModel(m_Dataij_,Mparam_);
+        break;
+      case pi_rho_sigma2:
+        Mparam_.fixedproportions_ =true;
+        model = new ContinuousLBModelequalsigma(m_Dataij_,Mparam_);
+        break;
+    }
+  }else{
+    switch (strategy_.Model_)
+    {
+      case pik_rhol_sigma2kl:
+        Mparam_.fixedproportions_ = false;
+        model = new ContinuousLBModel(m_Dataij_,v_rowlabels_,v_collabels_,Mparam_);
+        break;
+      case pik_rhol_sigma2:
+        Mparam_.fixedproportions_ = false;
+        model = new ContinuousLBModelequalsigma(m_Dataij_,v_rowlabels_,v_collabels_,Mparam_);
+        break;
+      case pi_rho_sigma2kl:
+        Mparam_.fixedproportions_ =true;
+        model = new ContinuousLBModel(m_Dataij_,v_rowlabels_,v_collabels_,Mparam_);
+        break;
+      case pi_rho_sigma2:
+        Mparam_.fixedproportions_ =true;
+        model = new ContinuousLBModelequalsigma(m_Dataij_,v_rowlabels_,v_collabels_,Mparam_);
+        break;
+    }
+  }
 }

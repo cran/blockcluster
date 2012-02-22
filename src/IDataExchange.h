@@ -39,6 +39,9 @@
 #include "conversion.h"
 #include "coclust/src/typedefs/typedef.h"
 #include "coclust/src/Models/ICoClustModel.h"
+#include "coclust/src/Algorithms/IAlgo.h"
+#include "coclust/src/Initialization/IInit.h"
+#include "coclust/src/Strategy/IStrategy.h"
 #include "coclust/src/InputParameters/InputParameters.h"
 #include <Rcpp.h>
 
@@ -52,12 +55,12 @@ class IDataExchange
     void InitializeParamEnum();
     virtual void DataInput(Rcpp::S4 & obj) = 0;
     virtual void Output(Rcpp::S4& obj,ICoClustModel*, bool) = 0;
+    virtual void instantiateModel(ICoClustModel*& model) = 0;
+    void instantiateAlgo(IAlgo*& algo,IStrategy*& strat);
+    void instantiateInit(IInit*& init);
     void SetInput(Rcpp::S4 & obj);
-    Strategy& GetStrategy(){return strategy_;}
     StrategyParameters& GetStrategyParameters(){return Stratparam_;}
-    ModelParameters& GetModelParameters(){return Mparam_;}
-    const VectorInteger& GetRowLabels() const {return v_rowlabels_;}
-    const VectorInteger& GetColLabels() const {return v_collabels_;}
+    void setStrategyParameters(StrategyParameters& strat){Stratparam_ = strat;}
     virtual ~IDataExchange();
   protected:
     Strategy strategy_;

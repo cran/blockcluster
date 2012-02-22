@@ -7,7 +7,8 @@
     nbiterationsXEM = 500, nbinititerations = 10,
     initepsilon = 0.01, nbiterations_int = 5,
     epsilon_int = 0.01, epsilonxem = 1e-04,
-    epsilonXEM = 1e-10, nbtry = 2, nbxem = 5)
+    epsilonXEM = 1e-10, nbtry = 2, nbxem = 5,
+    bayesianform = FALSE, hyperparam = numeric(0))
 }
 \arguments{
   \item{algo}{The valid values for this parameter are "BEM"
@@ -15,9 +16,10 @@
 
   \item{stopcriteria}{It specifies the stopping criteria.
   It can be based on either relative change in parameters
-  value or relative change in log-likelihood. Valid
-  criterion values are "Parameter" and "Likelihood".
-  Default criteria is "Parameter".}
+  (preffered due to computation reasons) value or relative
+  change in pseudo log-likelihood. Valid criterion values
+  are "Parameter" and "Likelihood". Default criteria is
+  "Parameter".}
 
   \item{initmethod}{Method to initialize model parameters.
   The valid values are "CEMInit", "FuzzyCEMInit" and
@@ -55,6 +57,13 @@
 
   \item{epsilonXEM}{Tolerance value used during XEM step.
   Default value is 1e-10}
+
+  \item{bayesianform}{Boolean parameter to indicate whether
+  to run algorithms in bayesian settings or not.Default
+  value is false.}
+
+  \item{hyperparam}{Hyper-parameters ("a" and "b") in case
+  of Bayesian settings.}
 }
 \value{
   Object of class \code{\linkS4class{strategy}}

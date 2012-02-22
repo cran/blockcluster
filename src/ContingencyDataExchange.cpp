@@ -34,13 +34,14 @@
  **/
 
 #include "ContingencyDataExchange.h"
-
-void ContingencyDataExchange::Output(Rcpp::S4& obj,ICoClustModel* p_Model_,bool successful)
+#include "coclust/src/Models/ContingencyLBModel.h"
+#include "coclust/src/Models/ContingencyLBModel_mu_i_nu_j.h"
+void ContingencyDataExchange::Output(Rcpp::S4& obj,ICoClustModel* model,bool successful)
 {
   if(!successful)
   {
     obj.slot("successful") = false;
-    obj.slot("message") = p_Model_->GetErrormsg();
+    obj.slot("message") = model->GetErrormsg();
   }
   else
   {
@@ -51,33 +52,33 @@ void ContingencyDataExchange::Output(Rcpp::S4& obj,ICoClustModel* p_Model_,bool 
     switch (strategy_.Model_)
     {
       case pik_rhol_unknown:
-         ptrLBM = dynamic_cast<ContingencyLBModel*>(p_Model_);
+         ptrLBM = dynamic_cast<ContingencyLBModel*>(model);
          obj.slot("classgamma") = convertMatrix<Rcpp::NumericMatrix,MatrixReal>(ptrLBM->GetGamma());
          obj.slot("coclusterdata") = convertMatrix<Rcpp::NumericMatrix,MatrixInteger>(ptrLBM->GetArrangedDataClusters());
         break;
       case pik_rhol_known:
-        ptrLBMknown = dynamic_cast<ContingencyLBModel_mu_i_nu_j*>(p_Model_);
+        ptrLBMknown = dynamic_cast<ContingencyLBModel_mu_i_nu_j*>(model);
         obj.slot("classgamma") = convertMatrix<Rcpp::NumericMatrix,MatrixReal>(ptrLBMknown->GetGamma());
         obj.slot("coclusterdata") = convertMatrix<Rcpp::NumericMatrix,MatrixInteger>(ptrLBMknown->GetArrangedDataClusters());
         break;
       case pi_rho_unknown:
-        ptrLBM = dynamic_cast<ContingencyLBModel*>(p_Model_);
+        ptrLBM = dynamic_cast<ContingencyLBModel*>(model);
         obj.slot("classgamma") = convertMatrix<Rcpp::NumericMatrix,MatrixReal>(ptrLBM->GetGamma());
         obj.slot("coclusterdata") = convertMatrix<Rcpp::NumericMatrix,MatrixInteger>(ptrLBM->GetArrangedDataClusters());
         break;
       case pi_rho_known:
-        ptrLBMknown = dynamic_cast<ContingencyLBModel_mu_i_nu_j*>(p_Model_);
+        ptrLBMknown = dynamic_cast<ContingencyLBModel_mu_i_nu_j*>(model);
         obj.slot("classgamma") = convertMatrix<Rcpp::NumericMatrix,MatrixReal>(ptrLBMknown->GetGamma());
         obj.slot("coclusterdata") = convertMatrix<Rcpp::NumericMatrix,MatrixInteger>(ptrLBMknown->GetArrangedDataClusters());
         break;
     }
-    obj.slot("rowclass") = convertvector<Rcpp::IntegerVector,VectorInteger>(p_Model_->GetRowClassificationVector());
-    obj.slot("colclass") = convertvector<Rcpp::IntegerVector,VectorInteger>(p_Model_->GetColumnClassificationVector());
-    obj.slot("rowproportions") = convertvector<Rcpp::NumericVector,VectorReal>(p_Model_->GetRowProportions());
-    obj.slot("columnproportions") = convertvector<Rcpp::NumericVector,VectorReal>(p_Model_->GetColProportions());
-    obj.slot("rowposteriorprob") = convertMatrix<Rcpp::NumericMatrix,MatrixReal>(p_Model_->GetRowPosteriorprob());
-    obj.slot("colposteriorprob") = convertMatrix<Rcpp::NumericMatrix,MatrixReal>(p_Model_->GetColPosteriorprob());
-    obj.slot("likelihood") = p_Model_->GetLikelihood();
+    obj.slot("rowclass") = convertvector<Rcpp::IntegerVector,VectorInteger>(model->GetRowClassificationVector());
+    obj.slot("colclass") = convertvector<Rcpp::IntegerVector,VectorInteger>(model->GetColumnClassificationVector());
+    obj.slot("rowproportions") = convertvector<Rcpp::NumericVector,VectorReal>(model->GetRowProportions());
+    obj.slot("columnproportions") = convertvector<Rcpp::NumericVector,VectorReal>(model->GetColProportions());
+    obj.slot("rowposteriorprob") = convertMatrix<Rcpp::NumericMatrix,MatrixReal>(model->GetRowPosteriorprob());
+    obj.slot("colposteriorprob") = convertMatrix<Rcpp::NumericMatrix,MatrixReal>(model->GetColPosteriorprob());
+    obj.slot("likelihood") = model->GetLikelihood();
   }
 }
 
@@ -94,5 +95,57 @@ void ContingencyDataExchange::DataInput(Rcpp::S4 & obj)
     Rcpp::NumericVector datanuj(SEXP(obj.slot("datanuj")));
     v_Nuj_ = convertvector<VectorReal,Rcpp::NumericVector>(datanuj);
   }
+}
 
+void ContingencyDataExchange::instantiateModel(ICoClustModel*& model){
+  if(!strategy_.SemiSupervised){
+    switch (strategy_.Model_)
+    {
+      case pik_rhol_unknown:
+        Mparam_.fixedproportions_ = false;
+        model = new ContingencyLBModel(m_Dataij_,Mparam_);
+        break;
+      case pik_rhol_known:
+        Mparam_.fixedproportions_ = false;
+        model = new ContingencyLBModel_mu_i_nu_j(m_Dataij_,v_Mui_
+                                                    ,v_Nuj_,Mparam_);
+        break;
+      case pi_rho_unknown:
+        Mparam_.fixedproportions_ = true;
+        model = new ContingencyLBModel(m_Dataij_,Mparam_);
+        break;
+      case pi_rho_known:
+        Mparam_.fixedproportions_ = true;
+        model = new ContingencyLBModel_mu_i_nu_j(m_Dataij_,v_Mui_
+                                                    ,v_Nuj_,Mparam_);
+        break;
+      default:
+        break;
+    }
+  }
+  else{
+    switch (strategy_.Model_)
+    {
+      case pik_rhol_unknown:
+        Mparam_.fixedproportions_ = false;
+        model = new ContingencyLBModel(m_Dataij_,v_rowlabels_,v_collabels_,Mparam_);
+        break;
+      case pik_rhol_known:
+        Mparam_.fixedproportions_ = false;
+        model = new ContingencyLBModel_mu_i_nu_j(m_Dataij_,v_rowlabels_,v_collabels_,v_Mui_
+                                                    ,v_Nuj_,Mparam_);
+        break;
+      case pi_rho_unknown:
+        Mparam_.fixedproportions_ = true;
+        model = new ContingencyLBModel(m_Dataij_,v_rowlabels_,v_collabels_,Mparam_);
+        break;
+      case pi_rho_known:
+        Mparam_.fixedproportions_ = true;
+        model = new ContingencyLBModel_mu_i_nu_j(m_Dataij_,v_rowlabels_,v_collabels_,v_Mui_
+                                                    ,v_Nuj_,Mparam_);
+        break;
+      default:
+        break;
+    }
+  }
 }

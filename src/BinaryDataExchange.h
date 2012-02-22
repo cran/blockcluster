@@ -48,9 +48,11 @@ class BinaryDataExchange: public IDataExchange
     BinaryDataExchange(){};
     virtual void Output(Rcpp::S4& obj,ICoClustModel*,bool);
     virtual void DataInput(Rcpp::S4 & obj);
-    const MatrixBinary& GetData() const{return m_Dataij_;}
+    virtual void instantiateModel(ICoClustModel*& model);
+    inline const MatrixBinary& GetData() const{return m_Dataij_;}
     ~BinaryDataExchange(){};
   protected:
+    int a_,b_;//hyperparameters
     MatrixBinary m_Dataij_;
 };
 

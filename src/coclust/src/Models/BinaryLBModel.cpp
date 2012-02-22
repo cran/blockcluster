@@ -33,16 +33,20 @@
 #ifndef RPACKAGE
 using namespace cimg_library;
 #endif
-BinaryLBModel::BinaryLBModel( MatrixBinary const& m_Dataij,ModelParameters const& Mparam)
+BinaryLBModel::BinaryLBModel( MatrixBinary const& m_Dataij,ModelParameters const& Mparam,int a,int b)
                            : ICoClustModel(Mparam) , m_Dataij_(m_Dataij)
 {
+  a_ = a;
+  b_ = b;
   dimprod_ = nbSample_*nbVar_;
 };
 
 BinaryLBModel::BinaryLBModel(MatrixBinary const& m_Dataij,VectorInteger const & rowlabels,
-                             VectorInteger const & collabels,ModelParameters const& Mparam)
+                             VectorInteger const & collabels,ModelParameters const& Mparam,int a,int b)
                             : ICoClustModel(Mparam,rowlabels,collabels) , m_Dataij_(m_Dataij)
 {
+  a_ = a;
+  b_ = b;
   dimprod_ = nbSample_*nbVar_;
 }
 
@@ -97,6 +101,8 @@ void BinaryLBModel::ConsoleOut()
 #ifndef RPACKAGE
   std::cout<<"Output Model parameter:"<<"\nakl:\n"<<m_akl_<<"\nepsilonkl:\n"<<m_epsilonkl_<<"\npiek: "<<
       v_Piek_.transpose()<<"\nRhol: "<<v_Rhol_.transpose()<<"\n";
+
+  std::cout<<"ICL: "<<ICLCriteriaValue()<<"\n";
 #endif
 }
 
@@ -240,7 +246,7 @@ float BinaryLBModel::EstimateLikelihood()
 //Computer Fuzzy clustering criteria and set the terminate variable accordingly
 void BinaryLBModel::likelihoodStopCriteria()
 {
-  Likelihood_ = EstimateLikelihood();
+  EstimateLikelihood();
 
   if(std::abs(1-Likelihood_/Likelihood_old)<Mparam_.epsilon_)
       StopAlgo = true;
@@ -263,54 +269,8 @@ void BinaryLBModel::ParameterStopCriteria()
 
 const MatrixBinary& BinaryLBModel::GetArrangedDataClusters()
 {
-  Eigen::ArrayXi v_Zi = v_Zi_.array();
-  Eigen::ArrayXi v_Wj = v_Wj_.array();
-  m_ClusterDataij_ = MatrixBinary::Zero(nbSample_,nbVar_);
-
-  //Rearrange data into clusters
-
-  VectorInteger rowincrement = MatrixInteger::Zero(Mparam_.nbrowclust_,1);
-
-  VectorInteger nbindrows = MatrixInteger::Zero(Mparam_.nbrowclust_+1,1);
-  for ( int k = 1; k < Mparam_.nbrowclust_; ++k) {
-    nbindrows(k) = (v_Zi==(k-1)).count()+nbindrows(k-1);
-  }
-
-  VectorInteger colincrement = MatrixInteger::Zero(Mparam_.nbcolclust_,1);
-
-  VectorInteger nbindcols = MatrixInteger::Zero(Mparam_.nbcolclust_+1,1);
-  for ( int l = 1; l < Mparam_.nbcolclust_; ++l) {
-    nbindcols(l)=(v_Wj==(l-1)).count()+nbindcols(l-1);
-  }
-
-  for ( int j = 0; j < nbVar_; ++j) {
-    m_ClusterDataij_.col(colincrement(v_Wj(j)) + nbindcols(v_Wj(j))) = m_Dataij_.col(j);
-    colincrement(v_Wj(j))+=1;
-  }
-  MatrixBinary temp = m_ClusterDataij_;
-
-  for ( int i = 0; i < nbSample_; ++i) {
-    m_ClusterDataij_.row( rowincrement(v_Zi(i)) + nbindrows(v_Zi(i))) = temp.row(i);
-    rowincrement(v_Zi(i))+=1;
-  }
-
-  /*// calculate mean of each cocluster in image
-
-  //nbindrows.resize(Mparam_.nbrowclust_+1);
-  //nbindcols.resize(Mparam_.nbcolclust_+1);
-  nbindrows(Mparam_.nbrowclust_) = Mparam_.nbrowdata_;
-  nbindcols(Mparam_.nbcolclust_) = Mparam_.nbcoldata_;
-  MatrixBinary mean(Mparam_.nbrowclust_,Mparam_.nbcolclust_);
-  for ( int i = 0; i < Mparam_.nbrowclust_; ++i) {
-    for ( int j = 0; j < Mparam_.nbcolclust_; ++j) {
-      MatrixBinary temp = m_ClusterDataij_.block(nbindrows(i),nbindcols(j),nbindrows(i+1)-nbindrows(i),nbindcols(j+1)-nbindcols(j));
-      //std::cout<<temp.cast<int>().array().sum()<<" "<<temp.rows()<<" "<<temp.cols()<<"\n";
-      mean(i,j) = (temp.cast<float>().array().sum()/(temp.rows()*temp.cols()))>=0.5?1:0;
-    }
-  }
-  std::cout<<"cluster mean:"<<mean;*/
+  ArrangedDataCluster<MatrixBinary>(m_ClusterDataij_,m_Dataij_);
   return m_ClusterDataij_;
-
 }
 #ifndef RPACKAGE
 void BinaryLBModel::DisplayCluster()
@@ -587,4 +547,61 @@ void BinaryLBModel::MStepFull()
   }
 
   m_Alphakl_ = (m_Tik_.transpose()*m_Dataij_.cast<float>()*m_Rjl_).array()/(v_Tk_*v_Rl_.transpose()).array();
+}
+
+
+void BinaryLBModel::MStepRows()
+{
+  if(!Mparam_.fixedproportions_) {
+    v_logPiek_=((v_Tk_.array()+a_-1)/(nbSample_+Mparam_.nbrowclust_*(a_-1))).log();
+  }
+
+  m_Alphakl_ = (((m_Tik_.transpose())*m_Uil_).array()+b_-1)/((v_Tk_*(v_Rl_.transpose())).array()+2*(b_-1));
+}
+
+void BinaryLBModel::MStepCols()
+{
+  if(!Mparam_.fixedproportions_) {
+    v_logRhol_=((v_Rl_.array()+a_-1)/(nbVar_+Mparam_.nbcolclust_*(a_-1))).log();
+  }
+
+  m_Alphakl_ = ((m_Vjk_.transpose()*m_Rjl_).array()+b_-1)/((v_Tk_*v_Rl_.transpose()).array()+2*(b_-1));
+}
+
+
+float BinaryLBModel::ICLCriteriaValue(){
+  float criteria = 0.0;
+
+  criteria+= lgamma(Mparam_.nbrowclust_*a_)+lgamma(Mparam_.nbcolclust_*a_)
+      -(Mparam_.nbrowclust_+Mparam_.nbcolclust_)*lgamma(a_)
+      +Mparam_.nbrowclust_*Mparam_.nbcolclust_*(lgamma(2*b_)-2*lgamma(b_))
+      -lgamma(Mparam_.nbrowdata_+Mparam_.nbrowclust_*a_)
+      -lgamma(Mparam_.nbcoldata_+Mparam_.nbcolclust_*a_);
+
+  for (int k = 0; k < Mparam_.nbrowclust_; ++k) {
+    criteria+= lgamma(a_+ (v_Zi_.array()== k).count());
+  }
+
+  for (int l = 0; l < Mparam_.nbcolclust_; ++l) {
+    criteria+= lgamma(a_+ (v_Wj_.array()==l).count());
+  }
+
+  Eigen::ArrayXXi temp0(Mparam_.nbrowclust_,Mparam_.nbcolclust_);
+  Eigen::ArrayXXi temp1(Mparam_.nbrowclust_,Mparam_.nbcolclust_);
+  MatrixBinary m_tempdata = (m_Dataij_.array()==0);
+  temp0 = (m_Zik_.transpose()*m_tempdata.cast<int>()*m_Wjl_).array()+b_;
+  temp1 = (m_Zik_.transpose()*m_Dataij_.cast<int>()*m_Wjl_).array()+b_;
+  for (int k = 0; k < Mparam_.nbrowclust_; ++k) {
+    for (int l = 0; l < Mparam_.nbcolclust_; ++l) {
+      criteria+=lgamma(temp0(k,l))+lgamma(temp1(k,l));
+    }
+  }
+
+  for (int k = 0; k < Mparam_.nbrowclust_; ++k) {
+    for (int l = 0; l < Mparam_.nbcolclust_; ++l) {
+      criteria-= lgamma(((v_Zi_.array()== k).count())*((v_Wj_.array()==l).count())+2*b_);
+    }
+  }
+
+  return criteria;
 }

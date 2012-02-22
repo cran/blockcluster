@@ -38,14 +38,14 @@ class IAlgo
   public:
     IAlgo(){};
     virtual bool run() = 0;
-    void SetModel(ICoClustModel*&);
+    void SetModel(ICoClustModel*);
     virtual ~IAlgo(){};
 
   protected:
     ICoClustModel * p_Model_;
 };
 
-inline void IAlgo::SetModel(ICoClustModel*& p_model)
+inline void IAlgo::SetModel(ICoClustModel* p_model)
 {
   p_Model_ = p_model;
 }

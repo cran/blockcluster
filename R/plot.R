@@ -504,3 +504,141 @@ setMethod(
 
 		}
 )
+
+#' @rdname plot-methods
+#' @aliases plot,CategoricalOptions-method
+#'
+
+setMethod(
+  f="plot",
+  signature = c("CategoricalOptions"),
+  definition = function(x,y,...) {
+    if(x@successful)
+    {
+      data<-x@data
+      clusterdata<-x@coclusterdata
+      min <- min(data)
+      max <- max(data)
+      dimention<-dim(data)
+      
+      
+      reverse <- nrow(data):1
+      data <- data[reverse,]
+      clusterdata <- clusterdata[reverse,]
+      
+      
+      
+      vararg = list(...)
+      
+      cocluterplot = TRUE 
+      if(hasArg("type"))
+      {
+        if(vararg$type!="cocluster"&&vararg$type!="distribution")
+          stop("Invalid plot type, Valid types are:'cocluster' and 'distribution'")
+        
+        if(vararg$type=="distribution")
+          cocluterplot = FALSE
+      }
+      
+      asp = FALSE
+      
+      if(hasArg(asp))
+      {
+        if(vararg$asp==TRUE)
+          asp = TRUE
+      }
+      
+      if(cocluterplot)
+      {
+        layout(matrix(data=c(1,2,3), nrow=1, ncol=3),widths =c(6,6,1))
+        
+        Color<- gray((0:256)/256)
+        
+        ColorLevels <- seq(min, max, length=length(Color))
+        
+        # Data 
+        par(mar = c(1,1,1,1))
+        if(asp == FALSE)
+          image(t(data), col=Color, axes=FALSE, zlim=c(min,max))
+        else
+          image(t(data), col=Color, axes=FALSE, zlim=c(min,max), asp=dim(data)[1]/dim(data)[2])
+        title("Original Data")
+        
+        
+        # Data cluter 
+        par(mar = c(1,1,1,1))
+        if(asp == FALSE)
+          image(t(clusterdata), col=Color, axes=FALSE, zlim=c(min,max))
+        else
+          image(t(clusterdata), col=Color, axes=FALSE, zlim=c(min,max), asp=dim(data)[1]/dim(data)[2])
+        
+        
+        rowvec=1:(x@nbcocluster[1])
+        for (i in 1:x@nbcocluster[1]) {
+          rowvec[i]=sum(x@rowclass==i-1)/nrow(x@data)
+        }
+        
+        colvec=1:(x@nbcocluster[2])
+        for (i in 1:x@nbcocluster[2]) {
+          colvec[i]=sum(x@colclass==i-1)/ncol(x@data)
+        }
+        reverse<-x@nbcocluster[1]:1
+        abline(h=cumsum(rowvec[reverse])[1:x@nbcocluster[1]-1],v=cumsum(colvec)[1:x@nbcocluster[2]-1],col="blue",lwd=2)
+        title("Co-Clustered Data")
+        
+        par(mar = c(1,2,1.5,1))
+        image(1, ColorLevels,
+              matrix(data=ColorLevels, ncol=length(ColorLevels),nrow=1),
+              col=Color,xaxt="n")
+        title("Scale")
+      }
+      else
+      {
+        
+        ############### Frequencies of classes of categorical data #######################
+        
+        par(mfrow=c(x@nbcocluster[1]+1,x@nbcocluster[2]+1))
+        
+        clusterdata<-x@coclusterdata 
+        # Mixture of columns
+        cumSample=0
+        for (i in 1:x@nbcocluster[1]){
+          cumVar=0
+          test=0
+          for(j in 1:x@nbcocluster[2]){
+            tableBloc=table(clusterdata[(cumSample+1):(cumSample+sum(x@rowclass==i-1)),(cumVar+1):(cumVar+sum(x@colclass==j-1))])
+            
+            test=rbind(test,tableBloc) #(clusterdata[(cumSample+1):(cumSample+sum(x@rowclass==i-1)),(cumVar+1):(cumVar+sum(x@colclass==j-1))]))
+            barplot(tableBloc/sum(tableBloc),xlab=paste("Data values block (",i,",",j,")"),ylab="Frequency",main=paste("Block (",i,",",j,")"))
+            #factor(clusterdata[(cumSample+1):(cumSample+sum(x@rowclass==i-1)),(cumVar+1):(cumVar+sum(x@colclass==j-1))]
+            cumVar<-cumVar+sum(x@colclass==j-1)
+          }
+          barplot(test/sum(test),xlab=paste("Data values of row",i),ylab="frequency", main=paste("Mixture of row",i))
+          cumSample<-cumSample+sum(x@rowclass==i-1)
+        }
+        
+        # Mixture of rows
+        cumVar=0
+        for (j in 1:x@nbcocluster[2]){
+          cumSample=0
+          temp=0
+          for(i in 1:x@nbcocluster[1]){
+            temp=rbind(temp,table(clusterdata[(cumSample+1):(cumSample+sum(x@rowclass==i-1)),(cumVar+1):(cumVar+sum(x@colclass==j-1))]))
+            cumSample<-cumSample+sum(x@rowclass==i-1)
+          }
+          barplot(temp/sum(temp),xlab=paste("Data values of column",j),ylab="Frequency", main=paste("Mixture of column",j))
+          cumVar<-cumVar+sum(x@colclass==j-1)
+        }
+        barplot(table(clusterdata)/sum(table(clusterdata)),xlab="Data values",ylab="Frequency",
+                main="Final mixture")
+        
+        title(main="Histogram/density for each block",outer=TRUE,line=-1)
+      }
+      
+    }
+    else{
+      cat("Co-Clustering was not successful.\n")
+    }
+    
+  }
+)

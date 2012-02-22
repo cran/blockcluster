@@ -37,6 +37,7 @@ bool XStrategyAlgo::run()
   float Lmax = -RealMax,L1 = -RealMax,Lcurrent;
   int ntry_empty=0;
   bool non_empty = false;
+  bool isinitialized = false;
   for ( int itry = 0; itry < Stratparam_.nbtry_; ++itry) {
     non_empty = false;
     L1 = -RealMax;
@@ -49,6 +50,7 @@ bool XStrategyAlgo::run()
       {
         if (p_Init_->run())
         {
+          isinitialized = true;
             for ( int itr = 0; itr < Stratparam_.nbiter_xem_; ++itr)
             {
 
@@ -69,6 +71,8 @@ bool XStrategyAlgo::run()
         }
         ntry_empty++;
       }
+
+      if(!isinitialized) return false;
       Lcurrent = p_Model_->EstimateLikelihood();
       if(!p_Model_->isEmptyCluster()&&Lcurrent>=L1)
       {

@@ -58,7 +58,6 @@ class ContingencyLBModel: public ICoClustModel
     virtual bool CEMInit();
     virtual void FinalizeOutput();
     virtual void ConsoleOut();
-    //virtual void UpdateAllUsingConditionalProbabilities();
     virtual void Modify_theta_start();
     virtual void Copy_theta_start();
     virtual void Copy_theta_max();

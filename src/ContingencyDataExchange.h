@@ -49,9 +49,10 @@ class ContingencyDataExchange: public IDataExchange
     ContingencyDataExchange(){};
     virtual void Output(Rcpp::S4& obj,ICoClustModel*,bool);
     virtual void DataInput(Rcpp::S4 & obj);
-    const MatrixInteger& GetData() const {return m_Dataij_;}
-    const VectorReal& GetMui() const {return v_Mui_;}
-    const VectorReal& GetNuj() const {return v_Nuj_;}
+    virtual void instantiateModel(ICoClustModel*& model);
+    inline const MatrixInteger& GetData() const {return m_Dataij_;}
+    inline const VectorReal& GetMui() const {return v_Mui_;}
+    inline const VectorReal& GetNuj() const {return v_Nuj_;}
     ~ContingencyDataExchange(){};
   protected:
     MatrixInteger m_Dataij_;

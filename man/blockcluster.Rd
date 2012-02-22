@@ -2,25 +2,25 @@
 \alias{blockcluster}
 \title{Co-Clustering Package}
 \description{
-  This package performs Co-clustering of Binary,
-  Contingency and Continuous data-sets.
+  This package performs Co-clustering of binary,
+  contingency, continuous and categorical data-sets.
 }
 \details{
-  This package performs Co-clustering of Binary,
-  Contingency and Continuous data-sets with utility
-  functions to visualize the Co-clustered data. The package
-  contains a function \code{\link{cocluster}} which perform
-  Co-clustering on various kinds of data-sets and returns
-  object of appropriate class (refer to documentation of
-  \code{\link{cocluster}}). The package also contains
-  function \code{\link{cocluststrategy}} (see documentation
-  of function to know various slots) which returns an
-  object of class \code{\linkS4class{strategy}}. This
-  object can be given as input to \code{\link{cocluster}}
-  to control various Co-clustering parameters. Please refer
-  to testmodels.R file which is included in "test"
-  directory to see examples with various models and
-  simulated data-sets.
+  This package performs Co-clustering of binary,
+  contingency, continuous and categorical data-sets with
+  utility functions to visualize the Co-clustered data. The
+  package contains a function \code{\link{cocluster}} which
+  perform Co-clustering on various kinds of data-sets and
+  returns object of appropriate class (refer to
+  documentation of \code{\link{cocluster}}). The package
+  also contains function \code{\link{cocluststrategy}} (see
+  documentation of function to know various slots) which
+  returns an object of class \code{\linkS4class{strategy}}.
+  This object can be given as input to
+  \code{\link{cocluster}} to control various Co-clustering
+  parameters. Please refer to testmodels.R file which is
+  included in "test" directory to see examples with various
+  models and simulated data-sets.
 
   The package also provide utility functions like summary()
   and plot() to summarize results and plot the original and

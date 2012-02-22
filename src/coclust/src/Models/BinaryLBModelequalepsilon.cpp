@@ -32,20 +32,26 @@
 #ifndef RPACKAGE
 using namespace cimg_library;
 #endif
-BinaryLBModelequalepsilon::BinaryLBModelequalepsilon( MatrixBinary const& m_Dataij,ModelParameters const& Mparam)
+BinaryLBModelequalepsilon::BinaryLBModelequalepsilon( MatrixBinary const& m_Dataij,
+                                                      ModelParameters const& Mparam,int a,int b)
                            : ICoClustModel(Mparam)
                            , m_Dataij_(m_Dataij)
 {
+  a_ = a;
+  b_ = b;
   dimprod_ = nbSample_*nbVar_;
   m_Xjl_ = m_Dataij.cast<float>().colwise().sum().transpose()*MatrixReal::Ones(1,Mparam_.nbcolclust_);
   m_Xik_ = m_Dataij.cast<float>().rowwise().sum()*MatrixReal::Ones(1,Mparam_.nbrowclust_);
 };
 
 BinaryLBModelequalepsilon::BinaryLBModelequalepsilon(MatrixBinary const& m_Dataij,VectorInteger const & rowlabels,
-                                                     VectorInteger const & collabels,ModelParameters const& Mparam)
+                                                     VectorInteger const & collabels,ModelParameters const& Mparam,
+                                                     int a,int b)
                                                     : ICoClustModel(Mparam,rowlabels,collabels),
                                                       m_Dataij_(m_Dataij)
 {
+  a_ = a;
+  b_ = b;
   dimprod_ = nbSample_*nbVar_;
   m_Xjl_ = m_Dataij.cast<float>().colwise().sum().transpose()*MatrixReal::Ones(1,Mparam_.nbcolclust_);
   m_Xik_ = m_Dataij.cast<float>().rowwise().sum()*MatrixReal::Ones(1,Mparam_.nbrowclust_);
@@ -89,6 +95,7 @@ void BinaryLBModelequalepsilon::ConsoleOut()
 #ifndef RPACKAGE
   std::cout<<"Output Model parameter:"<<"\nakl:\n"<<m_Akl_<<"\nepsilon:\n"<<Epsilon_<<"\npiek: "<<
       v_Piek_.transpose()<<"\nRhol: "<<v_Rhol_.transpose()<<std::endl;
+  std::cout<<"ICL: "<<ICLCriteriaValue()<<"\n";
 #endif
 }
 
@@ -271,40 +278,10 @@ void BinaryLBModelequalepsilon::ParameterStopCriteria()
 
 const MatrixBinary& BinaryLBModelequalepsilon::GetArrangedDataClusters()
 {
-  Eigen::ArrayXi v_Zi = (GetRowClassificationVector()).array();
-  Eigen::ArrayXi v_Wj = (GetColumnClassificationVector()).array();
-  m_ClusterDataij_ = MatrixBinary::Zero(nbSample_,nbVar_);
-
-  //Rearrange data into clusters
-
-  VectorInteger rowincrement = MatrixInteger::Zero(Mparam_.nbrowclust_,1);
-
-  VectorInteger nbindrows = MatrixInteger::Zero(Mparam_.nbrowclust_,1);
-  for ( int k = 1; k < Mparam_.nbrowclust_; ++k) {
-    nbindrows(k) = (v_Zi==(k-1)).count()+nbindrows(k-1);
-  }
-
-  VectorInteger colincrement = MatrixInteger::Zero(Mparam_.nbcolclust_,1);
-
-  VectorInteger nbindcols = MatrixInteger::Zero(Mparam_.nbcolclust_,1);
-  for ( int l = 1; l < Mparam_.nbcolclust_; ++l) {
-    nbindcols(l)=(v_Wj==(l-1)).count()+nbindcols(l-1);
-  }
-
-  for ( int j = 0; j < nbVar_; ++j) {
-    m_ClusterDataij_.col(colincrement(v_Wj(j)) + nbindcols(v_Wj(j))) = m_Dataij_.col(j);
-    colincrement(v_Wj(j))+=1;
-  }
-  MatrixBinary temp = m_ClusterDataij_;
-
-  for ( int i = 0; i < nbSample_; ++i) {
-    m_ClusterDataij_.row( rowincrement(v_Zi(i)) + nbindrows(v_Zi(i))) = temp.row(i);
-    rowincrement(v_Zi(i))+=1;
-  }
-
+  ArrangedDataCluster<MatrixBinary>(m_ClusterDataij_,m_Dataij_);
   return m_ClusterDataij_;
-
 }
+
 #ifndef RPACKAGE
 void BinaryLBModelequalepsilon::DisplayCluster()
 {
@@ -599,3 +576,41 @@ void BinaryLBModelequalepsilon::MStepFull()
   Epsilon_= (m_Ykl_.array()-(v_Tk_*v_Rl_.transpose()).array()*m_Akl_.cast<float>().array()).abs().sum()/dimprod_;
 
 }
+
+float BinaryLBModelequalepsilon::ICLCriteriaValue(){
+  float criteria = 0.0;
+
+  criteria+= lgamma(Mparam_.nbrowclust_*a_)+lgamma(Mparam_.nbcolclust_*a_)
+      -(Mparam_.nbrowclust_+Mparam_.nbcolclust_)*lgamma(a_)
+      +Mparam_.nbrowclust_*Mparam_.nbcolclust_*(lgamma(2*b_)-2*lgamma(b_))
+      -lgamma(Mparam_.nbrowdata_+Mparam_.nbrowclust_*a_)
+      -lgamma(Mparam_.nbcoldata_+Mparam_.nbcolclust_*a_);
+
+  for (int k = 0; k < Mparam_.nbrowclust_; ++k) {
+    criteria+= lgamma(a_+ (v_Zi_.array()== k).count());
+  }
+
+  for (int l = 0; l < Mparam_.nbcolclust_; ++l) {
+    criteria+= lgamma(a_+ (v_Wj_.array()==l).count());
+  }
+
+  Eigen::ArrayXXi temp0(Mparam_.nbrowclust_,Mparam_.nbcolclust_);
+  Eigen::ArrayXXi temp1(Mparam_.nbrowclust_,Mparam_.nbcolclust_);
+  MatrixBinary m_tempdata = (m_Dataij_.array()==0);
+  temp0 = (m_Zik_.transpose()*m_tempdata.cast<int>()*m_Wjl_).array()+b_;
+  temp1 = (m_Zik_.transpose()*m_Dataij_.cast<int>()*m_Wjl_).array()+b_;
+  for (int k = 0; k < Mparam_.nbrowclust_; ++k) {
+    for (int l = 0; l < Mparam_.nbcolclust_; ++l) {
+      criteria+=lgamma(temp0(k,l))+lgamma(temp1(k,l));
+    }
+  }
+
+  for (int k = 0; k < Mparam_.nbrowclust_; ++k) {
+    for (int l = 0; l < Mparam_.nbcolclust_; ++l) {
+      criteria-= lgamma(((v_Zi_.array()== k).count())*((v_Wj_.array()==l).count())+2*b_);
+    }
+  }
+
+  return criteria;
+}
+

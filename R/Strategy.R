@@ -5,8 +5,8 @@
 #' which can be given as input to \code{\link{cocluster}} function. 
 #' 
 #' @param algo  The valid values for this parameter are "BEM" (Default), "BCEM" and "BSEM".
-#' @param stopcriteria It specifies the stopping criteria. It can be based on either relative change in parameters
-#' value or relative change in log-likelihood. Valid criterion values are "Parameter" and "Likelihood". Default criteria is 
+#' @param stopcriteria It specifies the stopping criteria. It can be based on either relative change in parameters (preffered due to computation reasons)
+#' value or relative change in pseudo log-likelihood. Valid criterion values are "Parameter" and "Likelihood". Default criteria is 
 #' "Parameter".
 #' @param initmethod Method to initialize model parameters. The valid values are "CEMInit", "FuzzyCEMInit" and "RandomInit". 
 #' For now only one kind of initialization exist for every model currently available in the package. Hence default value for initialization is set according to the model.
@@ -20,6 +20,8 @@
 #' @param nbiterationsXEM Number of EM iterations used during XEM step. Default value is 500.
 #' @param epsilonxem Tolerance value used during xem step. Default value is 1e-4.
 #' @param epsilonXEM Tolerance value used during XEM step. Default value is 1e-10
+#' @param bayesianform Boolean parameter to indicate whether to run algorithms in bayesian settings or not.Default value is false.
+#' @param hyperparam Hyper-parameters ("a" and "b") in case of Bayesian settings.
 #' 
 #' @return Object of class \code{\linkS4class{strategy}}
 #' @export
@@ -36,13 +38,17 @@
 
 cocluststrategy<-function(algo = "BEM",initmethod=character(),stopcriteria = "Parameter",  
 		nbiterationsxem = 50, nbiterationsXEM = 500,nbinititerations = 10, initepsilon = 1e-2, nbiterations_int = 5,
-		epsilon_int = 1e-2, epsilonxem = 1e-4,epsilonXEM =1e-10, nbtry = 2,nbxem = 5) { 
+		epsilon_int = 1e-2, epsilonxem = 1e-4,epsilonXEM =1e-10, nbtry = 2,nbxem = 5,bayesianform = FALSE,hyperparam = numeric(0)) { 
   
+  if(bayesianform==TRUE&&missing(hyperparam)){
+    stop("Missing hyperparameters.")
+  }
 	#create and return object of class strategy
 	new("strategy",algo = algo,initmethod = initmethod,stopcriteria = stopcriteria, 
 			nbinititerations = nbinititerations,initepsilon = initepsilon, nbiterations_int = nbiterations_int, 
 			epsilonxem = epsilonxem,epsilonXEM = epsilonXEM, epsilon_int = epsilon_int, 
-			nbtry = nbtry,nbxem = nbxem,nbiterationsxem = nbiterationsxem, nbiterationsXEM = nbiterationsXEM)
+			nbtry = nbtry,nbxem = nbxem,nbiterationsxem = nbiterationsxem, nbiterationsXEM = nbiterationsXEM,
+      bayesianform=bayesianform,hyperparam=hyperparam)
 }
 
 #' strategy class
@@ -63,6 +69,8 @@ cocluststrategy<-function(algo = "BEM",initmethod=character(),stopcriteria = "Pa
 #' \item{nbiterationsXEM: }{Number of EM iterations used during XEM.}
 #' \item{epsilonxem: }{Tolerance value used during xem.}
 #' \item{epsilonXEM: }{Tolerance value used during XEM.} 
+#' \item{bayesianform: }{Boolean parameter to indicate whether to run algorithms in bayesian settings or not.Default value is false.}
+#' \item{hyperparam: }{Hyper-parameters ("a" and "b") in case of Bayesian settings.}
 #' }
 #' 
 #' @name strategy-class
@@ -84,7 +92,9 @@ setClass(
 				nbiterationsxem = "numeric",
 				nbiterationsXEM = "numeric",
 				epsilonxem = "numeric",
-				epsilonXEM = "numeric"
+				epsilonXEM = "numeric",
+        bayesianform = "logical",
+				hyperparam = "numeric"
 		),
 		prototype = prototype(
 				algo = character(0),
@@ -99,7 +109,9 @@ setClass(
 				nbiterationsxem = integer(0),
 				nbiterationsXEM = integer(0),
 				epsilonxem = numeric(0),
-				epsilonXEM = numeric(0)
+				epsilonXEM = numeric(0),
+        bayesianform = logical(0),
+				hyperparam = numeric(0)
 		)
 )
 			
@@ -126,6 +138,8 @@ setMethod(
 					"nbiterationsXEM"={return (x@nbiterationsXEM)},
 					"epsilonxem"={return (x@epsilonxem)},
 					"epsilonXEM"={return (x@epsilonXEM)},
+          "bayesianform"={return (x@bayesianform)},
+          "hyperparam"={return (x@hyperparam)},
 					stop("Invalid slot name.")
 			)
 			

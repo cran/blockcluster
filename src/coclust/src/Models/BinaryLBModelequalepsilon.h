@@ -47,7 +47,7 @@ class BinaryLBModelequalepsilon : public ICoClustModel
      * @param m_Dataij a constant reference on the data set.
      * @param Mparam A constant reference to various ModelParameters.
      * */
-    BinaryLBModelequalepsilon(MatrixBinary const& m_Dataij,ModelParameters const& Mparam);
+    BinaryLBModelequalepsilon(MatrixBinary const& m_Dataij,ModelParameters const& Mparam,int a=1,int b=1);
     /**Constructor for unsupervised co-clustering
      * @param m_Dataij a constant reference on the data set.
      * @param rowlabels various labels for rows (-1  for unknown row label)
@@ -55,7 +55,7 @@ class BinaryLBModelequalepsilon : public ICoClustModel
      * @param Mparam A constant reference to various ModelParameters.
      * */
     BinaryLBModelequalepsilon(MatrixBinary const& m_Dataij,VectorInteger const & rowlabels,
-                              VectorInteger const & collabels,ModelParameters const& Mparam);
+                              VectorInteger const & collabels,ModelParameters const& Mparam,int a=1,int b=1);
 
     /** cloning */
     virtual BinaryLBModelequalepsilon* Clone(){return new BinaryLBModelequalepsilon(*this);}
@@ -74,6 +74,7 @@ class BinaryLBModelequalepsilon : public ICoClustModel
     virtual bool CEMInit();
     virtual void FinalizeOutput();
     virtual void ConsoleOut();
+    virtual float ICLCriteriaValue();
     //virtual void UpdateAllUsingConditionalProbabilities();
     virtual void Modify_theta_start();
     virtual void Copy_theta_start();
@@ -84,7 +85,7 @@ class BinaryLBModelequalepsilon : public ICoClustModel
     /**Return Class despersion BinaryLBModelequalepsilon::m_epsilonkl_ for all the blocks (co-clusters) */
     float Getdispersion() const;
     /**Destructor*/
-    inline virtual ~BinaryLBModelequalepsilon(){};
+    virtual ~BinaryLBModelequalepsilon(){};
 
     const MatrixBinary& GetArrangedDataClusters();
 #ifndef RPACKAGE
@@ -94,6 +95,7 @@ class BinaryLBModelequalepsilon : public ICoClustModel
 
   protected:
     //Variables involved in Bernoulli model
+    int a_,b_;//hyper-parameters
     MatrixBinary const& m_Dataij_;
     MatrixBinary m_ClusterDataij_;
     MatrixReal m_Xjl_,m_Xik_,m_Tk_Rl_;

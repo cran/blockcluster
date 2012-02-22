@@ -2,6 +2,7 @@
 \name{plot}
 \alias{plot}
 \alias{plot,BinaryOptions-method}
+\alias{plot,CategoricalOptions-method}
 \alias{plot,ContingencyOptions-method}
 \alias{plot,ContinuousOptions-method}
 \title{Plot function.}

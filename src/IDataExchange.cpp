@@ -35,6 +35,17 @@
  **/
 
 #include "IDataExchange.h"
+//CoClust::Algorithms
+#include "coclust/src/Algorithms/EMAlgo.h"
+#include "coclust/src/Algorithms/CEMAlgo.h"
+#include "coclust/src/Algorithms/SEMAlgo.h"
+//CoClust::Initialization
+#include "coclust/src/Initialization/CEMInit.h"
+#include "coclust/src/Initialization/FuzzyCEMInit.h"
+#include "coclust/src/Initialization/RandomInit.h"
+//CoClust::strategy
+#include "coclust/src/Strategy/XStrategyAlgo.h"
+#include "coclust/src/Strategy/XStrategyforSEMAlgo.h"
 
 IDataExchange::~IDataExchange()
 {}
@@ -49,7 +60,7 @@ void IDataExchange::SetInput(Rcpp::S4 & obj)
   strategy_.DataType_ = S_DataType[Rcpp::as<std::string>(obj.slot("datatype"))];
   strategy_.Model_ = S_Model[Rcpp::as<std::string>(obj.slot("model"))];
   strategy_.SemiSupervised = Rcpp::as<bool>(obj.slot("semisupervised"));
-
+  strategy_.Bayesianform_ = Rcpp::as<bool>(strategy.slot("bayesianform"));
   //Get strategy parameters
   Stratparam_.nbiter_xem_ = Rcpp::as<int>(strategy.slot("nbiterationsxem"));
   Stratparam_.nbiter_XEM_ = Rcpp::as<int>(strategy.slot("nbiterationsXEM"));
@@ -100,6 +111,7 @@ void IDataExchange::InitializeParamEnum()
   S_DataType["binary"] = Binary;
   S_DataType["contingency"] = Contingency;
   S_DataType["continuous"] = Continuous;
+  S_DataType["continuous"] = Categorical;
 
   //Algorithm
   S_Algorithm["BEM"] = BEM;
@@ -128,4 +140,45 @@ void IDataExchange::InitializeParamEnum()
   S_Model["pik_rhol_sigma2"] = pik_rhol_sigma2;
   S_Model["pi_rho_sigma2kl"] = pi_rho_sigma2kl;
   S_Model["pik_rhol_sigma2kl"] = pik_rhol_sigma2kl;
+  S_Model["pi_rho_multi"] = pi_rho_multi;
+  S_Model["pik_rhol_multi"] = pik_rhol_multi;
+}
+
+void IDataExchange::instantiateAlgo(IAlgo*& algo,IStrategy*& strategy){
+  switch (strategy_.Algo_)
+  {
+    case BEM:
+      algo = new EMAlgo();
+      strategy = new XStrategyAlgo(Stratparam_);
+      break;
+    case BCEM:
+      algo = new CEMAlgo();
+      strategy = new XStrategyAlgo(Stratparam_);
+      break;
+    case BSEM:
+      algo = new SEMAlgo();
+      strategy = new XStrategyforSEMAlgo(Stratparam_);
+      break;
+    default:
+      algo = new EMAlgo();
+      strategy = new XStrategyAlgo(Stratparam_);
+      break;
+  }
+}
+
+void IDataExchange::instantiateInit(IInit*& init){
+  switch (strategy_.Init_) {
+    case e_CEMInit:
+      init = new CEMInit();
+      break;
+    case e_FuzzyCEMInit:
+      init = new FuzzyCEMInit();
+      break;
+    case e_RandomInit:
+      init = new RandomInit();
+      break;
+    default:
+      init = new CEMInit();
+      break;
+  }
 }

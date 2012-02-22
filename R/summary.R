@@ -29,6 +29,8 @@ setMethod(
           cat("\nCo-Clustering Type : Semi-Supervised")
         else
           cat("\nCo-Clustering Type : Unsupervised")
+        
+        cat("\nICL value: ",object@ICLvalue)
 				cat("\n\nModel Parameters..")
 				cat("\n\nClass Mean:\n")
 				print(object@classmean)
@@ -135,8 +137,66 @@ setMethod(
 			cat("\nTolerance value for internal E-step: ",object@epsilon_int)
 			cat("\nTolerance value used during xem: ",object@epsilonxem)
 			cat("\nTolerance value used during XEM: ",object@epsilonXEM)
+			cat("\nBayesian form: ",object@bayesianform)
+			cat("\nHyper-parameters: ",object@hyperparam)
 			
 			cat("\n******************************************************************\n")
 		}
+)
+
+#'
+#' Summary function.
+#' 
+#' This function gives the summary of output from \code{cocluster}.
+#' 
+#' @param object output object from \code{\link{cocluster}}.
+#' 
+#' @name summary
+#' @rdname summary-methods
+#' @docType methods
+#' @exportMethod summary
+#' 
+#' 
+NULL
+
+#' @rdname summary-methods
+#' @aliases summary summary,CategoricalOptions-method
+#' 
+
+setMethod(
+  f="summary",
+  signature = "CategoricalOptions",
+  definition = function(object,...) {
+    if (object@successful) {
+      cat("******************************************************************\n")
+      cat("Model Family : Categorical Latent block model\n")
+      cat("Model Name :",object@model)
+      if(object@semisupervised)
+        cat("\nCo-Clustering Type : Semi-Supervised")
+      else
+        cat("\nCo-Clustering Type : Unsupervised")
+      cat("\nICL value: ",object@ICLvalue)
+      cat("\n\nModel Parameters..")
+      cat("\n\nClass Mean:\n")
+      cat("******************************************************************\n")
+      tempmatrix<-matrix(nrow=object@nbcocluster[1],ncol=object@nbcocluster[2])
+      for(h in 1:length(object@classmean)){
+        cat("\nProability for category",h,"in various blocks\n")
+        cat("********************************************\n")
+        for(k in 1:object@nbcocluster[1]){
+          for(l in 1:object@nbcocluster[2]){
+            tempmatrix[k,l] = as.double(object@classmean[[h]][[k]][[l]])
+          }
+        }
+        print(tempmatrix)
+      }
+      cat("\nRow proportions: ",object@rowproportions)
+      cat("\nColumn proportions: ",object@columnproportions)
+      cat("\nPseudo-likelihood: ",object@likelihood)
+      cat("\n******************************************************************\n")
+    } else {
+      cat("Co-Clustering was not successful.\n")
+    }	
+  }
 )
 		

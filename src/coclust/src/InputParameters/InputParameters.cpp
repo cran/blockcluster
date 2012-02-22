@@ -167,6 +167,12 @@ void InputParameters::ReadFromOptionFile( std::string optionfilename)
     case pi_rho_known:
       Mparam_.fixedproportions_ = true;
       break;
+    case pi_rho_multi:
+      Mparam_.fixedproportions_ = true;
+      break;
+    case pik_rhol_multi:
+      Mparam_.fixedproportions_ = false;
+      break;
     default:
       Mparam_.fixedproportions_ = false;
       break;
@@ -199,6 +205,7 @@ void InputParameters::InitializeParamEnum()
   S_DataType["Binary"] = Binary;
   S_DataType["Contingency"] = Contingency;
   S_DataType["Continuous"] = Continuous;
+  S_DataType["Categorical"] = Categorical;
 
   //Algorithm
   S_Algorithm["BEM"] = BEM;
@@ -227,5 +234,7 @@ void InputParameters::InitializeParamEnum()
   S_Model["pik_rhol_sigma2"] = pik_rhol_sigma2;
   S_Model["pi_rho_sigma2kl"] = pi_rho_sigma2kl;
   S_Model["pik_rhol_sigma2kl"] = pik_rhol_sigma2kl;
+  S_Model["pik_rhol_sigma2kl"] = pik_rhol_multi;
+  S_Model["pik_rhol_sigma2kl"] = pi_rho_multi;
 }
 

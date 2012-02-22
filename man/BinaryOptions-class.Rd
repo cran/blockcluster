@@ -11,6 +11,7 @@
 \details{
   \describe{ \item{classmean:}{The mean value of each
   co-cluster.} \item{classdispersion:}{The dispersion of
-  each co-cluster.} }
+  each co-cluster.} \item{ICLvalue: }{Integrated complete
+  likelihood} }
 }
 

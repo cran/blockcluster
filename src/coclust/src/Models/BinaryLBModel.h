@@ -47,16 +47,20 @@ class BinaryLBModel : public ICoClustModel
     /**Constructor for unsupervised co-clustering
      * @param m_Dataij a constant reference on the data set.
      * @param Mparam A constant reference to various ModelParameters.
+     * @param a hyperparameter
+     * @param b hyperparameter
      * */
-    BinaryLBModel(MatrixBinary const& m_Dataij,ModelParameters const& Mparam);
+    BinaryLBModel(MatrixBinary const& m_Dataij,ModelParameters const& Mparam,int a=1,int b=1);
     /**Constructor for unsupervised co-clustering
      * @param m_Dataij a constant reference on the data set.
      * @param rowlabels various labels for rows (-1  for unknown row label)
      * @param collabels various labels for columns (-1 for unknown column label)
      * @param Mparam A constant reference to various ModelParameters.
+     * @param a hyperparameter
+     * @param b hyperparameter
      * */
     BinaryLBModel(MatrixBinary const& m_Dataij,VectorInteger const & rowlabels,
-                  VectorInteger const & collabels,ModelParameters const& Mparam);
+                  VectorInteger const & collabels,ModelParameters const& Mparam,int a=1,int b=1);
 
     /** cloning */
     virtual BinaryLBModel* Clone(){return new BinaryLBModel(*this);}
@@ -73,20 +77,20 @@ class BinaryLBModel : public ICoClustModel
     virtual void ParameterStopCriteria();
     virtual bool CEMInit();
     virtual void FinalizeOutput();
+    virtual float ICLCriteriaValue();
     virtual void ConsoleOut();
-    //virtual void UpdateAllUsingConditionalProbabilities();
     virtual void Modify_theta_start();
     virtual void Copy_theta_start();
     virtual void Copy_theta_max();
     virtual void Modify_theta_max();
-    float EstimateLikelihood();
+    virtual float EstimateLikelihood();
     const MatrixBinary& GetArrangedDataClusters();
     /**Return class mean BinaryLBModel::m_akl_ for all the blocks (co-clusters)*/
     const MatrixBinary& Getmean() const;
     /**Return Class despersion BinaryLBModel::m_epsilonkl_ for all the blocks (co-clusters) */
     const MatrixReal& Getdispersion() const;
     /**Destructor*/
-    inline virtual ~BinaryLBModel(){};
+    virtual ~BinaryLBModel(){};
 
 
 #ifndef RPACKAGE
@@ -95,7 +99,8 @@ class BinaryLBModel : public ICoClustModel
 #endif
 
   protected:
-    //Variables involved in Bernoulli model
+    //Variables involved in Bernouilli model
+    int a_,b_;//hyper-parameters
     MatrixBinary const& m_Dataij_;
     MatrixBinary m_ClusterDataij_;
     float dimprod_;
@@ -106,8 +111,6 @@ class BinaryLBModel : public ICoClustModel
     MatrixReal m_epsilonkl_,m_epsilonklstart_,m_epsilonklmax_;
     float Likelihood_old;
 
-
-    //M-steps
     void MStepRows();
     void MStepCols();
 
@@ -130,24 +133,6 @@ inline const MatrixBinary& BinaryLBModel::Getmean() const
 inline const MatrixReal& BinaryLBModel::Getdispersion() const
 {
   return m_epsilonkl_;
-}
-
-inline void BinaryLBModel::MStepRows()
-{
-  if(!Mparam_.fixedproportions_) {
-    v_logPiek_=(v_Tk_.array()/nbSample_).log();
-  }
-
-  m_Alphakl_ = ((m_Tik_.transpose())*m_Uil_).array()/(v_Tk_*(v_Rl_.transpose())).array();
-}
-
-inline void BinaryLBModel::MStepCols()
-{
-  if(!Mparam_.fixedproportions_) {
-    v_logRhol_=(v_Rl_.array()/nbVar_).log();
-  }
-
-  m_Alphakl_ = (m_Vjk_.transpose()*m_Rjl_).array()/(v_Tk_*v_Rl_.transpose()).array();
 }
 
 #endif /* BinaryLBModel_H_ */

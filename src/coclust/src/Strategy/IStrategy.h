@@ -53,9 +53,9 @@ class IStrategy
     /** Function to set the model
      *  @param model the model to set
      **/
-    void SetModel(ICoClustModel *& model);
-    void SetInit(IInit *& init);
-    void SetAlgo(IAlgo*&);
+    void SetModel(ICoClustModel * model);
+    void SetInit(IInit * init);
+    void SetAlgo(IAlgo* algo);
 
   protected:
     ICoClustModel * p_Model_; /**<Pointer to Model to be run.*/
@@ -65,17 +65,17 @@ class IStrategy
 };
 
 
-inline void IStrategy::SetModel(ICoClustModel *& model)
+inline void IStrategy::SetModel(ICoClustModel * model)
 {
   p_Model_ = model;
 }
 
-inline void IStrategy::SetInit(IInit *& init)
+inline void IStrategy::SetInit(IInit * init)
 {
   p_Init_ = init;
 }
 
-inline void IStrategy::SetAlgo(IAlgo *& algo)
+inline void IStrategy::SetAlgo(IAlgo *  algo)
 {
   p_Algo_ = algo;
 }

@@ -324,37 +324,7 @@ void ContinuousLBModelequalsigma::GenerateRandomMean(const MatrixReal & m_jk, Ma
 
 const MatrixReal& ContinuousLBModelequalsigma::GetArrangedDataClusters()
 {
-  Eigen::ArrayXi v_Zi = (GetRowClassificationVector()).array();
-  Eigen::ArrayXi v_Wj = (GetColumnClassificationVector()).array();
-  m_ClusterDataij_ = MatrixReal::Zero(nbSample_,nbVar_);
-
-  //Rearrange data into clusters
-
-  VectorInteger rowincrement = MatrixInteger::Zero(Mparam_.nbrowclust_,1);
-
-  VectorInteger nbindrows = MatrixInteger::Zero(Mparam_.nbrowclust_,1);
-  for ( int k = 1; k < Mparam_.nbrowclust_; ++k) {
-    nbindrows(k) = (v_Zi==(k-1)).count()+nbindrows(k-1);
-  }
-
-  VectorInteger colincrement = MatrixInteger::Zero(Mparam_.nbcolclust_,1);
-
-  VectorInteger nbindcols = MatrixInteger::Zero(Mparam_.nbcolclust_,1);
-  for ( int l = 1; l < Mparam_.nbcolclust_; ++l) {
-    nbindcols(l)=(v_Wj==(l-1)).count()+nbindcols(l-1);
-  }
-
-  for ( int j = 0; j < nbVar_; ++j) {
-    m_ClusterDataij_.col(colincrement(v_Wj(j)) + nbindcols(v_Wj(j))) = m_Dataij_.col(j);
-    colincrement(v_Wj(j))+=1;
-  }
-  MatrixReal temp = m_ClusterDataij_;
-
-  for ( int i = 0; i < nbSample_; ++i) {
-    m_ClusterDataij_.row( rowincrement(v_Zi(i)) + nbindrows(v_Zi(i))) = temp.row(i);
-    rowincrement(v_Zi(i))+=1;
-  }
-
+  ArrangedDataCluster<MatrixReal>(m_ClusterDataij_,m_Dataij_);
   return m_ClusterDataij_;
 }
 

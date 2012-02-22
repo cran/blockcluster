@@ -14,7 +14,7 @@
   and column effects.)}
 
   \item{datatype}{This is the type of data which can be
-  "binary" , "contingency" or "continuous".}
+  "binary" , "contingency", "continuous" or "categorical".}
 
   \item{semisupervised}{Boolean value specifying whether to
   perform semi-supervised co-clustering or not. Make sure
@@ -45,7 +45,9 @@
   contingency \tab unequal \tab N.A \cr pi_rho_unknown \tab
   contingency \tab equal \tab N.A \cr pik_rhol_known \tab
   contingency \tab unequal \tab N.A \cr pi_rho_known \tab
-  contingency \tab equal \tab N.A \cr }}
+  contingency \tab equal \tab N.A \cr pik_rhol_multi \tab
+  categorical \tab unequal \tab unequal \cr pi_rho_multi
+  \tab categorical \tab equal \tab unequal \cr }}
 
   \item{nbcocluster}{Integer vector specifying the number
   of row and column clusters respectively.}

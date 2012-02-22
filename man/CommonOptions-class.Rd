@@ -20,9 +20,11 @@
   proportions.} \item{rowclass: }{Vector of assigned row
   cluster to each row.} \item{colclass: }{Vector of
   assigned column cluster to each column.}
-  \item{likelihood: }{Final log-likelihood.}
+  \item{likelihood: }{Final pseudo log-likelihood.}
   \item{rowposteriorprob: }{Final posterior probabilities
   for rows.} \item{colposteriorprob: }{Final posterior
-  probabilities for columns.} }
+  probabilities for columns.}
+
+  }
 }
 
