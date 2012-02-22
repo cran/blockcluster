@@ -23,9 +23,10 @@ setMethod(
 		definition = function(object,...) {
 			if (object@successful) {
 				cat("******************************************************************\n")
-				cat("Model = Bernoulli Latent block model\n")
-				cat("Model Parameters:")
-				cat("\nClass Mean:\n")
+				cat("Model Family : Bernoulli Latent block model\n")
+				cat("Model Name :",object@model)
+				cat("\n\nModel Parameters..")
+				cat("\n\nClass Mean:\n")
 				print(object@classmean)
 				cat("\nClass Dispersion:\n")
 				print(object@classdispersion)
@@ -50,9 +51,10 @@ setMethod(
 		definition = function(object,...) {
 			if (object@successful) {
 				cat("******************************************************************\n")
-				cat("Model Distribution = Poisson Latent block model\n")
-				cat("Model Parameters:")
-				cat("\nClass Gamma:\n")
+				cat("Model Family : Poisson Latent block model\n")
+				cat("Model Name :",object@model)
+				cat("\n\nModel Parameters..")
+				cat("\n\nClass Gamma:\n")
 				print(object@classgamma)
 				cat("\nRow proportions: ",object@rowproportions)
 				cat("\nColumn proportions: ",object@columnproportions)
@@ -77,9 +79,10 @@ setMethod(
 		definition = function(object,...) {
 			if (object@successful) {
 				cat("******************************************************************\n")
-				cat("Model Distribution = Gaussian Latent block model\n")
-				cat("Model Parameters:")
-				cat("\nClass Mean:\n")
+				cat("Model Family : Gaussian Latent block model\n")
+				cat("Model Name :",object@model)
+				cat("\n\nModel Parameters..")
+				cat("\n\nClass Mean:\n")
 				print(object@classmean)
 				cat("\nClass Variance:\n")
 				print(object@classvariance)

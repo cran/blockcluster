@@ -24,7 +24,7 @@ NULL
 #'     pik_rhol_epsilon \tab binary \tab unequal \tab equal \cr
 #'     pi_rho_epsilonkl \tab binary \tab equal \tab unequal \cr
 #'     pi_rho_epsilon \tab binary \tab equal \tab equal \cr
-#'     pik_rhol_sigma2kl \tab continuous \tab unequal \tab unequal \cr
+#'     pik_rhol_sigma2kl(Default) \tab continuous \tab unequal \tab unequal \cr
 #'     pik_rhol_sigma \tab continuous \tab unequal \tab equal \cr
 #'     pi_rho_sigma2kl \tab continuous \tab equal \tab unequal \cr
 #'     pi_rho_sigma2 \tab continuous \tab equal \tab equal \cr
@@ -37,7 +37,7 @@ NULL
 #' @param nbcocluster Interger vector specifying the number of row and column clusters respectively.
 #' @param strategy Object of class \code{\linkS4class{strategy}}.
 #' @return Return an object of \code{\linkS4class{BinaryOptions}} or \code{\linkS4class{ContingencyOptions}}
-#' or \code{\linkS4class{ContinuousOptions}} depending of whether the datatype is Bianry, Contingency or Continuous
+#' or \code{\linkS4class{ContinuousOptions}} depending on whether the datatype is Binary, Contingency or Continuous
 #' respectively.
 #' 
 #' @export
@@ -47,6 +47,7 @@ NULL
 #' 
 #' @examples
 #' 
+
 #' # Simple example with simulated binary data
 #' #load data
 #' data(binarydata)
@@ -57,13 +58,8 @@ NULL
 #' #Plot the original and co-clustered data 
 #' plot(out)
 #' 
-#' # A little advanced example with simulated gaussian data
-#' data(gaussiandata)
-#' #set strategy , see documentation for "cocluststrategy" function for more details.
-#' newstrategy<-cocluststrategy(nbxem=5,nbtry=2,algo="XEMStrategy")
-#' # calling cocluster function with newstrategy and default model
-#' out<-cocluster(gaussiandata,datatype="continuous",nbcocluster=c(2,3),strategy=newstrategy)
 #' 
+
 
 cocluster<-function(data, datatype, model, nbcocluster, strategy = cocluststrategy()) 
 {
@@ -154,7 +150,7 @@ cocluster<-function(data, datatype, model, nbcocluster, strategy = cocluststrate
 			}
 			else if(model!="pik_rhol_sigma2kl" && model!="pik_rhol_sigma2" && 
 					model!="pi_rho_sigma2kl" && model!="pi_rho_sigma2"){
-				stop("Incorrect Model, Valid Binary models are: pik_rhol_sigma2kl, pik_rhol_sigma2, pi_rho_sigma2kl, pi_rho_sigma2")
+				stop("Incorrect Model, Valid Continuous models are: pik_rhol_sigma2kl, pik_rhol_sigma2, pi_rho_sigma2kl, pi_rho_sigma2")
 			}
 			
 			if(length(strategy@initmethod)==0){
@@ -180,7 +176,7 @@ cocluster<-function(data, datatype, model, nbcocluster, strategy = cocluststrate
 			}
 			else if(model!="pik_rhol_unknown" && model!="pik_rhol_known" && 
 					model!="pi_rho_unknown" && model!="pi_rho_known"){
-				stop("Incorrect Model, Valid Binary models are:pik_rhol_unknown, pik_rhol_known, pi_rho_unknown, pi_rho_known")
+				stop("Incorrect Model, Valid Contingency models are:pik_rhol_unknown, pik_rhol_known, pi_rho_unknown, pi_rho_known")
 		}
 		
 		if((model=="pi_rho_known"||model=="pik_rhol_known")&& (length(data)!=3))

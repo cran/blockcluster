@@ -121,20 +121,20 @@ void BinaryCoClust::SetModel()
   switch (strategy_.Model_)
   {
     case pik_rhol_epsilonkl:
-      p_Model_ = new BinaryLBModel(m_Dataij_,Mparam_);
       Mparam_.fixedproportions_ = false;
+      p_Model_ = new BinaryLBModel(m_Dataij_,Mparam_);
       break;
     case pik_rhol_epsilon:
-      p_Model_ = new BinaryLBModelequalepsilon(m_Dataij_,Mparam_);
       Mparam_.fixedproportions_ = false;
+      p_Model_ = new BinaryLBModelequalepsilon(m_Dataij_,Mparam_);
       break;
     case pi_rho_epsilonkl:
-      p_Model_ = new BinaryLBModel(m_Dataij_,Mparam_);
       Mparam_.fixedproportions_ = true;
+      p_Model_ = new BinaryLBModel(m_Dataij_,Mparam_);
       break;
     case pi_rho_epsilon:
-      p_Model_ = new BinaryLBModelequalepsilon(m_Dataij_,Mparam_);
       Mparam_.fixedproportions_ =true;
+      p_Model_ = new BinaryLBModelequalepsilon(m_Dataij_,Mparam_);
       break;
   }
 }

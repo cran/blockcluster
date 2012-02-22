@@ -124,20 +124,20 @@ void ContingencyCoClust::SetModel()
   switch (strategy_.Model_)
   {
     case pik_rhol_unknown:
-      p_Model_ = new ContingencyLBModel(m_Dataij_,Mparam_);
       Mparam_.fixedproportions_ = false;
+      p_Model_ = new ContingencyLBModel(m_Dataij_,Mparam_);
       break;
     case pik_rhol_known:
-      p_Model_ = new ContingencyLBModel_mu_i_nu_j(m_Dataij_,v_Mui_,v_Nuj_,Mparam_);
       Mparam_.fixedproportions_ = false;
+      p_Model_ = new ContingencyLBModel_mu_i_nu_j(m_Dataij_,v_Mui_,v_Nuj_,Mparam_);
       break;
     case pi_rho_unknown:
-      p_Model_ = new ContingencyLBModel(m_Dataij_,Mparam_);
       Mparam_.fixedproportions_ = true;
+      p_Model_ = new ContingencyLBModel(m_Dataij_,Mparam_);
       break;
     case pi_rho_known:
-      p_Model_ = new ContingencyLBModel_mu_i_nu_j(m_Dataij_,v_Mui_,v_Nuj_,Mparam_);
       Mparam_.fixedproportions_ = true;
+      p_Model_ = new ContingencyLBModel_mu_i_nu_j(m_Dataij_,v_Mui_,v_Nuj_,Mparam_);
       break;
   }
 }

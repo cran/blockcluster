@@ -150,12 +150,14 @@ void BinaryLBModel::FinalizeOutput()
     for (int l = 0; l < Mparam_.nbcolclust_; ++l) {
       if(m_Alphakl_(k,l)>=.5)
         m_akl_(k,l) = 1;
+      else {
+        m_akl_(k,l) = 0;
+      }
     }
   }
 
   // Calculate probability for Summary Matrix
   m_epsilonkl_ = m_akl_.cast<float>().array()*(1-m_Alphakl_.array()) + (1-m_akl_.cast<float>().array())*m_Alphakl_.array();
-
 }
 
 void BinaryLBModel::ConsoleOut()

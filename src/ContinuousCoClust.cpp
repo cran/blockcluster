@@ -123,20 +123,20 @@ void ContinuousCoClust::SetModel()
   switch (strategy_.Model_)
   {
     case pik_rhol_sigma2kl:
-      p_Model_ = new ContinuousLBModel(m_Dataij_,Mparam_);
       Mparam_.fixedproportions_ = false;
+      p_Model_ = new ContinuousLBModel(m_Dataij_,Mparam_);
       break;
     case pik_rhol_sigma2:
-      p_Model_ = new ContinuousLBModelequalsigma(m_Dataij_,Mparam_);
       Mparam_.fixedproportions_ = false;
+      p_Model_ = new ContinuousLBModelequalsigma(m_Dataij_,Mparam_);
       break;
     case pi_rho_sigma2kl:
-      p_Model_ = new ContinuousLBModel(m_Dataij_,Mparam_);
       Mparam_.fixedproportions_ =true;
+      p_Model_ = new ContinuousLBModel(m_Dataij_,Mparam_);
       break;
     case pi_rho_sigma2:
-      p_Model_ = new ContinuousLBModelequalsigma(m_Dataij_,Mparam_);
       Mparam_.fixedproportions_ =true;
+      p_Model_ = new ContinuousLBModelequalsigma(m_Dataij_,Mparam_);
       break;
   }
 }

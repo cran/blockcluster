@@ -29,6 +29,7 @@
 #' 
 #' @examples
 #' #Default strategy values
+#' 
 #' strategy<-cocluststrategy()
 #' summary(strategy)
 #' 
