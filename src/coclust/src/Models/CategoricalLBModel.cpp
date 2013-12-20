@@ -369,8 +369,8 @@ float CategoricalLBModel::EstimateLikelihood()
     tempsum+= (m_Ukl.array()*(m_Ukl+RealMin).log()).sum()+(b_-1)*((m3_Alphahkl_[h].array()+RealMin).log()).sum();
   }
   Likelihood_ = tempsum
-               +v_Tk_.dot(v_logPiek_) - Mparam_.nbrowdata_*log(Mparam_.nbrowdata_)
-               +v_Rl_.dot(v_logRhol_) - Mparam_.nbcoldata_*log(Mparam_.nbcoldata_)
+               +v_Tk_.dot(v_logPiek_) - Mparam_.nbrowdata_*log(float(Mparam_.nbrowdata_))
+               +v_Rl_.dot(v_logRhol_) - Mparam_.nbcoldata_*log(float(Mparam_.nbcoldata_))
                -(m_Tik_.array()*(RealMin + m_Tik_.array()).log()).sum()
                -(m_Rjl_.array()*(RealMin + m_Rjl_.array()).log()).sum()
                +(a_-1)*(v_logPiek_.sum()+v_logRhol_.sum());

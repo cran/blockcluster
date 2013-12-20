@@ -36,7 +36,7 @@
 #include <limits>
 
 #if EIGENCONTAINERS==1
-#include "../../../Eigen/Dense"
+#include <Eigen/Dense>
 #else
 #include "../../../stkpp/include/Arrays.h"
 #endif
