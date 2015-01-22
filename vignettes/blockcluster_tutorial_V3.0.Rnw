@@ -1,4 +1,4 @@
-%\VignetteIndexEntry{blockcluster tutorial}
+%\VignetteIndexEntry{blockcluster}
 
 \documentclass[a4paper,11pt]{article}
 \usepackage[utf8x]{inputenc}
@@ -155,6 +155,7 @@
 
 
 \begin{document}
+\SweaveOpts{concordance=TRUE}
 \maketitle
 \tableofcontents
 \begin{abstract}

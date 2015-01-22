@@ -557,6 +557,7 @@ void BinaryLBModel::MStepRows()
   }
 
   m_Alphakl_ = (((m_Tik_.transpose())*m_Uil_).array()+b_-1)/((v_Tk_*(v_Rl_.transpose())).array()+2*(b_-1));
+  m_Alphakl_ = m_Alphakl_.array().max(0.).min(1.);
 }
 
 void BinaryLBModel::MStepCols()
@@ -566,6 +567,7 @@ void BinaryLBModel::MStepCols()
   }
 
   m_Alphakl_ = ((m_Vjk_.transpose()*m_Rjl_).array()+b_-1)/((v_Tk_*v_Rl_.transpose()).array()+2*(b_-1));
+  m_Alphakl_ = m_Alphakl_.array().max(0.).min(1.);
 }
 
 

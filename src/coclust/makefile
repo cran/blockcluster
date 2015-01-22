@@ -1,4 +1,5 @@
 include $(R_HOME)/etc${R_ARCH}/Makeconf
+-include ~/.R/Makevars
 MYCXXFLAGS = -DNDEBUG -DRPACKAGE $(shell $(R_HOME)/bin/Rscript -e "cat(RcppEigen:::RcppEigenCxxFlags())")
 LIB = libcoclust.a
 SRCS = $(wildcard src/Algorithms/*.cpp\

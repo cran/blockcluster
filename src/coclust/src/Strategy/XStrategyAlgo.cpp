@@ -28,6 +28,29 @@
  **/
 
 #include "XStrategyAlgo.h"
+#include <iostream>
+#include <fstream>
+
+void XStrategyAlgo::writeVector(int it, MatrixReal classes, std::string type)
+{
+  std::ostringstream stream;
+  stream << "data/" << it << "-" << type << ".txt";
+  std::string str = stream.str();
+  std::cout << str << std::endl;
+  std::ofstream o_file(str.c_str());
+  std::cout << classes.cols() << std::endl;
+  std::cout << classes.rows() << std::endl;
+  for (int i = 0; i < classes.rows(); ++i)
+  {
+    int maxInd = 0;
+    int maxVal = classes(i, 0);
+    for (int j = 0; j < classes.cols(); ++j)
+    {
+      if (classes(i, j) > maxVal) maxInd = j;
+    }
+    o_file << maxInd << std::endl;
+  }
+}
 
 bool XStrategyAlgo::run()
 {

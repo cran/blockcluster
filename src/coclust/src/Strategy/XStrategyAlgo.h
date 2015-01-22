@@ -44,6 +44,8 @@ class XStrategyAlgo: public IStrategy
     {};
     virtual bool run();
     virtual ~XStrategyAlgo(){};
+  private:
+    void writeVector(int it, MatrixReal classes, std::string type);
 };
 
 #endif /* XSTRATEGYALGO_H_ */
