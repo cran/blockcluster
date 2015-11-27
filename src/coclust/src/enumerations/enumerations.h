@@ -1,6 +1,6 @@
 
 /*--------------------------------------------------------------------*/
-/*     Copyright (C) 2011-2013  Parmeet Singh Bhatia
+/*     Copyright (C) 2011-2015  <MODAL team @INRIA,Lille & U.M.R. C.N.R.S. 6599 Heudiasyc, UTC>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as

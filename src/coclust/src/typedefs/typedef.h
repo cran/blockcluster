@@ -1,6 +1,6 @@
 
 /*--------------------------------------------------------------------*/
-/*     Copyright (C) 2011-2013  Parmeet Singh Bhatia
+/*     Copyright (C) 2011-2015  <MODAL team @INRIA,Lille & U.M.R. C.N.R.S. 6599 Heudiasyc, UTC>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as
@@ -32,13 +32,11 @@
 #ifndef TYPEDEF_H_
 #define TYPEDEF_H_
 
-#define EIGENCONTAINERS 1
 #include <limits>
-
-#if EIGENCONTAINERS==1
-#include <Eigen/Dense>
+#ifdef RPACKAGE
+#include <RTKpp.h>
 #else
-#include "../../../stkpp/include/Arrays.h"
+#include <STKpp.h>
 #endif
 
 class InputParameters;
@@ -46,23 +44,26 @@ class ICoClustModel;
 /*
  * Macro definition for numeric limits
  */
-#define RealMax std::numeric_limits<float>::max()
-#define RealMin std::numeric_limits<float>::min()
+#define RealMax std::numeric_limits<STK::Real>::max()
+#define RealMin std::numeric_limits<STK::Real>::min()
 
 /*
  * Typedefs for Matrix and vector containers
  */
 
 //Matrix containers
-typedef Eigen::MatrixXf MatrixReal;
-typedef Eigen::MatrixXi MatrixInteger;
-typedef Eigen::Matrix<bool,Eigen::Dynamic,Eigen::Dynamic> MatrixBinary;
+typedef STK::CArrayXX MatrixReal;
+typedef STK::CArrayXXi MatrixInteger;
+typedef STK::CArray<bool, STK::UnknownSize, STK::UnknownSize> MatrixBinary;
+
 //Vector Containers
-typedef Eigen::VectorXf VectorReal;
-typedef Eigen::VectorXi VectorInteger;
-typedef Eigen::Matrix<bool,Eigen::Dynamic,1> VectorBinary;
+typedef STK::CVectorXd VectorReal;
+typedef STK::CPointXd PointReal;
+typedef STK::CVectorXi VectorInteger;
+typedef STK::CArrayVector<bool, STK::UnknownSize> VectorBinary;
+
 //2D array containers
-typedef Eigen::ArrayXXf Array2DReal;
+typedef STK::ArrayXX Array2DReal;
 
 /**
  * Member Function pointers

@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------------*/
-/*     Copyright (C) 2011-2013  Parmeet Singh Bhatia
+/*     Copyright (C) 2011-2015  <MODAL team @INRIA,Lille & U.M.R. C.N.R.S. 6599 Heudiasyc, UTC>
 
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as
@@ -38,101 +38,99 @@
 #include <iostream>
 #include "../typedefs/typedef.h"
 #include "../Models/ICoClustModel.h"
+
 #ifndef RPACKAGE
 #include "../../../CImg/CImg.h"
 #endif
+
 class BinaryLBModel : public ICoClustModel
 {
   public:
     /**Constructor for unsupervised co-clustering
      * @param m_Dataij a constant reference on the data set.
      * @param Mparam A constant reference to various ModelParameters.
-     * @param a hyperparameter
-     * @param b hyperparameter
+     * @param a,b bayesian hyperparameters
      * */
-    BinaryLBModel(MatrixBinary const& m_Dataij,ModelParameters const& Mparam,int a=1,int b=1);
+    BinaryLBModel( MatrixBinary const&  m_Dataij
+                 , ModelParameters const& Mparam
+                 , int a=1,int b=1);
     /**Constructor for unsupervised co-clustering
      * @param m_Dataij a constant reference on the data set.
      * @param rowlabels various labels for rows (-1  for unknown row label)
      * @param collabels various labels for columns (-1 for unknown column label)
      * @param Mparam A constant reference to various ModelParameters.
-     * @param a hyperparameter
-     * @param b hyperparameter
+     * @param a,b bayesian hyperparameters
      * */
-    BinaryLBModel(MatrixBinary const& m_Dataij,VectorInteger const & rowlabels,
-                  VectorInteger const & collabels,ModelParameters const& Mparam,int a=1,int b=1);
+    BinaryLBModel( MatrixBinary const&  m_Dataij
+                 , VectorInteger const & rowlabels
+                 , VectorInteger const & collabels
+                 , ModelParameters const& Mparam
+                 , int a=1,int b=1);
 
     /** cloning */
-    virtual BinaryLBModel* Clone(){return new BinaryLBModel(*this);}
-    virtual void LogSumRows(MatrixReal & _m_sum);
-    virtual void LogSumCols(MatrixReal & _m_sum);
-    virtual void MStepFull();
-    virtual bool EMRows();
-    virtual bool CEMRows();
-    virtual bool EMCols();
-    virtual bool CEMCols();
-    virtual bool SEMRows();
-    virtual bool SEMCols();
-    virtual void likelihoodStopCriteria();
-    virtual void ParameterStopCriteria();
-    virtual bool CEMInit();
-    virtual void FinalizeOutput();
-    virtual float ICLCriteriaValue();
-    virtual void ConsoleOut();
-    virtual void Modify_theta_start();
-    virtual void Copy_theta_start();
-    virtual void Copy_theta_max();
-    virtual void Modify_theta_max();
-    virtual float EstimateLikelihood();
-    const MatrixBinary& GetArrangedDataClusters();
+    virtual BinaryLBModel* clone(){return new BinaryLBModel(*this);}
+    virtual void logSumRows(MatrixReal & _m_sum);
+    virtual void logSumCols(MatrixReal & _m_sum);
+    virtual void mStepFull();
+    virtual bool emRows();
+    virtual bool cemRows();
+    virtual bool emCols();
+    virtual bool cemCols();
+    virtual bool semRows();
+    virtual bool semCols();
+    virtual void parameterStopCriteria();
+    virtual bool cemInitStep();
+    virtual void finalizeOutput();
+    virtual STK::Real iclCriteriaValue();
+    virtual void consoleOut();
+    virtual void modifyThetaStart();
+    virtual void copyThetaStart();
+    virtual void copyThetaMax();
+    virtual void modifyThetaMax();
+    virtual STK::Real estimateLikelihood();
+    MatrixBinary const&  arrangedDataClusters();
     /**Return class mean BinaryLBModel::m_akl_ for all the blocks (co-clusters)*/
-    const MatrixBinary& Getmean() const;
+    MatrixBinary const&  mean() const;
     /**Return Class despersion BinaryLBModel::m_epsilonkl_ for all the blocks (co-clusters) */
-    const MatrixReal& Getdispersion() const;
+    MatrixReal const& dispersion() const;
     /**Destructor*/
-    virtual ~BinaryLBModel(){};
-
+    inline virtual ~BinaryLBModel(){};
 
 #ifndef RPACKAGE
     /**This function display co-clusters for Binary data.*/
-    void DisplayCluster();
+    void displayCluster();
 #endif
 
   protected:
     //Variables involved in Bernouilli model
     int a_,b_;//hyper-parameters
-    MatrixBinary const& m_Dataij_;
+    MatrixBinary const&  m_Dataij_;
     MatrixBinary m_ClusterDataij_;
-    float dimprod_;
+    STK::Real dimprod_;
     MatrixReal m_Vjk_;
     MatrixReal m_Uil_;
     MatrixReal m_Alphakl_, m_Alphaklold_, m_Alphakl1_, m_Alphakl1old_,m_Alphaklmax_,m_Alphaklstart_;
     MatrixBinary m_akl_;
     MatrixReal m_epsilonkl_,m_epsilonklstart_,m_epsilonklmax_;
-    float Likelihood_old;
 
-    void MStepRows();
-    void MStepCols();
+    void mStepRows();
+    void mStepCols();
 
     // Functions used to operate on data in intermediate steps when running the Initialization
-    bool InitCEMRows();
-    bool InitCEMCols();
-    void InitBernoulliLogsumRows(MatrixReal & m_sum);
-    void InitBernoulliLogsumCols(MatrixReal & m_sum);
-    void SelectRandomColsfromdata(MatrixReal& m,int col);
-    void GenerateRandomBernoulliParameterRows(MatrixReal& m,int col);
-    void GenerateRandomBernoulliParameterCols(MatrixReal& m);
+    bool initCEMRows();
+    bool initCEMCols();
+    void initBernoulliLogSumRows(MatrixReal & m_sum);
+    void initBernoulliLogSumCols(MatrixReal & m_sum);
+    void selectRandomColsFromData(MatrixReal& m,int col);
+    void generateRandomBernoulliParameterRows(MatrixReal& m,int col);
+    void generateRandomBernoulliParameterCols(MatrixReal& m);
 };
 
 
-inline const MatrixBinary& BinaryLBModel::Getmean() const
-{
-  return m_akl_;
-}
+inline MatrixBinary const&  BinaryLBModel::mean() const
+{ return m_akl_;}
 
-inline const MatrixReal& BinaryLBModel::Getdispersion() const
-{
-  return m_epsilonkl_;
-}
+inline MatrixReal const& BinaryLBModel::dispersion() const
+{ return m_epsilonkl_;}
 
 #endif /* BinaryLBModel_H_ */

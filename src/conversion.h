@@ -37,13 +37,13 @@
 
 #ifndef CONVERSION_H_
 #define CONVERSION_H_
-#include <Rcpp.h>
+#include <RTKpp.h>
 
 template<class out,class inp>
 inline out convertMatrix(const inp& matrixinput)
 {
-  int rows = matrixinput.rows();
-  int cols = matrixinput.cols();
+  int rows = matrixinput.sizeRows();
+  int cols = matrixinput.sizeCols();
   out matrixOutput(rows,cols);
    for(int i=0;i<rows;i++)
    {
@@ -64,31 +64,27 @@ inline void convertMatrix(const inp& matrixinput,out& matrixOutput)
    for(int i=0;i<rows;i++)
    {
      for(int j=0;j<cols;j++)
-     {
-       matrixOutput(i,j) = matrixinput(i,j);
-     }
+     { matrixOutput(i,j) = matrixinput(i,j);}
    }
 }
 
 template<class out,class inp>
 inline out convertvector(const inp& vectorinput)
 {
-    int len = vectorinput.size();
-    out vectoroutput(len);
-    for (int i = 0; i < len; ++i) {
-      vectoroutput(i) = vectorinput(i);
-    }
-    return vectoroutput;
+  int len = vectorinput.size();
+  out vectoroutput(len);
+  for (int i = 0; i < len; ++i)
+  { vectoroutput[i] = vectorinput[i];}
+  return vectoroutput;
 }
 
 template<class inp,class out>
 inline void convertvector(const inp& vectorinput,out& vectoroutput)
 {
-    int len = vectorinput.size();
-    vectoroutput = out(len);
-    for (int i = 0; i < len; ++i) {
-      vectoroutput(i) = vectorinput(i);
-    }
+  int len = vectorinput.size();
+  vectoroutput = out(len);
+  for (int i = 0; i < len; ++i)
+  { vectoroutput[i] = vectorinput[i];}
 }
 
 #endif /* CONVERSION_H_ */

@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------------*/
-/*     Copyright (C) 2011-2013  Parmeet Singh Bhatia
+/*     Copyright (C) 2011-2015  <MODAL team @INRIA,Lille & U.M.R. C.N.R.S. 6599 Heudiasyc, UTC>
 
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU Lesser General Public License as
@@ -19,7 +19,9 @@
  Boston, MA 02111-1307
  USA
 
- Contact : bhatia.parmeet@gmail.com , parmeet.bhatia@inria.fr
+ Author : Parmeet Bhatia
+ Contact : bhatia.parmeet@gmail.com , serge.iovleff@stkpp.org
+
  */
 
 
@@ -35,7 +37,7 @@ bool XStrategyforSEMAlgo::run()
 #ifdef COVERBOSE
   std::cout<<"Running XStrategy.."<<"\n";
 #endif
-  float Lmax = -RealMax,L1 = -RealMax,Lcurrent;
+  STK::Real Lmax = -RealMax,L1 = -RealMax,Lcurrent;
   int ntry_empty=0;
   bool non_empty = false;
   for ( int itry = 0; itry < Stratparam_.nbtry_; ++itry) {
@@ -43,7 +45,7 @@ bool XStrategyforSEMAlgo::run()
     L1 = -RealMax;
     for ( int ixem = 0; ixem < Stratparam_.nbxem_; ++ixem) {
       ntry_empty = -1;
-      p_Model_->SetEmptyCluster(true);
+      p_Model_->setEmptyCluster(true);
       while(p_Model_->isEmptyCluster()&&ntry_empty<100)
       {
         if (p_Init_->run())
@@ -51,12 +53,12 @@ bool XStrategyforSEMAlgo::run()
             for ( int itr = 0; itr < Stratparam_.nbiter_xem_; ++itr)
             {
               if (p_Algo_->run()) {
-                Lcurrent = p_Model_->EstimateLikelihood();
+                Lcurrent = p_Model_->estimateLikelihood();
                 if(Lcurrent>=L1)
                 {
                   non_empty = true;
                   L1 = Lcurrent;
-                  p_Model_->Modify_theta_start();
+                  p_Model_->modifyThetaStart();
                 }
               }
             }
@@ -66,21 +68,21 @@ bool XStrategyforSEMAlgo::run()
     }
 
     if(non_empty){
-      p_Model_->Copy_theta_start();
-      Lcurrent = p_Model_->EstimateLikelihood();
+      p_Model_->copyThetaStart();
+      Lcurrent = p_Model_->estimateLikelihood();
       if(!p_Model_->isEmptyCluster()&&Lcurrent>Lmax)
       {
         Lmax = Lcurrent;
-        p_Model_->Modify_theta_max();
+        p_Model_->modifyThetaMax();
       }
         for ( int itr = 0; itr < Stratparam_.nbiter_XEM_; ++itr)
         {
           if (p_Algo_->run()) {
-            Lcurrent = p_Model_->EstimateLikelihood();
+            Lcurrent = p_Model_->estimateLikelihood();
             if(Lcurrent>Lmax)
             {
               Lmax = Lcurrent;
-              p_Model_->Modify_theta_max();
+              p_Model_->modifyThetaMax();
             }
           }
         }
@@ -88,11 +90,11 @@ bool XStrategyforSEMAlgo::run()
 
   }
   if(non_empty){
-    p_Model_->Copy_theta_max();
-    p_Model_->FinalizeOutput();
+    p_Model_->copyThetaMax();
+    p_Model_->finalizeOutput();
 #ifdef COVERBOSE
     std::cout<<"Algorithm over."<<"\n";
-    p_Model_->ConsoleOut();
+    p_Model_->consoleOut();
     std::cout<<"\nLmax:"<<Lmax<<"\n";
 #endif
     return true;

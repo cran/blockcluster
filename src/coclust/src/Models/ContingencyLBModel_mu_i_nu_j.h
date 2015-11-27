@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------------*/
-/*     Copyright (C) 2011-2013  Parmeet Singh Bhatia
+/*     Copyright (C) 2011-2015  <MODAL team @INRIA,Lille & U.M.R. C.N.R.S. 6599 Heudiasyc, UTC>
 
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as
@@ -46,80 +46,78 @@ class ContingencyLBModel_mu_i_nu_j: public ICoClustModel
      * @param v_Nuj Constant reference to Known column effects.
      * @return
      */
-    ContingencyLBModel_mu_i_nu_j(MatrixInteger const& m_Dataij,VectorReal const& v_Mui,
-                                 VectorReal const& v_Nuj,ModelParameters const& Mparam);
-    ContingencyLBModel_mu_i_nu_j(MatrixInteger const& m_Dataij,VectorInteger const & rowlabels,VectorInteger const & collabels,
-                                 VectorReal const& v_Mui,VectorReal const& v_Nuj,ModelParameters const& Mparam);
-    /** cloning */
-    virtual ContingencyLBModel_mu_i_nu_j* Clone(){return new ContingencyLBModel_mu_i_nu_j(*this);}
-    virtual void LogSumRows(MatrixReal & _m_sum);
-    virtual void LogSumCols(MatrixReal & _m_sum);
-    virtual void MStepFull();
-    virtual bool EMRows();
-    virtual bool CEMRows();
-    virtual bool EMCols();
-    virtual bool CEMCols();
-    virtual bool SEMRows();
-    virtual bool SEMCols();
-    virtual void likelihoodStopCriteria();
-    virtual void ParameterStopCriteria();
-    virtual float EstimateLikelihood();
-    virtual bool RandomInit();
-    virtual void FinalizeOutput();
-    virtual void ConsoleOut();
-    virtual void Modify_theta_start();
-    virtual void Copy_theta_start();
-    virtual void Copy_theta_max();
-    virtual void Modify_theta_max();
-    const MatrixInteger& GetArrangedDataClusters();
-    /**Return Poisson Parameters ContingencyLBModel_mu_i_nu_j::m_Gammakl_*/
-    const MatrixReal& GetGamma() const;
+    ContingencyLBModel_mu_i_nu_j( MatrixReal const& m_Dataij, VectorReal const& v_Mui,
+                                  VectorReal const& v_Nuj, ModelParameters const& Mparam);
+    ContingencyLBModel_mu_i_nu_j( MatrixReal const& m_Dataij, VectorInteger const & rowlabels
+                                , VectorInteger const & collabels
+                                , VectorReal const& v_Mui
+                                , VectorReal const& v_Nuj
+                                , ModelParameters const& Mparam);
     /**Destructor*/
-    virtual ~ContingencyLBModel_mu_i_nu_j(){};
+    inline virtual ~ContingencyLBModel_mu_i_nu_j(){};
+
+    /** cloning */
+    virtual ContingencyLBModel_mu_i_nu_j* clone(){return new ContingencyLBModel_mu_i_nu_j(*this);}
+    virtual void logSumRows(MatrixReal & _m_sum);
+    virtual void logSumCols(MatrixReal & _m_sum);
+    virtual void mStepFull();
+    virtual bool emRows();
+    virtual bool cemRows();
+    virtual bool emCols();
+    virtual bool cemCols();
+    virtual bool semRows();
+    virtual bool semCols();
+    virtual void parameterStopCriteria();
+    virtual STK::Real estimateLikelihood();
+    virtual bool randomInit();
+    virtual void finalizeOutput();
+    virtual void consoleOut();
+    virtual void modifyThetaStart();
+    virtual void copyThetaStart();
+    virtual void copyThetaMax();
+    virtual void modifyThetaMax();
+    MatrixReal const& arrangedDataClusters();
+    /**Return Poisson Parameters ContingencyLBModel_mu_i_nu_j::m_Gammakl_*/
+    MatrixReal const& gamma() const;
 
   protected:
     //Variables involved in Bernoulli model
-    MatrixInteger const& m_Dataij_;
-    MatrixInteger m_ClusterDataij_;
+    MatrixReal const& m_Dataij_;
+    MatrixReal m_ClusterDataij_;
     VectorReal const& v_Mui_;
     VectorReal const& v_Nuj_;
-    float DataSum_;
+    STK::Real DataSum_;
     MatrixReal m_Vjk_;
     MatrixReal m_Uil_;
     MatrixReal m_Gammakl_, m_Gammaklold_, m_Gammakl1_, m_Gammakl1old_,m_Gammaklstart_,m_Gammaklmax_;
     VectorReal v_nul_;
     VectorReal v_muk_;
     MatrixReal m_Ykl_;
-    float Likelihood_old;
 
     //M-steps
-    void MStepRows();
-    void MStepCols();
+    void mStepRows();
+    void mStepCols();
 };
 
-inline const MatrixReal& ContingencyLBModel_mu_i_nu_j::GetGamma() const
+inline MatrixReal const& ContingencyLBModel_mu_i_nu_j::gamma() const
+{ return m_Gammakl_;}
+
+inline void ContingencyLBModel_mu_i_nu_j::mStepRows()
 {
-  return m_Gammakl_;
+  if(!Mparam_.fixedproportions_) { v_logPiek_=(v_Tk_/nbSample_).log();}
+
+  m_Ykl_     = m_Tik_.transpose()*m_Uil_;
+  m_Gammakl_ = m_Ykl_/(m_Tik_.transpose()*v_Mui_*v_nul_.transpose());
+  //m_Gammakl_ = m_Ykl_/(v_Tk_* v_Rl_.transpose());
 }
 
-inline void ContingencyLBModel_mu_i_nu_j::MStepRows()
+inline void ContingencyLBModel_mu_i_nu_j::mStepCols()
 {
-  if(!Mparam_.fixedproportions_) {
-    v_logPiek_=(v_Tk_.array()/nbSample_).log();
-  }
+  if(!Mparam_.fixedproportions_) { v_logRhol_=(v_Rl_/nbVar_).log();}
 
-  m_Ykl_ = m_Tik_.transpose()*m_Uil_;
-  m_Gammakl_ = m_Ykl_.array()/(m_Tik_.transpose()*v_Mui_*v_nul_.transpose()).array();
-}
-
-inline void ContingencyLBModel_mu_i_nu_j::MStepCols()
-{
-  if(!Mparam_.fixedproportions_) {
-    v_logRhol_=(v_Rl_.array()/nbVar_).log();
-  }
-
-  m_Ykl_ = m_Vjk_.transpose()*m_Rjl_;
-  m_Gammakl_ = m_Ykl_.array()/(v_muk_*v_Nuj_.transpose()*m_Rjl_).array();
+  m_Ykl_     = m_Vjk_.transpose()*m_Rjl_;
+  m_Gammakl_ = m_Ykl_/(v_muk_*v_Nuj_.transpose()*m_Rjl_);
+  //m_Gammakl_ = m_Ykl_/(v_Tk_* v_Rl_.transpose());
 }
 
 #endif /* CONTINGENCYLBMODEL_MU_I_NU_J_H_ */

@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------------*/
-/*     Copyright (C) 2011-2013  Parmeet Singh Bhatia
+/*     Copyright (C) 2011-2015  <MODAL team @INRIA,Lille & U.M.R. C.N.R.S. 6599 Heudiasyc, UTC>
 
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as
@@ -33,9 +33,7 @@
 #include <map>
 #include <list>
 #include "../typedefs/typedef.h"
-#ifdef STK_DMANAGER
-#include "../../../stkpp/include/DManager.h"
-#endif
+#include <DManager.h>
 #include "../enumerations/enumerations.h"
 
 /**
@@ -58,17 +56,17 @@ struct StrategyParameters
 struct ModelParameters
 {
     //iterations and epsilon inside model
-    float epsilon_int_ ;
+    STK::Real epsilon_int_ ;
     int nbiterations_int_;
-    float eps_xem_;
-    float eps_XEM_;
+    STK::Real eps_xem_;
+    STK::Real eps_XEM_;
 
     //iterations and epsilon inside initialization
     int nbinititerations_;
-    float initepsilon_;
+    STK::Real initepsilon_;
 
     //epsilon set either to eps_xem_ or esp_XEM_ depending on where we are in XEMstrategy
-    float epsilon_;
+    STK::Real epsilon_;
 
     //other input options, self explanatory
     int nbrowclust_;
@@ -84,16 +82,14 @@ struct ModelParameters
  */
 struct Strategy
 {
-    Strategy(){
-      Bayesianform_ = false;
-    }
+    Strategy()
+    {}
     Algorithm Algo_;
     StopCriteria stopcriteria_;
     Initialization Init_;
     Model Model_;
     DataType DataType_;
     bool SemiSupervised;
-    bool Bayesianform_;
 };
 
 /** @brief This class contains all the parameters that are required to run various algorithms. This class publicly inherits IPage class defined in STKpp
@@ -109,7 +105,7 @@ class InputParameters : public STK::IPage
     /**
      * function that must be called to initialize various enumeration mappings
      */
-    void InitializeParamEnum();
+    void initializeParamEnum();
     /**
      * This function read various input parameters from text file
      * @param optionfilename path to text file with input parameters
@@ -152,13 +148,13 @@ class InputParameters
 {
   public:
     /**Constructor*/
-    InputParameters(){InitializeParamEnum();}
+    InputParameters(){initializeParamEnum();}
     /**Get Model parameters*/
     const ModelParameters& GetModelparameters() const;
     /**
      * function that must be called to initialize various enumeration mappings
      */
-    void InitializeParamEnum();
+    void initializeParamEnum();
     /**Get Algorithm parameters*/
     const StrategyParameters& GetStrategyparameters() const;
     /**Get Strategy*/

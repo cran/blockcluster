@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------------*/
-/*     Copyright (C) 2011-2013  Parmeet Singh Bhatia
+/*     Copyright (C) 2011-2015  <MODAL team @INRIA,Lille & U.M.R. C.N.R.S. 6599 Heudiasyc, UTC>
 
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as
@@ -33,7 +33,7 @@
 InputParameters::InputParameters( STK::Integer const& level = 1) :
   STK::IPage("InputOptions", level, true)
 {
-  InitializeParamEnum();
+  initializeParamEnum();
   options_.reserve(21);
   options_.push_back(STK::Option("DataType", STK::Option::string_, false));
 
@@ -182,12 +182,12 @@ void InputParameters::ReadFromOptionFile( std::string optionfilename)
   switch (strategy_.stopcriteria_)
   {
     case Parameter:
-      Stratparam_.Stop_Criteria = &ICoClustModel::ParameterStopCriteria;
+      Stratparam_.Stop_Criteria = &ICoClustModel::parameterStopCriteria;
       break;
     case Likelihood:
       Stratparam_.Stop_Criteria = &ICoClustModel::likelihoodStopCriteria;
     default:
-      Stratparam_.Stop_Criteria = &ICoClustModel::ParameterStopCriteria;
+      Stratparam_.Stop_Criteria = &ICoClustModel::parameterStopCriteria;
       break;
   }
 
@@ -199,7 +199,7 @@ void InputParameters::ReadFromOptionFile( std::string optionfilename)
 
 //Initializing static mappings
 
-void InputParameters::InitializeParamEnum()
+void InputParameters::initializeParamEnum()
 {
   //Datatype
   S_DataType["Binary"] = Binary;
@@ -217,9 +217,9 @@ void InputParameters::InitializeParamEnum()
   S_StopCriteria["Likelihood"] = Likelihood;
 
   //Initialization
-  S_Init["CEMInit"] = e_CEMInit;
-  S_Init["FuzzyCEMInit"] = e_FuzzyCEMInit;
-  S_Init["RandomInit"] = e_RandomInit;
+  S_Init["cemInitStep"] = e_CEMInit;
+  S_Init["fuzzyCemInitStep"] = e_FuzzyCEMInit;
+  S_Init["randomInit"] = e_RandomInit;
 
   //Models
   S_Model["pi_rho_epsilon"] = pi_rho_epsilon;

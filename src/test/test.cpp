@@ -28,6 +28,6 @@ int main(int argc, char *argv[])
     RInside R(argc, argv);              // create an embedded R instance
     R.parseEvalQ("library(\"blockcluster\")");
     R.parseEvalQ("data(\"binarydata\")");
-    R.parseEvalQ("out<-cocluster(binarydata, datatype=\"binary\",nbcocluster=c(2,3))");
+    R.parseEvalQ("out<-coclusterBinary(binarydata,nbcocluster=c(2,3))");
     exit(0);
 }

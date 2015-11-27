@@ -19,7 +19,9 @@
     Boston, MA 02111-1307
     USA
 
-    Contact : bhatia.parmeet@gmail.com , parmeet.bhatia@inria.fr
+    Author : Parmeet Bhatia
+ Contact : bhatia.parmeet@gmail.com , serge.iovleff@stkpp.org
+
 */
 
 /*
@@ -60,7 +62,6 @@ void IDataExchange::SetInput(Rcpp::S4 & obj)
   strategy_.DataType_ = S_DataType[Rcpp::as<std::string>(obj.slot("datatype"))];
   strategy_.Model_ = S_Model[Rcpp::as<std::string>(obj.slot("model"))];
   strategy_.SemiSupervised = Rcpp::as<bool>(obj.slot("semisupervised"));
-  strategy_.Bayesianform_ = Rcpp::as<bool>(strategy.slot("bayesianform"));
   //Get strategy parameters
   Stratparam_.nbiter_xem_ = Rcpp::as<int>(strategy.slot("nbiterationsxem"));
   Stratparam_.nbiter_XEM_ = Rcpp::as<int>(strategy.slot("nbiterationsXEM"));
@@ -70,21 +71,21 @@ void IDataExchange::SetInput(Rcpp::S4 & obj)
   //get row/column labels if semisupervised
   if(strategy_.SemiSupervised)
   {
-    v_rowlabels_ = convertvector<VectorInteger,Rcpp::NumericVector>((SEXP(obj.slot("rowlabels"))));
-    v_collabels_ = convertvector<VectorInteger,Rcpp::NumericVector>((SEXP(obj.slot("collabels"))));
+    v_rowlabels_ = STK::RVector<int>((SEXP(obj.slot("rowlabels"))));
+    v_collabels_ = STK::RVector<int>((SEXP(obj.slot("collabels"))));
   }
 
   // Set stopping-criteria
   switch (strategy_.stopcriteria_)
   {
     case Parameter:
-      Stratparam_.Stop_Criteria = &ICoClustModel::ParameterStopCriteria;
+      Stratparam_.Stop_Criteria = &ICoClustModel::parameterStopCriteria;
       break;
     case Likelihood:
       Stratparam_.Stop_Criteria = &ICoClustModel::likelihoodStopCriteria;
       break;
     default:
-      Stratparam_.Stop_Criteria = &ICoClustModel::ParameterStopCriteria;
+      Stratparam_.Stop_Criteria = &ICoClustModel::parameterStopCriteria;
       break;
   }
   //Set various  model parameters
@@ -101,11 +102,11 @@ void IDataExchange::SetInput(Rcpp::S4 & obj)
 
   //get row and column clusters
   Rcpp::IntegerVector nbcocluster(SEXP(obj.slot("nbcocluster")));
-  Mparam_.nbrowclust_ = nbcocluster(0);
-  Mparam_.nbcolclust_ = nbcocluster(1);
+  Mparam_.nbrowclust_ = nbcocluster[0];
+  Mparam_.nbcolclust_ = nbcocluster[1];
 }
 
-void IDataExchange::InitializeParamEnum()
+void IDataExchange::initializeParamEnum()
 {
   //Datatype
   S_DataType["binary"] = Binary;
@@ -123,9 +124,9 @@ void IDataExchange::InitializeParamEnum()
   S_StopCriteria["Likelihood"] = Likelihood;
 
   //Initialization
-  S_Init["CEMInit"] = e_CEMInit;
-  S_Init["FuzzyCEMInit"] = e_FuzzyCEMInit;
-  S_Init["RandomInit"] = e_RandomInit;
+  S_Init["cemInitStep"] = e_CEMInit;
+  S_Init["fuzzyCemInitStep"] = e_FuzzyCEMInit;
+  S_Init["randomInit"] = e_RandomInit;
 
   //Models
   S_Model["pi_rho_epsilon"] = pi_rho_epsilon;
@@ -144,7 +145,8 @@ void IDataExchange::InitializeParamEnum()
   S_Model["pik_rhol_multi"] = pik_rhol_multi;
 }
 
-void IDataExchange::instantiateAlgo(IAlgo*& algo,IStrategy*& strategy){
+void IDataExchange::instantiateAlgo(IAlgo*& algo,IStrategy*& strategy)
+{
   switch (strategy_.Algo_)
   {
     case BEM:
@@ -166,13 +168,15 @@ void IDataExchange::instantiateAlgo(IAlgo*& algo,IStrategy*& strategy){
   }
 }
 
-void IDataExchange::instantiateInit(IInit*& init){
-  switch (strategy_.Init_) {
+void IDataExchange::instantiateInit(IInit*& init)
+{
+  switch (strategy_.Init_)
+  {
     case e_CEMInit:
       init = new CEMInit();
       break;
     case e_FuzzyCEMInit:
-      init = new FuzzyCEMInit();
+      init = new FuzzyCemInit();
       break;
     case e_RandomInit:
       init = new RandomInit();

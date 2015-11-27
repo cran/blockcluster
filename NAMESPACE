@@ -1,15 +1,27 @@
-export(cocluster)
-export(cocluststrategy)
+export(coclusterBinary)
+export(coclusterCategorical)
+export(coclusterContingency)
+export(coclusterContinuous)
+export(coclusterStrategy)
+
 exportClasses(BinaryOptions)
 exportClasses(CategoricalOptions)
 exportClasses(CommonOptions)
 exportClasses(ContingencyOptions)
 exportClasses(ContinuousOptions)
 exportClasses(strategy)
+
 exportMethods(plot)
 exportMethods(summary)
 exportPattern("^[[:alpha:]]+")
-import(Rcpp)
-import(methods)
+
+import(rtkore)
+
 importFrom(graphics,plot)
+importFrom("grDevices", "gray")
+importFrom("graphics", "abline", "barplot", "hist", "image", "layout",
+             "legend", "par", "points", "title")
+importFrom("methods", "show", "hasArg", "new")
+importFrom("stats", "dnorm")
+  
 useDynLib(blockcluster)

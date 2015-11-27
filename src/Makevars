@@ -1,15 +1,25 @@
 COCLUSTDIR = ./coclust/
 COCLUSTLIB = $(COCLUSTDIR)libcoclust.a
-PKG_CPPFLAGS = -DRPACKAGE $(SHLIB_OPENMP_CXXFLAGS)
+
 ## Use the R_HOME indirection to support installations of multiple R version
-PKG_LIBS = `$(R_HOME)/bin/Rscript -e "Rcpp:::LdFlags()"` $(SHLIB_OPENMP_CXXFLAGS) -L$(COCLUSTDIR) -lcoclust
+PKG_CPPFLAGS = `${R_HOME}/bin/Rscript -e "rtkore:::CxxFlags()"`
+PKG_CXXFLAGS = -DRPACKAGE `${R_HOME}/bin/Rscript -e "rtkore:::CppFlags()"` \
+               $(SHLIB_OPENMP_CXXFLAGS)
+PKG_LIBS     =  $(COCLUSTLIB) `$(R_HOME)/bin/Rscript -e "rtkore:::LdFlags()"` $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS) \
+							  $(SHLIB_OPENMP_CFLAGS)
+
+CO_CPPFLAGS  = $(ALL_CPPFLAGS) #-DCOVERBOSE
+CO_CXXFLAGS  = $(ALL_CXXFLAGS)
+
+export
 
 .PHONY: all coclust
 
 all: $(SHLIB)
 $(SHLIB): coclust
 
-
 coclust:
 	(cd $(COCLUSTDIR) && $(MAKE))
 	$(RANLIB) $(COCLUSTLIB)
+	(cd $(COCLUSTDIR) && $(MAKE) clean)
+	

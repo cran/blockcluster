@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------------*/
-/*     Copyright (C) 2011-2013  Parmeet Singh Bhatia
+/*     Copyright (C) 2011-2015  <MODAL team @INRIA,Lille & U.M.R. C.N.R.S. 6599 Heudiasyc, UTC>
 
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as
@@ -46,7 +46,7 @@ class CEMInit: public IInit
 
 inline bool CEMInit::run()
 {
-  return p_Model_->CEMInit();
+  return p_Model_->cemInitStep();
 }
 
 #endif /* CEMINIT_H_ */

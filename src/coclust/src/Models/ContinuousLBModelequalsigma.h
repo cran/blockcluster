@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------------*/
-/*     Copyright (C) 2011-2013  Parmeet Singh Bhatia
+/*     Copyright (C) 2011-2015  <MODAL team @INRIA,Lille & U.M.R. C.N.R.S. 6599 Heudiasyc, UTC>
 
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as
@@ -42,84 +42,74 @@ class ContinuousLBModelequalsigma: public ICoClustModel
     ContinuousLBModelequalsigma(MatrixReal const& m_Dataij,VectorInteger const & rowlabels,
                        VectorInteger const & collabels,ModelParameters const& Mparam);
     /** cloning */
-    virtual ContinuousLBModelequalsigma* Clone(){return new ContinuousLBModelequalsigma(*this);}
-    virtual void LogSumRows(MatrixReal & _m_sum);
-    virtual void LogSumCols(MatrixReal & _m_sum);
-    virtual void MStepFull();
-    virtual bool EMRows();
-    virtual bool CEMRows();
-    virtual bool EMCols();
-    virtual bool CEMCols();
-    virtual bool SEMRows();
-    virtual bool SEMCols();
-    virtual void likelihoodStopCriteria();
-    virtual void ParameterStopCriteria();
-    virtual float EstimateLikelihood();
-    virtual bool CEMInit();
-    virtual void FinalizeOutput();
-    virtual void ConsoleOut();
-    virtual void Modify_theta_start();
-    virtual void Copy_theta_start();
-    virtual void Copy_theta_max();
-    virtual void Modify_theta_max();
-    const MatrixReal& GetArrangedDataClusters();
+    virtual ContinuousLBModelequalsigma* clone(){return new ContinuousLBModelequalsigma(*this);}
+    virtual void logSumRows(MatrixReal & _m_sum);
+    virtual void logSumCols(MatrixReal & _m_sum);
+    virtual void mStepFull();
+    virtual bool emRows();
+    virtual bool cemRows();
+    virtual bool emCols();
+    virtual bool cemCols();
+    virtual bool semRows();
+    virtual bool semCols();
+    virtual void parameterStopCriteria();
+    virtual STK::Real estimateLikelihood();
+    virtual bool cemInitStep();
+    virtual void finalizeOutput();
+    virtual void consoleOut();
+    virtual void modifyThetaStart();
+    virtual void copyThetaStart();
+    virtual void copyThetaMax();
+    virtual void modifyThetaMax();
+    MatrixReal const& arrangedDataClusters();
     virtual ~ContinuousLBModelequalsigma(){};
 
     /**Return means ContinuousLBModelequalsigma::m_Mukl_*/
-    const MatrixReal& GetMean() const;
+    MatrixReal const& mean() const;
     /**Return Sigma ContinuousLBModelequalsigma::m_Sigma2kl_*/
-    float GetSigma() const;
+    STK::Real sigma2() const;
   protected:
     MatrixReal const& m_Dataij_;
     MatrixReal m_ClusterDataij_;
-    float dimprod_;
+    STK::Real dimprod_;
     MatrixReal m_Dataij2_;
-    MatrixReal m_Mukl_,m_Mukl2_;
-    float Sigma2_,Sigma2start_,Sigma2max_;
+    MatrixReal m_Mukl_; //,m_Mukl2_;
+    STK::Real Sigma2_,Sigma2start_,Sigma2max_;
     MatrixReal m_Muklold1_,m_Muklold2_,m_Muklstart_,m_Muklmax_;
     MatrixReal m_Vjk1_,m_Vjk2_;
     MatrixReal m_Uil1_,m_Uil2_;
-    float Likelihood_old;
 
     //M-steps
-    void MStepRows();
-    void MStepCols();
+    void mStepRows();
+    void mStepCols();
 
     // Functions used to operate on data in intermediate steps when running the Initialization
-    bool InitCEMCols();
-    void SelectRandomRowsfromdata(MatrixReal &);
-    void GenerateRandomMean(const MatrixReal & , MatrixReal &);
+    bool initCEMCols();
+    void selectRandomRowsFromData(MatrixReal &);
+    void generateRandomMean(const MatrixReal & , MatrixReal &);
 };
 
-inline const MatrixReal& ContinuousLBModelequalsigma::GetMean() const
+inline MatrixReal const& ContinuousLBModelequalsigma::mean() const
+{ return m_Mukl_;}
+
+inline STK::Real ContinuousLBModelequalsigma::sigma2() const
+{ return Sigma2_;}
+
+inline void ContinuousLBModelequalsigma::mStepRows()
 {
-  return m_Mukl_;
+  if(!Mparam_.fixedproportions_) { v_logPiek_=(v_Tk_/nbSample_).log();}
+
+  m_Mukl_  = (m_Tik_.transpose()*m_Uil1_)/(v_Tk_*v_Rl_.transpose());
+  //m_Mukl2_ = m_Mukl_.square();
+  Sigma2_  = ((m_Tik_.transpose()*m_Uil2_).sum()-v_Tk_.dot(m_Mukl_.square()*v_Rl_))/dimprod_;
 }
 
-inline float ContinuousLBModelequalsigma::GetSigma() const
+inline void ContinuousLBModelequalsigma::mStepCols()
 {
-  return Sigma2_;
-}
+  if(!Mparam_.fixedproportions_) { v_logRhol_=(v_Rl_/nbVar_).log();}
 
-inline void ContinuousLBModelequalsigma::MStepRows()
-{
-  if(!Mparam_.fixedproportions_) {
-    v_logPiek_=(v_Tk_.array()/nbSample_).log();
-  }
-
-  m_Mukl_ = (m_Tik_.transpose()*m_Uil1_).array()/(v_Tk_*(v_Rl_.transpose())).array();
-  m_Mukl2_ = m_Mukl_.array().square();
-  Sigma2_ = ((m_Tik_.transpose()*m_Uil2_).array().sum()-v_Tk_.transpose()*m_Mukl2_*v_Rl_)/dimprod_;
-}
-
-inline void ContinuousLBModelequalsigma::MStepCols()
-{
-  if(!Mparam_.fixedproportions_) {
-    v_logRhol_=(v_Rl_.array()/nbVar_).log();
-  }
-
-  m_Mukl_ = (m_Vjk1_.transpose()*m_Rjl_).array()/(v_Tk_*(v_Rl_.transpose())).array();
-  m_Mukl2_ = m_Mukl_.array().square();
-  Sigma2_ = ((m_Vjk2_.transpose()*m_Rjl_).array().sum()-v_Tk_.transpose()*m_Mukl2_*v_Rl_)/dimprod_;
+  m_Mukl_  = (m_Vjk1_.transpose()*m_Rjl_)/(v_Tk_*v_Rl_.transpose());
+//  m_Mukl2_ = m_Mukl_.square();
+  Sigma2_  = ((m_Vjk2_.transpose()*m_Rjl_).sum()-v_Tk_.dot(m_Mukl_.square()*v_Rl_))/dimprod_;
 }
 #endif /* CONTINUOUSLBMODELEQUALSIGMA_H_ */

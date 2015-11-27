@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------------*/
-/*     Copyright (C) 2011-2013  Parmeet Singh Bhatia
+/*     Copyright (C) 2011-2015  <MODAL team @INRIA,Lille & U.M.R. C.N.R.S. 6599 Heudiasyc, UTC>
 
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as
@@ -32,19 +32,20 @@
 #ifndef RPACKAGE
 using namespace cimg_library;
 #endif
-BinaryLBModelequalepsilon::BinaryLBModelequalepsilon( MatrixBinary const& m_Dataij,
-                                                      ModelParameters const& Mparam,int a,int b)
-                           : ICoClustModel(Mparam)
-                           , m_Dataij_(m_Dataij)
+BinaryLBModelequalepsilon::BinaryLBModelequalepsilon( MatrixBinary const&  m_Dataij,
+                                                      ModelParameters const& Mparam
+                                                      ,int a,int b)
+                                                     : ICoClustModel(Mparam)
+                                                     , m_Dataij_(m_Dataij)
 {
   a_ = a;
   b_ = b;
   dimprod_ = nbSample_*nbVar_;
-  m_Xjl_ = m_Dataij.cast<float>().colwise().sum().transpose()*MatrixReal::Ones(1,Mparam_.nbcolclust_);
-  m_Xik_ = m_Dataij.cast<float>().rowwise().sum()*MatrixReal::Ones(1,Mparam_.nbrowclust_);
+  m_Xjl_ = STK::sum(m_Dataij.cast<STK::Real>()).transpose()*STK::Const::Point<STK::Real>(Mparam_.nbcolclust_);
+  m_Xik_ = STK::sumByRow(m_Dataij.cast<STK::Real>())*STK::Const::Point<STK::Real>(Mparam_.nbrowclust_);
 };
 
-BinaryLBModelequalepsilon::BinaryLBModelequalepsilon(MatrixBinary const& m_Dataij,VectorInteger const & rowlabels,
+BinaryLBModelequalepsilon::BinaryLBModelequalepsilon(MatrixBinary const&  m_Dataij,VectorInteger const & rowlabels,
                                                      VectorInteger const & collabels,ModelParameters const& Mparam,
                                                      int a,int b)
                                                     : ICoClustModel(Mparam,rowlabels,collabels),
@@ -53,27 +54,29 @@ BinaryLBModelequalepsilon::BinaryLBModelequalepsilon(MatrixBinary const& m_Datai
   a_ = a;
   b_ = b;
   dimprod_ = nbSample_*nbVar_;
-  m_Xjl_ = m_Dataij.cast<float>().colwise().sum().transpose()*MatrixReal::Ones(1,Mparam_.nbcolclust_);
-  m_Xik_ = m_Dataij.cast<float>().rowwise().sum()*MatrixReal::Ones(1,Mparam_.nbrowclust_);
+  m_Xjl_ = STK::sum(m_Dataij.cast<STK::Real>()).transpose()*STK::Const::Point<STK::Real>(Mparam_.nbcolclust_);
+  m_Xik_ = STK::sum(m_Dataij.cast<STK::Real>())*STK::Const::Point<STK::Real>(Mparam_.nbrowclust_);
 };
 
-bool BinaryLBModelequalepsilon::CEMInit()
+bool BinaryLBModelequalepsilon::cemInitStep()
 {
 #ifdef COVERBOSE
   std::cout<<"Initializing Model Parameters.."<<std::endl;
 #endif
 
-  if (InitCEMRows()) {
-    if (InitCEMCols()) {
+  if (initCEMRows())
+  {
+    if (initCEMCols())
+    {
       m_Ykl_old1_ = m_Ykl_;
-      m_Uil_ = MatrixReal::Zero(nbSample_,Mparam_.nbcolclust_);
-      m_Vjk_ =MatrixReal::Zero(nbVar_,Mparam_.nbrowclust_);
-      v_Zi_ = VectorInteger::Zero(nbSample_);
-      v_Wj_ = VectorInteger::Zero(nbVar_);
-      m_Zik_ = MatrixInteger::Zero(nbSample_,Mparam_.nbrowclust_);
-      m_Wjl_ = MatrixInteger::Zero(nbVar_,Mparam_.nbcolclust_);
-      v_logPiek_ = std::log(1.0/Mparam_.nbrowclust_)*(VectorReal::Ones(Mparam_.nbrowclust_));
-      v_logRhol_ = std::log(1.0/Mparam_.nbcolclust_)*(VectorReal::Ones(Mparam_.nbcolclust_));
+      m_Uil_.resize(nbSample_,Mparam_.nbcolclust_) = 0;
+      m_Vjk_.resize(nbVar_,Mparam_.nbrowclust_) = 0;
+      v_Zi_.resize(nbSample_) = 0;
+      v_Wj_.resize(nbVar_) = 0;
+      m_Zik_.resize(nbSample_,Mparam_.nbrowclust_) = 0;
+      m_Wjl_.resize(nbVar_,Mparam_.nbcolclust_) = 0;
+      v_logPiek_ = std::log(1.0/Mparam_.nbrowclust_)*(STK::Const::Vector<STK::Real>(Mparam_.nbrowclust_));
+      v_logRhol_ = std::log(1.0/Mparam_.nbcolclust_)*(STK::Const::Vector<STK::Real>(Mparam_.nbcolclust_));
 
 #ifdef COVERBOSE
   std::cout<<"Initialization over."<<std::endl;
@@ -85,61 +88,66 @@ bool BinaryLBModelequalepsilon::CEMInit()
 
 }
 
-void BinaryLBModelequalepsilon::FinalizeOutput()
+void BinaryLBModelequalepsilon::finalizeOutput()
 {
-  CommonFinalizeOutput();
+  commonFinalizeOutput();
 }
 
-void BinaryLBModelequalepsilon::ConsoleOut()
+void BinaryLBModelequalepsilon::consoleOut()
 {
-#ifndef RPACKAGE
+#ifdef COVERBOSE
   std::cout<<"Output Model parameter:"<<"\nakl:\n"<<m_Akl_<<"\nepsilon:\n"<<Epsilon_<<"\npiek: "<<
       v_Piek_.transpose()<<"\nRhol: "<<v_Rhol_.transpose()<<std::endl;
-  std::cout<<"ICL: "<<ICLCriteriaValue()<<"\n";
+  std::cout<<"ICL: "<<iclCriteriaValue()<<"\n";
 #endif
 }
 
 //Compute Bernoulli log-sum for all rows
-void BinaryLBModelequalepsilon::LogSumRows(MatrixReal & m_sum)
+void BinaryLBModelequalepsilon::logSumRows(MatrixReal & m_sum)
 {
-  float logepsilon = log(Epsilon_/(1-Epsilon_));
-  m_sum = VectorReal::Ones(nbSample_)*(v_logPiek_+logepsilon*m_Akl_.cast<float>()*v_Rl_).transpose()
-          -logepsilon*(2*m_Uil_*m_Akl_.cast<float>().transpose() + m_Xik_.cast<float>());
+  STK::Real logepsilon = log(Epsilon_/(1-Epsilon_));
+  m_sum = STK::Const::Vector<STK::Real>(nbSample_)*(v_logPiek_+logepsilon*m_Akl_.cast<STK::Real>()*v_Rl_).transpose()
+          -logepsilon*(2*m_Uil_*m_Akl_.cast<STK::Real>().transpose() + m_Xik_.cast<STK::Real>());
 }
 
 //Compute Bernoulli log-sum for all columns
-void BinaryLBModelequalepsilon::LogSumCols(MatrixReal & m_sum)
+void BinaryLBModelequalepsilon::logSumCols(MatrixReal & m_sum)
 {
-  float logepsilon = log(Epsilon_/(1-Epsilon_));
-  m_sum = VectorReal::Ones(nbVar_)*(v_logRhol_.transpose()+logepsilon*v_Tk_.transpose()*m_Akl_.cast<float>())
-          -logepsilon*(2*m_Vjk_*m_Akl_.cast<float>() + m_Xjl_.cast<float>());
+  STK::Real logepsilon = log(Epsilon_/(1-Epsilon_));
+  m_sum = STK::Const::Vector<STK::Real>(nbVar_)*(v_logRhol_.transpose()+logepsilon*v_Tk_.transpose()*m_Akl_.cast<STK::Real>())
+          -logepsilon*(2*m_Vjk_*m_Akl_.cast<STK::Real>() + m_Xjl_.cast<STK::Real>());
 }
 
-void BinaryLBModelequalepsilon::InitBernoulliLogsumRows(MatrixReal & m_sum)
+void BinaryLBModelequalepsilon::initBernoulliLogSumRows(MatrixReal & m_sum)
 {
-  int cols = m_Uil_.cols();
-  m_sum = MatrixReal::Ones(nbSample_,cols)*m_Akl_.cast<float>().transpose()-2*m_Uil_*m_Akl_.cast<float>().transpose()+v_Ui_*MatrixReal::Ones(1,Mparam_.nbrowclust_);
+  int cols = m_Uil_.sizeCols();
+  m_sum = STK::Const::Array<STK::Real>(nbSample_,cols)*m_Akl_.cast<STK::Real>().transpose()
+        - 2*m_Uil_*m_Akl_.cast<STK::Real>().transpose()
+        + v_Ui_*STK::Const::Point<STK::Real>(Mparam_.nbrowclust_);
 }
 
-void BinaryLBModelequalepsilon::InitBernoulliLogsumCols(MatrixReal & m_sum)
+void BinaryLBModelequalepsilon::initBernoulliLogSumCols(MatrixReal & m_sum)
 {
-  m_sum = MatrixReal::Ones(nbVar_,1)*v_Tk_.transpose()*m_Akl_.cast<float>() - 2*m_Vjk_*m_Akl_.cast<float>() +m_Xjl_.cast<float>();
+  m_sum = STK::Const::Vector<STK::Real>(nbVar_)* (v_Tk_.transpose()*m_Akl_.cast<STK::Real>())
+        - 2*m_Vjk_*m_Akl_.cast<STK::Real>()
+        + m_Xjl_;
 }
 
 //Run EM algorithm on data Matrix m_Uil_
-bool BinaryLBModelequalepsilon::EMRows()
+bool BinaryLBModelequalepsilon::emRows()
 {
   //Initializations
-  m_Ykl_ = (m_Akl_.cast<float>().array()*(1-Epsilon_)+(1-m_Akl_.cast<float>().array())*Epsilon_)*dimprod_;
-  m_Uil_=m_Dataij_.cast<float>()*m_Rjl_;
+  m_Ykl_ = (m_Akl_.cast<STK::Real>()*(1-Epsilon_)+(1-m_Akl_.cast<STK::Real>())*Epsilon_)*dimprod_;
+  m_Uil_ = m_Dataij_.cast<STK::Real>()*m_Rjl_;
 
-  for ( int itr = 0; itr < Mparam_.nbiterations_int_; ++itr) {
+  for ( int itr = 0; itr < Mparam_.nbiterations_int_; ++itr)
+  {
     //E-step
-    if(!ERows()) return false;
+    if(!eStepRows()) return false;
     //M-step
     m_Ykl_old2_ = m_Ykl_;
-    MStepRows();
-    if(((m_Ykl_-m_Ykl_old2_).array()/m_Ykl_.array()).abs().sum()<Mparam_.epsilon_int_)
+    mStepRows();
+    if(((m_Ykl_-m_Ykl_old2_)/m_Ykl_).abs().sum()<Mparam_.epsilon_int_)
     {
       break;
     }
@@ -148,20 +156,20 @@ bool BinaryLBModelequalepsilon::EMRows()
 }
 
 //Run CEM algorithm on data Matrix m_Uil_
-bool BinaryLBModelequalepsilon::CEMRows()
+bool BinaryLBModelequalepsilon::cemRows()
 {
   //Initializations
-  m_Ykl_ = (m_Akl_.cast<float>().array()*(1-Epsilon_)+(1-m_Akl_.cast<float>().array())*Epsilon_)*dimprod_;
-  m_Uil_=m_Dataij_.cast<float>()*m_Rjl_;
+  m_Ykl_ = (m_Akl_.cast<STK::Real>()*(1-Epsilon_)+(1-m_Akl_.cast<STK::Real>())*Epsilon_)*dimprod_;
+  m_Uil_=m_Dataij_.cast<STK::Real>()*m_Rjl_;
   MatrixReal  m_sumik(nbSample_,Mparam_.nbrowclust_);
   for ( int itr = 0; itr < Mparam_.nbiterations_int_; ++itr) {
     //E-step
-    if(!CERows()) return false;
+    if(!ceStepRows()) return false;
     //M-step
     //M-step
     m_Ykl_old2_ = m_Ykl_;
-    MStepRows();
-    if(((m_Ykl_-m_Ykl_old2_).array()/m_Ykl_.array()).abs().sum()<Mparam_.epsilon_int_)
+    mStepRows();
+    if(((m_Ykl_-m_Ykl_old2_)/m_Ykl_).abs().sum()<Mparam_.epsilon_int_)
     {
        break;
     }
@@ -170,23 +178,23 @@ bool BinaryLBModelequalepsilon::CEMRows()
 }
 
 // Run EM algorithm on data matrix m_Vjk_
-bool BinaryLBModelequalepsilon::EMCols()
+bool BinaryLBModelequalepsilon::emCols()
 {
   //Initializations
-  m_Vjk_=m_Dataij_.cast<float>().transpose()*m_Tik_;
+  m_Vjk_=m_Dataij_.cast<STK::Real>().transpose()*m_Tik_;
 
   for ( int itr = 0; itr < Mparam_.nbiterations_int_; ++itr) {
     //E-step
-    if(!ECols()) return false;
+    if(!eStepCols()) return false;
      //M-step
 
     if(!Mparam_.fixedproportions_) {
-      v_logRhol_=(v_Rl_.array()/nbVar_).log();
+      v_logRhol_=(v_Rl_/nbVar_).log();
     }
     //M-step
     m_Ykl_old2_ = m_Ykl_;
-    MStepCols();
-    if(((m_Ykl_-m_Ykl_old2_).array()/m_Ykl_.array()).abs().sum()<Mparam_.epsilon_int_)
+    mStepCols();
+    if(((m_Ykl_-m_Ykl_old2_)/m_Ykl_).abs().sum()<Mparam_.epsilon_int_)
     {
       break;
     }
@@ -195,19 +203,19 @@ bool BinaryLBModelequalepsilon::EMCols()
 }
 
 // Run CEM algorithm on data matrix m_Vjk_
-bool BinaryLBModelequalepsilon::CEMCols()
+bool BinaryLBModelequalepsilon::cemCols()
 {
   //Initializations
-  m_Vjk_=m_Dataij_.cast<float>().transpose()*m_Tik_;
+  m_Vjk_=m_Dataij_.cast<STK::Real>().transpose()*m_Tik_;
   MatrixReal  m_sumjl(nbVar_,Mparam_.nbcolclust_);
   for ( int itr = 0; itr < Mparam_.nbiterations_int_; ++itr) {
     //E-step
-    if(!CECols()) return false;
+    if(!ceStepCols()) return false;
     //M-step
     m_Ykl_old2_ = m_Ykl_;
-    MStepCols();
+    mStepCols();
 
-    if(((m_Ykl_-m_Ykl_old2_).array()/m_Ykl_.array()).abs().sum()<Mparam_.epsilon_int_)
+    if(((m_Ykl_-m_Ykl_old2_)/m_Ykl_).abs().sum()<Mparam_.epsilon_int_)
     {
       break;
     }
@@ -216,79 +224,65 @@ bool BinaryLBModelequalepsilon::CEMCols()
   return true;
 }
 
-bool BinaryLBModelequalepsilon::SEMRows()
+bool BinaryLBModelequalepsilon::semRows()
 {
   //Initializations
-  m_Ykl_ = (m_Akl_.cast<float>().array()*(1-Epsilon_)+(1-m_Akl_.cast<float>().array())*Epsilon_)*dimprod_;
-  m_Uil_=m_Dataij_.cast<float>()*m_Rjl_;
+  m_Ykl_ = (m_Akl_.cast<STK::Real>()*(1-Epsilon_)+(1-m_Akl_.cast<STK::Real>())*Epsilon_)*dimprod_;
+  m_Uil_=m_Dataij_.cast<STK::Real>()*m_Rjl_;
 
-  if(!SERows()) return false;
+  if(!seStepRows()) return false;
   //M-step
-  MStepRows();
+  mStepRows();
   return true;
 }
 
-bool BinaryLBModelequalepsilon::SEMCols()
+bool BinaryLBModelequalepsilon::semCols()
 {
   //Initializations
-  m_Vjk_=m_Dataij_.cast<float>().transpose()*m_Tik_;
+  m_Vjk_=m_Dataij_.cast<STK::Real>().transpose()*m_Tik_;
 
-  if(!SECols()) return false;
+  if(!seStepCols()) return false;
   //M-step
-  MStepCols();
+  mStepCols();
   return true;
 }
 
 
-float BinaryLBModelequalepsilon::EstimateLikelihood()
+STK::Real BinaryLBModelequalepsilon::estimateLikelihood()
 {
-  Likelihood_ = (dimprod_*(Epsilon_*std::log(Epsilon_/(1-Epsilon_)) + std::log(1-Epsilon_))
-            +v_Tk_.dot(v_logPiek_) + v_Rl_.dot(v_logRhol_)
-            -(m_Tik_.array()*(RealMin + m_Tik_.array()).log()).sum()
-            -(m_Rjl_.array()*(RealMin + m_Rjl_.array()).log()).sum())/dimprod_;
-
-  return Likelihood_;
-}
-//Computer Fuzzy clustering criteria and set the terminate variable accordingly
-void BinaryLBModelequalepsilon::likelihoodStopCriteria()
-{
-  EstimateLikelihood();
-
-  if(std::abs(1-Likelihood_/Likelihood_old)<Mparam_.epsilon_)
-      StopAlgo = true;
-  else
-  {
-    Likelihood_old = Likelihood_;
-    StopAlgo = false;
-  }
+  likelihood_ = (dimprod_*(Epsilon_*std::log(Epsilon_/(1-Epsilon_)) + std::log(1-Epsilon_))
+              + v_Tk_.dot(v_logPiek_) + v_Rl_.dot(v_logRhol_)
+              - (m_Tik_.prod((RealMin + m_Tik_).log()) ).sum()
+              - (m_Rjl_.prod((RealMin + m_Rjl_).log()) ).sum())/dimprod_;
+  return likelihood_;
 }
 
 //Compute change in Alpha and set the terminate variable accordingly
-void BinaryLBModelequalepsilon::ParameterStopCriteria()
+void BinaryLBModelequalepsilon::parameterStopCriteria()
 {
-  float relativechange = ((m_Ykl_-m_Ykl_old1_).array()/m_Ykl_old1_.array()).abs().sum();
+  STK::Real relativechange = ((m_Ykl_-m_Ykl_old1_)/m_Ykl_old1_).abs().sum();
   if(relativechange<Mparam_.epsilon_)
-    StopAlgo = true;
+    stopAlgo_ = true;
   else
-    StopAlgo = false;
+    stopAlgo_ = false;
 
   // Update Ykl for outer loop
   m_Ykl_old1_ = m_Ykl_;
 }
 
-const MatrixBinary& BinaryLBModelequalepsilon::GetArrangedDataClusters()
+MatrixBinary const& BinaryLBModelequalepsilon::arrangedDataClusters()
 {
-  ArrangedDataCluster<MatrixBinary>(m_ClusterDataij_,m_Dataij_);
+  arrangedDataCluster<MatrixBinary>(m_ClusterDataij_,m_Dataij_);
   return m_ClusterDataij_;
 }
 
 #ifndef RPACKAGE
-void BinaryLBModelequalepsilon::DisplayCluster()
+void BinaryLBModelequalepsilon::displayCluster()
 {
   CImg<unsigned char>  cluster(nbVar_,nbSample_,1,1,0);
   CImg<unsigned char>  data(nbVar_,nbSample_,1,1,0);
 
-  MatrixBinary m_ClusterDataij_ = GetArrangedDataClusters();
+  MatrixBinary m_ClusterDataij_ = arrangedDataClusters();
 
   // Assign value to images
   for ( int i = 0; i < nbSample_; ++i) {
@@ -318,160 +312,124 @@ void BinaryLBModelequalepsilon::DisplayCluster()
 }
 #endif
 
-bool BinaryLBModelequalepsilon::InitCEMRows()
+bool BinaryLBModelequalepsilon::initCEMRows()
 {
   // Initialization of various parameters
   int cols=std::min(100,int(nbVar_));
-  m_Uil_ = MatrixReal::Zero(nbSample_,cols);
-  SelectRandomColsfromdata(m_Uil_,cols);
-  v_Ui_ = m_Uil_.rowwise().sum();
-  m_Vjk_ =MatrixReal::Zero(nbVar_,Mparam_.nbrowclust_);
-  v_Rl_ = VectorReal::Ones(cols);
-  v_Tk_ = VectorReal::Zero(Mparam_.nbrowclust_);
-  m_Tik_ = MatrixReal::Zero(nbSample_,Mparam_.nbrowclust_);
-  m_Rjl_ = MatrixReal::Zero(nbVar_,Mparam_.nbcolclust_);
-  m_Akl_.setZero(Mparam_.nbrowclust_,cols);
-  GenerateRandomMean(m_Akl_);
+  m_Uil_.resize(nbSample_,cols) = 0;
+  selectRandomColsFromData(m_Uil_,cols);
+  v_Ui_ = STK::sumByRow(m_Uil_);
+  m_Vjk_.resize(nbVar_,Mparam_.nbrowclust_) = 0;
+  v_Rl_ = STK::Const::Vector<STK::Real>(cols);
+  v_Tk_.resize(Mparam_.nbrowclust_) = 0;
+  m_Tik_.resize(nbSample_,Mparam_.nbrowclust_) = 0;
+  m_Rjl_.resize(nbVar_,Mparam_.nbcolclust_) = 0;
+  m_Akl_.resize(Mparam_.nbrowclust_,cols) = 0;
+  generateRandomMean(m_Akl_);
   W1_ = RealMax;
   //Determine row partition using CEM algorithm with equal proportions
   MatrixReal m_sumik(nbSample_,Mparam_.nbrowclust_);
-  VectorReal::Index minIndex;
+  int minIndex;
   std::pair<int,int> Label_pair;
-#ifdef RANGEBASEDFORLOOP
-  for(Label_pair : knownLabelsRows_){
-    m_Tik_(Label_pair.first,Label_pair.second) = 1;
-  }
-#else
-  for(int i = 0;i<knownLabelsRows_.size();i++){
+  for(int i = 0;i< (int)knownLabelsRows_.size();i++){
     Label_pair = knownLabelsRows_[i];
     m_Tik_(Label_pair.first,Label_pair.second) = 1;
   }
-#endif
 
-  for ( int itr = 0; itr < Mparam_.nbinititerations_; ++itr) {
-    InitBernoulliLogsumRows(m_sumik);
-#ifdef RANGEBASEDFORLOOP
-    for ( int i : UnknownLabelsRows_) {
-      m_sumik.row(i).minCoeff(&minIndex);
-      m_Tik_.row(i).setZero();
-      m_Tik_(i,minIndex)=1;
-    }
-#else
-    for ( int i =0;i< UnknownLabelsRows_.size();i++) {
-      m_sumik.row(UnknownLabelsRows_[i]).minCoeff(&minIndex);
-      m_Tik_.row(UnknownLabelsRows_[i]).setZero();
+  for ( int itr = 0; itr < Mparam_.nbinititerations_; ++itr)
+  {
+    initBernoulliLogSumRows(m_sumik);
+    for ( int i =0;i< (int)UnknownLabelsRows_.size();i++) {
+      m_sumik.row(UnknownLabelsRows_[i]).minElt(minIndex);
+      m_Tik_.row(UnknownLabelsRows_[i]).setZeros();
       m_Tik_(UnknownLabelsRows_[i],minIndex)=1;
     }
-#endif
-
-    v_Tk_ = m_Tik_.colwise().sum();
-    if((v_Tk_.array()<.00001).any()){
-      Error_msg_  = "Row clustering failed while running initialization.";
+    // check empty class
+    if( (empty_cluster_ = finalizeStepRows()) )
+    {
+      Error_msg_  = "In BinaryLBModelequalepsilon::initCEMRows(). Class size too small while initializing model.\n";
 #ifdef COVERBOSE
-    std::cout<<Error_msg_<<"\n";
+      std::cout << Error_msg_;
 #endif
-    empty_cluster = true;
-    return false;
+      return false;
     }
-    else
-    {empty_cluster = false;}
-
     // M-step
     W1_old_ = W1_;
-    W1_ = (m_Tik_.array()*m_sumik.array()).sum();
+    W1_ = (m_Tik_.prod(m_sumik)).sum();
     m_Ukl_ = m_Tik_.transpose()*m_Uil_;
-    for ( int k = 0; k < Mparam_.nbrowclust_; ++k) {
-      for ( int l = 0; l < cols; ++l) {
-        if(m_Ukl_(k,l)>=v_Tk_(k)/2)
-        m_Akl_(k,l) = 1;
-        else
-          m_Akl_(k,l) = 0;
+    for ( int k = 0; k < Mparam_.nbrowclust_; ++k)
+    {
+      for ( int l = 0; l < cols; ++l)
+      {
+        m_Akl_(k,l)  = (m_Ukl_(k,l)>=v_Tk_[k]/2) ? 1 : 0;
       }
     }
-    //m_Akl_ = m_Ukl_.array()>=(v_Tk_*MatrixReal(1,cols)/2).array();
-    if (std::abs((W1_-W1_old_)/W1_)<Mparam_.initepsilon_) {
-      break;
-    }
+    //m_Akl_ = m_Ukl_ >=(v_Tk_*MatrixReal(1,cols)/2);
+    if (std::abs((W1_-W1_old_)/W1_)<Mparam_.initepsilon_)
+    { break;}
   }
   return true;
 }
 
-bool BinaryLBModelequalepsilon::InitCEMCols()
+bool BinaryLBModelequalepsilon::initCEMCols()
 {
   //Determine row partition using CEM algorithm with equal proportions
   MatrixReal m_sumjl(nbVar_, Mparam_.nbcolclust_);
   MatrixReal m_Tk_Rl(Mparam_.nbrowclust_,Mparam_.nbcolclust_);
   MatrixReal m_Ulk(Mparam_.nbcolclust_,Mparam_.nbrowclust_);
-  VectorReal::Index minIndex;
-  m_Vjk_=m_Dataij_.cast<float>().transpose()*m_Tik_;
+  int minIndex;
+  m_Vjk_=m_Dataij_.cast<STK::Real>().transpose()*m_Tik_;
   SelectRandomRows(m_Ulk);
   m_Ukl_ = m_Ulk.transpose();
   m_Akl_.resize(Mparam_.nbrowclust_,Mparam_.nbcolclust_);
-  for ( int k = 0; k < Mparam_.nbrowclust_; ++k) {
-    for ( int l = 0; l < Mparam_.nbcolclust_; ++l) {
-      if(m_Ukl_(k,l)>=v_Tk_(k)/2)
-      m_Akl_(k,l) = 1;
-      else
-        m_Akl_(k,l) = 0;
+  for ( int k = 0; k < Mparam_.nbrowclust_; ++k)
+  {
+    for ( int l = 0; l < Mparam_.nbcolclust_; ++l)
+    {
+      m_Akl_(k,l) = (m_Ukl_(k,l)>=v_Tk_[k]/2) ? 1: 0;
     }
   }
 
   std::pair<int,int> Label_pair;
-#ifdef RANGEBASEDFORLOOP
-  for ( Label_pair : knownLabelsCols_) {
-    m_Rjl_(Label_pair.first,Label_pair.second)=1;
-  }
-#else
-  for ( int j=0;j<knownLabelsCols_.size();j++ ) {
+  for ( int j=0;j< (int)knownLabelsCols_.size();j++ )
+  {
     Label_pair = knownLabelsCols_[j];
     m_Rjl_(Label_pair.first,Label_pair.second)=1;
   }
-#endif
-    for ( int itr = 0; itr < Mparam_.nbinititerations_; ++itr) {
+    for ( int itr = 0; itr < Mparam_.nbinititerations_; ++itr)
+    {
       // CE-step
-      InitBernoulliLogsumCols(m_sumjl);
-#ifdef RANGEBASEDFORLOOP
-      for ( int j : UnknownLabelsCols_) {
-        m_sumjl.row(j).minCoeff(&minIndex);
-        m_Rjl_.row(j).setZero();
-        m_Rjl_(j,minIndex)=1;
-      }
-#else
-      for ( int j=0 ;j< UnknownLabelsCols_.size();j++) {
-        m_sumjl.row(UnknownLabelsCols_[j]).minCoeff(&minIndex);
-        m_Rjl_.row(UnknownLabelsCols_[j]).setZero();
+      initBernoulliLogSumCols(m_sumjl);
+      for ( int j=0 ;j< (int)UnknownLabelsCols_.size();j++)
+      {
+        m_sumjl.row(UnknownLabelsCols_[j]).minElt(minIndex);
+        m_Rjl_.row(UnknownLabelsCols_[j]).setZeros();
         m_Rjl_(UnknownLabelsCols_[j],minIndex)=1;
       }
-#endif
-      v_Rl_ = m_Rjl_.colwise().sum();
-      //Check for empty cluster
-      if((v_Rl_.array()<.00001).any()){
-        Error_msg_  = "Column clustering failed while running initialization.";
-#ifdef COVERBOSE
-      std::cout<<Error_msg_<<"\n";
-#endif
-      empty_cluster = true;
-      return false;
+      // check empty class
+      if( (empty_cluster_ = finalizeStepCols()) )
+      {
+        Error_msg_  = "In BinaryLBModelequalepsilon::initCEMCols(). Class size too small while initializing model.\n";
+  #ifdef COVERBOSE
+        std::cout << Error_msg_;
+  #endif
+        return false;
       }
-      else
-      {empty_cluster = false;}
-
       // M-step
       W1_old_ = W1_;
-      W1_ = (m_Rjl_.array()*m_sumjl.array()).sum();
+      W1_ = (m_Rjl_.prod(m_sumjl)).sum();
       m_Ykl_ = m_Vjk_.transpose()*m_Rjl_;
       m_Tk_Rl = v_Tk_*v_Rl_.transpose()/2.0;
-      for ( int k = 0; k < Mparam_.nbrowclust_; ++k) {
-        for ( int l = 0; l < Mparam_.nbcolclust_; ++l) {
-          if(m_Ykl_(k,l)>=m_Tk_Rl(k,l))
-          m_Akl_(k,l) = 1;
-          else
-            m_Akl_(k,l) = 0;
+      for ( int k = 0; k < Mparam_.nbrowclust_; ++k)
+      {
+        for ( int l = 0; l < Mparam_.nbcolclust_; ++l)
+        {
+          m_Akl_(k,l) = (m_Ykl_(k,l)>=m_Tk_Rl(k,l)) ? 1 : 0;
         }
       }
-      //m_Akl_ = m_Ykl_.array()>=(v_Tk_*v_Rl_.transpose()/2).array();
-
-      if (std::abs((W1_-W1_old_)/W1_)<Mparam_.initepsilon_) {
+      //m_Akl_ = m_Ykl_>=(v_Tk_*v_Rl_.transpose()/2);
+      if (std::abs((W1_-W1_old_)/W1_)<Mparam_.initepsilon_)
+      {
         Epsilon_ = W1_/dimprod_;
         break;
       }
@@ -480,40 +438,43 @@ bool BinaryLBModelequalepsilon::InitCEMCols()
   return true;
 }
 
-void BinaryLBModelequalepsilon::SelectRandomColsfromdata(MatrixReal& _m_il,int cols)
+void BinaryLBModelequalepsilon::selectRandomColsFromData(MatrixReal& _m_il,int cols)
 {
   if(cols==Mparam_.nbcoldata_)
-    _m_il=m_Dataij_.cast<float>();
+    _m_il=m_Dataij_.cast<STK::Real>();
   else{
     //random shuffle Algorithm
-    VectorInteger _v_temp = RandSample(nbVar_,cols);
+    VectorInteger _v_temp = randSample(nbVar_,cols);
 
-    for ( int l = 0; l < cols; ++l){
-      _m_il.col(l)=m_Dataij_.cast<float>().col(_v_temp(l));
-      //_m_il.col(l)=m_Dataij_.cast<float>().col(l);
+    for ( int l = 0; l < cols; ++l)
+    {
+      _m_il.col(l)=m_Dataij_.cast<STK::Real>().col(_v_temp[l]);
+      //_m_il.col(l)=m_Dataij_.cast<STK::Real>().col(l);
     }
   }
 }
 
 void BinaryLBModelequalepsilon::SelectRandomRows(MatrixReal& m_lk)
 {
-  VectorInteger v_temp = RandSample(nbVar_,Mparam_.nbcolclust_);
-  for ( int l = 0; l < Mparam_.nbcolclust_; ++l) {
-    m_lk.row(l) = m_Vjk_.row(v_temp(l));
+  VectorInteger v_temp = randSample(nbVar_,Mparam_.nbcolclust_);
+  for ( int l = 0; l < Mparam_.nbcolclust_; ++l)
+  {
+    m_lk.row(l) = m_Vjk_.row(v_temp[l]);
     //m_lk.row(l) = m_Vjk_.row(l);
   }
 }
 
-void BinaryLBModelequalepsilon::GenerateRandomMean(MatrixBinary& m_kl)
+void BinaryLBModelequalepsilon::generateRandomMean(MatrixBinary& m_kl)
 {
-  VectorInteger _v_temp = RandSample(nbSample_,Mparam_.nbrowclust_);
-  for ( int k = 0; k < Mparam_.nbrowclust_; ++k){
-    m_kl.row(k) = m_Uil_.cast<bool>().row(_v_temp(k));
+  VectorInteger _v_temp = randSample(nbSample_,Mparam_.nbrowclust_);
+  for ( int k = 0; k < Mparam_.nbrowclust_; ++k)
+  {
+    m_kl.row(k) = m_Uil_.cast<bool>().row(_v_temp[k]);
     //m_kl.row(k) = m_Uil_.cast<bool>().row(k);
   }
 }
 
-void BinaryLBModelequalepsilon::Modify_theta_start()
+void BinaryLBModelequalepsilon::modifyThetaStart()
 {
   m_Aklstart_ = m_Akl_;
   Epsilonstart_ = Epsilon_;
@@ -522,7 +483,7 @@ void BinaryLBModelequalepsilon::Modify_theta_start()
   m_Rjlstart_ = m_Rjl_;
 }
 
-void BinaryLBModelequalepsilon::Copy_theta_start()
+void BinaryLBModelequalepsilon::copyThetaStart()
 {
   m_Akl_ = m_Aklstart_;
   Epsilon_ = Epsilonstart_;
@@ -530,11 +491,11 @@ void BinaryLBModelequalepsilon::Copy_theta_start()
   v_logRhol_ = v_logRholstart_;
   m_Rjl_ = m_Rjlstart_;
   //initialization
-  v_Rl_ = m_Rjl_.colwise().sum();
+  v_Rl_ = STK::sum(m_Rjl_);
   m_Ykl_old1_ = m_Ykl_;
 }
 
-void BinaryLBModelequalepsilon::Copy_theta_max()
+void BinaryLBModelequalepsilon::copyThetaMax()
 {
   m_Akl_ = m_Aklmax_;
   Epsilon_ = Epsilonmax_;
@@ -542,10 +503,10 @@ void BinaryLBModelequalepsilon::Copy_theta_max()
   v_logRhol_ = v_logRholmax_;
   m_Tik_ = m_Tikmax_;
   m_Rjl_ = m_Rjlmax_;
-  Likelihood_ = Lmax_;
+  likelihood_ = Lmax_;
 }
 
-void BinaryLBModelequalepsilon::Modify_theta_max()
+void BinaryLBModelequalepsilon::modifyThetaMax()
 {
   m_Aklmax_ = m_Akl_;
   Epsilonmax_ = Epsilon_;
@@ -553,32 +514,32 @@ void BinaryLBModelequalepsilon::Modify_theta_max()
   v_logRholmax_ = v_logRhol_;
   m_Rjlmax_ = m_Rjl_;
   m_Tikmax_ = m_Tik_;
-  Lmax_ = Likelihood_;
+  Lmax_ = likelihood_;
 }
 
-void BinaryLBModelequalepsilon::MStepFull()
+void BinaryLBModelequalepsilon::mStepFull()
 {
-  if(!Mparam_.fixedproportions_) {
-    v_logRhol_=(v_Rl_.array()/nbVar_).log();
-    v_logPiek_=(v_Tk_.array()/nbSample_).log();
+  if(!Mparam_.fixedproportions_)
+  {
+    v_logRhol_=(v_Rl_/nbVar_).log();
+    v_logPiek_=(v_Tk_/nbSample_).log();
   }
 
-  m_Ykl_ = m_Tik_.transpose()*m_Dataij_.cast<float>()*m_Rjl_;
+  m_Ykl_ = m_Tik_.transpose()*m_Dataij_.cast<STK::Real>()*m_Rjl_;
   m_Tk_Rl_ = v_Tk_*v_Rl_.transpose()/2.0;
-  for ( int k = 0; k < Mparam_.nbrowclust_; ++k) {
-    for ( int l = 0; l < Mparam_.nbcolclust_; ++l) {
-      if(m_Ykl_(k,l)>=m_Tk_Rl_(k,l))
-      m_Akl_(k,l) = 1;
-      else
-        m_Akl_(k,l) = 0;
+  for ( int k = 0; k < Mparam_.nbrowclust_; ++k)
+  {
+    for ( int l = 0; l < Mparam_.nbcolclust_; ++l)
+    {
+      m_Akl_(k,l) = (m_Ykl_(k,l)>=m_Tk_Rl_(k,l)) ? 1 : 0;
     }
   }
-  Epsilon_= (m_Ykl_.array()-(v_Tk_*v_Rl_.transpose()).array()*m_Akl_.cast<float>().array()).abs().sum()/dimprod_;
+  Epsilon_= (m_Ykl_-(v_Tk_*v_Rl_.transpose()).prod(m_Akl_.cast<STK::Real>()) ).abs().sum()/dimprod_;
 
 }
 
-float BinaryLBModelequalepsilon::ICLCriteriaValue(){
-  float criteria = 0.0;
+STK::Real BinaryLBModelequalepsilon::iclCriteriaValue(){
+  STK::Real criteria = 0.0;
 
   criteria+= lgamma(Mparam_.nbrowclust_*a_)+lgamma(Mparam_.nbcolclust_*a_)
       -(Mparam_.nbrowclust_+Mparam_.nbcolclust_)*lgamma(a_)
@@ -586,31 +547,35 @@ float BinaryLBModelequalepsilon::ICLCriteriaValue(){
       -lgamma(Mparam_.nbrowdata_+Mparam_.nbrowclust_*a_)
       -lgamma(Mparam_.nbcoldata_+Mparam_.nbcolclust_*a_);
 
-  for (int k = 0; k < Mparam_.nbrowclust_; ++k) {
-    criteria+= lgamma(a_+ (v_Zi_.array()== k).count());
+  for (int k = 0; k < Mparam_.nbrowclust_; ++k)
+  {
+    criteria+= lgamma(a_+ (v_Zi_== k).count());
   }
 
-  for (int l = 0; l < Mparam_.nbcolclust_; ++l) {
-    criteria+= lgamma(a_+ (v_Wj_.array()==l).count());
+  for (int l = 0; l < Mparam_.nbcolclust_; ++l)
+  {
+    criteria+= lgamma(a_+ (v_Wj_==l).count());
   }
 
-  Eigen::ArrayXXi temp0(Mparam_.nbrowclust_,Mparam_.nbcolclust_);
-  Eigen::ArrayXXi temp1(Mparam_.nbrowclust_,Mparam_.nbcolclust_);
-  MatrixBinary m_tempdata = (m_Dataij_.array()==0);
-  temp0 = (m_Zik_.transpose()*m_tempdata.cast<int>()*m_Wjl_).array()+b_;
-  temp1 = (m_Zik_.transpose()*m_Dataij_.cast<int>()*m_Wjl_).array()+b_;
+  STK::ArrayXXi temp0(Mparam_.nbrowclust_,Mparam_.nbcolclust_);
+  STK::ArrayXXi temp1(Mparam_.nbrowclust_,Mparam_.nbcolclust_);
+  MatrixBinary m_tempdata = (m_Dataij_==0);
+  temp0 = (m_Zik_.transpose()*m_tempdata.cast<int>()*m_Wjl_)+b_;
+  temp1 = (m_Zik_.transpose()*m_Dataij_.cast<int>()*m_Wjl_)+b_;
   for (int k = 0; k < Mparam_.nbrowclust_; ++k) {
-    for (int l = 0; l < Mparam_.nbcolclust_; ++l) {
+    for (int l = 0; l < Mparam_.nbcolclust_; ++l)
+    {
       criteria+=lgamma(temp0(k,l))+lgamma(temp1(k,l));
     }
   }
 
-  for (int k = 0; k < Mparam_.nbrowclust_; ++k) {
-    for (int l = 0; l < Mparam_.nbcolclust_; ++l) {
-      criteria-= lgamma(((v_Zi_.array()== k).count())*((v_Wj_.array()==l).count())+2*b_);
+  for (int k = 0; k < Mparam_.nbrowclust_; ++k)
+  {
+    for (int l = 0; l < Mparam_.nbcolclust_; ++l)
+    {
+      criteria-= lgamma(((v_Zi_== k).count())*((v_Wj_==l).count())+2*b_);
     }
   }
-
   return criteria;
 }
 

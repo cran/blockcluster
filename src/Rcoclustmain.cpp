@@ -33,7 +33,7 @@
  *  @brief 
  **/
 
-#include <Rcpp.h>
+#include <RTKpp.h>
 #include <time.h>
 #include <exception>
 #include <map>
@@ -92,13 +92,14 @@ RcppExport SEXP CoClustmain(SEXP robj)
       p_DataExchange_ = new CategoricalDataExchange();
       break;
     default:
+      Rcpp::stop("Wrong datatype in CoClustmain. Please report Bug.");
       break;
   }
 
   //Get input parameters
   p_DataExchange_->SetInput(CoClustobj);
   //Get data
-  p_DataExchange_->DataInput(CoClustobj);
+  p_DataExchange_->dataInput(CoClustobj);
   //instantiate model
   p_DataExchange_->instantiateModel(p_FinalModel_);
   // Set Aparam_ for parallel use
@@ -107,38 +108,39 @@ RcppExport SEXP CoClustmain(SEXP robj)
   Sparam_.nbtry_ = 1;
 
   //use to update p_FinalModel_ in case the thread model is better then it.
-  float Lmax = -RealMax;
+  STK::Real Lmax = -RealMax;
   //to measure global success
   bool globalsuccess = false;
   //start measuring time after exchange of data and various initializations
   //double starttime=omp_get_wtime();
 #pragma omp parallel shared(Lmax,globalsuccess,Sparam_,nbtry) private(p_Model_,p_CoCluster_,p_Algo_,p_Init_,p_Strategy_)
-    {
+  {
     //instantiate algorithm and strategy
     p_DataExchange_->instantiateAlgo(p_Algo_,p_Strategy_);
     //instantiate initialization
     p_DataExchange_->instantiateInit(p_Init_);
-        // get copy of model for each thread
-        p_Model_ = p_FinalModel_->Clone();
+    // get copy of model for each thread
+    p_Model_ = p_FinalModel_->clone();
 
-        //set cocluster
-        p_CoCluster_ = new CoCluster();
-        p_CoCluster_->SetStrategy(p_Strategy_);
-        p_CoCluster_->SetAlgo(p_Algo_);
-        p_CoCluster_->SetModel(p_Model_);
-        p_CoCluster_->SetInit(p_Init_);
+    //set cocluster
+    p_CoCluster_ = new CoCluster();
+    p_CoCluster_->SetStrategy(p_Strategy_);
+    p_CoCluster_->SetAlgo(p_Algo_);
+    p_CoCluster_->SetModel(p_Model_);
+    p_CoCluster_->SetInit(p_Init_);
 
 #pragma omp for schedule(dynamic,1)
-
-      for (int i = 0; i < nbtry; ++i) {
+      for (int i = 0; i < nbtry; ++i)
+      {
         bool success = p_CoCluster_->run();
 #pragma omp critical
         {
-          if (Lmax<p_Model_->GetLikelihood()&& success) {
-            Lmax = p_Model_->GetLikelihood();
+          if (Lmax<p_Model_->likelihood()&& success)
+          {
+            Lmax = p_Model_->likelihood();
             globalsuccess = true;
             delete p_FinalModel_;
-            p_FinalModel_ = p_Model_->Clone();
+            p_FinalModel_ = p_Model_->clone();
           }
         }
       }
@@ -150,7 +152,7 @@ RcppExport SEXP CoClustmain(SEXP robj)
 
       }
 
-  p_DataExchange_->Output(CoClustobj,p_FinalModel_,globalsuccess);
+  p_DataExchange_->dataOutput(CoClustobj,p_FinalModel_,globalsuccess);
   //CoClustobj.slot("time") = omp_get_wtime()-starttime;
 
   //release memory
@@ -184,7 +186,8 @@ RcppExport SEXP CoClustmain(SEXP robj)
   IDataExchange * p_DataExchange_ = NULL;
 
   //set p_DataExchange_ to required case
-  switch (datatype) {
+  switch (datatype)
+  {
     case Binary:
       p_DataExchange_ = new BinaryDataExchange();
       break;
@@ -198,13 +201,14 @@ RcppExport SEXP CoClustmain(SEXP robj)
       p_DataExchange_ = new CategoricalDataExchange();
       break;
     default:
+      Rcpp::stop("Wrong datatype in CoClustmain. Please report Bug.");
       break;
   }
 
   //Get input parameters
   p_DataExchange_->SetInput(CoClustobj);
   //Get data
-  p_DataExchange_->DataInput(CoClustobj);
+  p_DataExchange_->dataInput(CoClustobj);
   //instantiate algorithm and strategy
   p_DataExchange_->instantiateAlgo(p_Algo_,p_Strategy_);
   //instantiate initialization
@@ -219,7 +223,7 @@ RcppExport SEXP CoClustmain(SEXP robj)
   p_CoCluster_->SetModel(p_Model_);
   p_CoCluster_->SetInit(p_Init_);
   bool success = p_CoCluster_->run();
-  p_DataExchange_->Output(CoClustobj,p_Model_,success);
+  p_DataExchange_->dataOutput(CoClustobj,p_Model_,success);
 
   //release memory
   delete p_DataExchange_;

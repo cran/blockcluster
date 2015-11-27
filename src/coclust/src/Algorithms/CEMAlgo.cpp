@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------------*/
-/*     Copyright (C) 2011-2013  Parmeet Singh Bhatia
+/*     Copyright (C) 2011-2015  <MODAL team @INRIA,Lille & U.M.R. C.N.R.S. 6599 Heudiasyc, UTC>
 
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU Lesser General Public License as
@@ -19,7 +19,9 @@
  Boston, MA 02111-1307
  USA
 
- Contact : bhatia.parmeet@gmail.com , parmeet.bhatia@inria.fr
+ Author : Parmeet Bhatia
+ Contact : bhatia.parmeet@gmail.com , serge.iovleff@stkpp.org
+
  */
 
 /** @file CEMAlgo.cpp
@@ -41,8 +43,8 @@ CEMAlgo::~CEMAlgo()
 
 bool CEMAlgo::run()
 {
-  if (p_Model_->CEMRows()) {
-    if (p_Model_->CEMCols()) {
+  if (p_Model_->cemRows()) {
+    if (p_Model_->cemCols()) {
       return true;
     }
   }

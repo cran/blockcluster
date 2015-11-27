@@ -35,15 +35,16 @@
 
 #ifndef IDataExchange_H_
 #define IDataExchange_H_
+
 #include <iostream>
-#include "conversion.h"
+//#include "conversion.h"
 #include "coclust/src/typedefs/typedef.h"
 #include "coclust/src/Models/ICoClustModel.h"
 #include "coclust/src/Algorithms/IAlgo.h"
 #include "coclust/src/Initialization/IInit.h"
 #include "coclust/src/Strategy/IStrategy.h"
 #include "coclust/src/InputParameters/InputParameters.h"
-#include <Rcpp.h>
+#include <RTKpp.h>
 
 /** @brief
  *
@@ -51,17 +52,21 @@
 class IDataExchange
 {
   public:
-    IDataExchange(){InitializeParamEnum();}
-    void InitializeParamEnum();
-    virtual void DataInput(Rcpp::S4 & obj) = 0;
-    virtual void Output(Rcpp::S4& obj,ICoClustModel*, bool) = 0;
+    inline IDataExchange(){ initializeParamEnum();}
+    void initializeParamEnum();
+
+    virtual void dataInput(Rcpp::S4 & obj) = 0;
+    virtual void dataOutput(Rcpp::S4& obj,ICoClustModel*, bool) = 0;
     virtual void instantiateModel(ICoClustModel*& model) = 0;
+
     void instantiateAlgo(IAlgo*& algo,IStrategy*& strat);
     void instantiateInit(IInit*& init);
     void SetInput(Rcpp::S4 & obj);
+
     StrategyParameters& GetStrategyParameters(){return Stratparam_;}
     void setStrategyParameters(StrategyParameters& strat){Stratparam_ = strat;}
     virtual ~IDataExchange();
+
   protected:
     Strategy strategy_;
     StrategyParameters Stratparam_;

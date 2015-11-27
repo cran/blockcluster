@@ -36,12 +36,12 @@
 #include "ContingencyDataExchange.h"
 #include "coclust/src/Models/ContingencyLBModel.h"
 #include "coclust/src/Models/ContingencyLBModel_mu_i_nu_j.h"
-void ContingencyDataExchange::Output(Rcpp::S4& obj,ICoClustModel* model,bool successful)
+void ContingencyDataExchange::dataOutput(Rcpp::S4& obj,ICoClustModel* model,bool successful)
 {
   if(!successful)
   {
     obj.slot("successful") = false;
-    obj.slot("message") = model->GetErrormsg();
+    obj.slot("message") = std::string("Co-Clustering Failed! ") + model->errorMsg();
   }
   else
   {
@@ -53,52 +53,56 @@ void ContingencyDataExchange::Output(Rcpp::S4& obj,ICoClustModel* model,bool suc
     {
       case pik_rhol_unknown:
          ptrLBM = dynamic_cast<ContingencyLBModel*>(model);
-         obj.slot("classgamma") = convertMatrix<Rcpp::NumericMatrix,MatrixReal>(ptrLBM->GetGamma());
-         obj.slot("coclusterdata") = convertMatrix<Rcpp::NumericMatrix,MatrixInteger>(ptrLBM->GetArrangedDataClusters());
+         obj.slot("classgamma") = STK::wrap(ptrLBM->gamma());
+         obj.slot("coclusterdata") = STK::wrap(ptrLBM->arrangedDataClusters());
         break;
       case pik_rhol_known:
         ptrLBMknown = dynamic_cast<ContingencyLBModel_mu_i_nu_j*>(model);
-        obj.slot("classgamma") = convertMatrix<Rcpp::NumericMatrix,MatrixReal>(ptrLBMknown->GetGamma());
-        obj.slot("coclusterdata") = convertMatrix<Rcpp::NumericMatrix,MatrixInteger>(ptrLBMknown->GetArrangedDataClusters());
+        obj.slot("classgamma") = STK::wrap(ptrLBMknown->gamma());
+        obj.slot("coclusterdata") = STK::wrap(ptrLBMknown->arrangedDataClusters());
         break;
       case pi_rho_unknown:
         ptrLBM = dynamic_cast<ContingencyLBModel*>(model);
-        obj.slot("classgamma") = convertMatrix<Rcpp::NumericMatrix,MatrixReal>(ptrLBM->GetGamma());
-        obj.slot("coclusterdata") = convertMatrix<Rcpp::NumericMatrix,MatrixInteger>(ptrLBM->GetArrangedDataClusters());
+        obj.slot("classgamma") = STK::wrap(ptrLBM->gamma());
+        obj.slot("coclusterdata") = STK::wrap(ptrLBM->arrangedDataClusters());
         break;
       case pi_rho_known:
         ptrLBMknown = dynamic_cast<ContingencyLBModel_mu_i_nu_j*>(model);
-        obj.slot("classgamma") = convertMatrix<Rcpp::NumericMatrix,MatrixReal>(ptrLBMknown->GetGamma());
-        obj.slot("coclusterdata") = convertMatrix<Rcpp::NumericMatrix,MatrixInteger>(ptrLBMknown->GetArrangedDataClusters());
+        obj.slot("classgamma") = STK::wrap(ptrLBMknown->gamma());
+        obj.slot("coclusterdata") = STK::wrap(ptrLBMknown->arrangedDataClusters());
+        break;
+      default:
+        Rcpp::stop("Wrong Model in ContingencyDataExchange. Please report Bug.");
         break;
     }
-    obj.slot("rowclass") = convertvector<Rcpp::IntegerVector,VectorInteger>(model->GetRowClassificationVector());
-    obj.slot("colclass") = convertvector<Rcpp::IntegerVector,VectorInteger>(model->GetColumnClassificationVector());
-    obj.slot("rowproportions") = convertvector<Rcpp::NumericVector,VectorReal>(model->GetRowProportions());
-    obj.slot("columnproportions") = convertvector<Rcpp::NumericVector,VectorReal>(model->GetColProportions());
-    obj.slot("rowposteriorprob") = convertMatrix<Rcpp::NumericMatrix,MatrixReal>(model->GetRowPosteriorprob());
-    obj.slot("colposteriorprob") = convertMatrix<Rcpp::NumericMatrix,MatrixReal>(model->GetColPosteriorprob());
-    obj.slot("likelihood") = model->GetLikelihood();
+    obj.slot("rowclass") = STK::wrap(model->rowClassificationVector());
+    obj.slot("colclass") = STK::wrap(model->columnClassificationVector());
+    obj.slot("rowproportions") = STK::wrap(model->rowProportions());
+    obj.slot("columnproportions") = STK::wrap(model->colProportions());
+    obj.slot("rowposteriorprob") = STK::wrap(model->rowPosteriorProb());
+    obj.slot("colposteriorprob") = STK::wrap(model->colPosteriorProb());
+    obj.slot("likelihood") = model->likelihood();
   }
 }
 
-void ContingencyDataExchange::DataInput(Rcpp::S4 & obj)
+void ContingencyDataExchange::dataInput(Rcpp::S4 & obj)
 {
-  Rcpp::NumericMatrix data(SEXP(obj.slot("data")));
-  convertMatrix<Rcpp::NumericMatrix,MatrixInteger>(data,m_Dataij_);
-  Mparam_.nbrowdata_ = m_Dataij_.rows();
-  Mparam_.nbcoldata_ = m_Dataij_.cols();
+  STK::RMatrix<STK::Real> data(SEXP(obj.slot("data")));
+  m_Dataij_ = data;
+  //convertMatrix(data,m_Dataij_);
+  Mparam_.nbrowdata_ = m_Dataij_.sizeRows();
+  Mparam_.nbcoldata_ = m_Dataij_.sizeCols();
   if(strategy_.Model_ == pik_rhol_known||strategy_.Model_ == pi_rho_known )
   {
-    Rcpp::NumericVector datamui(SEXP(obj.slot("datamui")));
-    v_Mui_ = convertvector<VectorReal,Rcpp::NumericVector>(datamui);
-    Rcpp::NumericVector datanuj(SEXP(obj.slot("datanuj")));
-    v_Nuj_ = convertvector<VectorReal,Rcpp::NumericVector>(datanuj);
+    v_Mui_ = STK::RVector<STK::Real>(SEXP(obj.slot("datamui")));
+    v_Nuj_ = STK::RVector<STK::Real>(SEXP(obj.slot("datanuj")));
   }
 }
 
-void ContingencyDataExchange::instantiateModel(ICoClustModel*& model){
-  if(!strategy_.SemiSupervised){
+void ContingencyDataExchange::instantiateModel(ICoClustModel*& model)
+{
+  if(!strategy_.SemiSupervised)
+  {
     switch (strategy_.Model_)
     {
       case pik_rhol_unknown:
@@ -107,8 +111,7 @@ void ContingencyDataExchange::instantiateModel(ICoClustModel*& model){
         break;
       case pik_rhol_known:
         Mparam_.fixedproportions_ = false;
-        model = new ContingencyLBModel_mu_i_nu_j(m_Dataij_,v_Mui_
-                                                    ,v_Nuj_,Mparam_);
+        model = new ContingencyLBModel_mu_i_nu_j(m_Dataij_,v_Mui_ ,v_Nuj_,Mparam_);
         break;
       case pi_rho_unknown:
         Mparam_.fixedproportions_ = true;
@@ -116,14 +119,15 @@ void ContingencyDataExchange::instantiateModel(ICoClustModel*& model){
         break;
       case pi_rho_known:
         Mparam_.fixedproportions_ = true;
-        model = new ContingencyLBModel_mu_i_nu_j(m_Dataij_,v_Mui_
-                                                    ,v_Nuj_,Mparam_);
+        model = new ContingencyLBModel_mu_i_nu_j(m_Dataij_, v_Mui_ , v_Nuj_,Mparam_);
         break;
       default:
+        Rcpp::stop("Wrong Model in ContingencyDataExchange. Please report Bug.");
         break;
     }
   }
-  else{
+  else
+  {
     switch (strategy_.Model_)
     {
       case pik_rhol_unknown:
@@ -132,8 +136,7 @@ void ContingencyDataExchange::instantiateModel(ICoClustModel*& model){
         break;
       case pik_rhol_known:
         Mparam_.fixedproportions_ = false;
-        model = new ContingencyLBModel_mu_i_nu_j(m_Dataij_,v_rowlabels_,v_collabels_,v_Mui_
-                                                    ,v_Nuj_,Mparam_);
+        model = new ContingencyLBModel_mu_i_nu_j(m_Dataij_,v_rowlabels_,v_collabels_,v_Mui_,v_Nuj_,Mparam_);
         break;
       case pi_rho_unknown:
         Mparam_.fixedproportions_ = true;
@@ -141,10 +144,10 @@ void ContingencyDataExchange::instantiateModel(ICoClustModel*& model){
         break;
       case pi_rho_known:
         Mparam_.fixedproportions_ = true;
-        model = new ContingencyLBModel_mu_i_nu_j(m_Dataij_,v_rowlabels_,v_collabels_,v_Mui_
-                                                    ,v_Nuj_,Mparam_);
+        model = new ContingencyLBModel_mu_i_nu_j(m_Dataij_,v_rowlabels_,v_collabels_,v_Mui_,v_Nuj_,Mparam_);
         break;
       default:
+        Rcpp::stop("Wrong Model in ContingencyDataExchange. Please report Bug.");
         break;
     }
   }

@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------------*/
-/*     Copyright (C) 2011-2013  Parmeet Singh Bhatia
+/*     Copyright (C) 2011-2015  <MODAL team @INRIA,Lille & U.M.R. C.N.R.S. 6599 Heudiasyc, UTC>
 
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as
@@ -35,29 +35,28 @@ class CategoricalLBModel:public ICoClustModel
     CategoricalLBModel(MatrixInteger const& m_Dataij,ModelParameters const& Mparam,int a=1,int b=1);
     CategoricalLBModel(MatrixInteger const& m_Dataij,VectorInteger const & rowlabels,
                        VectorInteger const & collabels,ModelParameters const& Mparam,int a=1,int b=1);
-    virtual CategoricalLBModel* Clone(){return new CategoricalLBModel(*this);}
-    virtual void LogSumRows(MatrixReal & m_sum);
-    virtual void LogSumCols(MatrixReal & m_sum);
-    virtual void MStepFull(){};
-    virtual bool EMRows();
-    virtual bool CEMRows();
-    virtual bool EMCols();
-    virtual bool CEMCols();
-    virtual bool SEMRows();
-    virtual bool SEMCols();
-    virtual void likelihoodStopCriteria();
-    virtual void ParameterStopCriteria();
-    virtual bool RandomInit();
-    virtual float ICLCriteriaValue();
-    virtual void FinalizeOutput();
-    virtual void ConsoleOut();
-    virtual void Modify_theta_start();
-    virtual void Copy_theta_start();
-    virtual void Copy_theta_max();
-    virtual void Modify_theta_max();
-    virtual float EstimateLikelihood();
-    const MatrixInteger& GetArrangedDataClusters();
-    inline const std::vector<MatrixReal>& Getmean(){return m3_Alphahkl_;}
+    virtual CategoricalLBModel* clone(){return new CategoricalLBModel(*this);}
+    virtual void logSumRows(MatrixReal & m_sum);
+    virtual void logSumCols(MatrixReal & m_sum);
+    virtual void mStepFull(){};
+    virtual bool emRows();
+    virtual bool cemRows();
+    virtual bool emCols();
+    virtual bool cemCols();
+    virtual bool semRows();
+    virtual bool semCols();
+    virtual void parameterStopCriteria();
+    virtual bool randomInit();
+    virtual STK::Real iclCriteriaValue();
+    virtual void finalizeOutput();
+    virtual void consoleOut();
+    virtual void modifyThetaStart();
+    virtual void copyThetaStart();
+    virtual void copyThetaMax();
+    virtual void modifyThetaMax();
+    virtual STK::Real estimateLikelihood();
+    const MatrixInteger& arrangedDataClusters();
+    inline const std::vector<MatrixReal>& mean(){return m3_Alphahkl_;}
     virtual ~CategoricalLBModel();
 
   protected:
@@ -68,12 +67,9 @@ class CategoricalLBModel:public ICoClustModel
     std::vector<MatrixReal> m3_Alphahkl_,m3_Alphahklold_,m3_Alphahkl1_,
     m3_Alphahkl1old_,m3_Alphahklstart_,m3_Alphahklmax_,m3_logAlhphahkl_;
     std::vector<MatrixBinary> m3_Yhij_,m3_Yijh_,m3_Yjih_;//different ways to store data
-    float Likelihood_old;
 
-    virtual void MStepRows();
-    virtual void MStepCols();
-
-
+    virtual void mStepRows();
+    virtual void mStepCols();
 };
 
 

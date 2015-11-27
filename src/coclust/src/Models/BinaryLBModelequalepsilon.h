@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------------*/
-/*     Copyright (C) 2011-2013  Parmeet Singh Bhatia
+/*     Copyright (C) 2011-2015  <MODAL team @INRIA,Lille & U.M.R. C.N.R.S. 6599 Heudiasyc, UTC>
 
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as
@@ -46,130 +46,128 @@ class BinaryLBModelequalepsilon : public ICoClustModel
     /**Constructor for unsupervised co-clustering
      * @param m_Dataij a constant reference on the data set.
      * @param Mparam A constant reference to various ModelParameters.
-     * */
-    BinaryLBModelequalepsilon(MatrixBinary const& m_Dataij,ModelParameters const& Mparam,int a=1,int b=1);
+     * @param a,b bayesian hyperparameters
+     **/
+    BinaryLBModelequalepsilon( MatrixBinary const& m_Dataij
+                             , ModelParameters const& Mparam
+                             , int a=1, int b=1);
     /**Constructor for unsupervised co-clustering
      * @param m_Dataij a constant reference on the data set.
      * @param rowlabels various labels for rows (-1  for unknown row label)
      * @param collabels various labels for columns (-1 for unknown column label)
      * @param Mparam A constant reference to various ModelParameters.
-     * */
-    BinaryLBModelequalepsilon(MatrixBinary const& m_Dataij,VectorInteger const & rowlabels,
-                              VectorInteger const & collabels,ModelParameters const& Mparam,int a=1,int b=1);
+     * @param a,b bayesian hyperparameters
+     **/
+    BinaryLBModelequalepsilon( MatrixBinary const&  m_Dataij
+                             , VectorInteger const & rowlabels
+                             , VectorInteger const & collabels
+                             , ModelParameters const& Mparam
+                             , int a=1, int b=1);
 
     /** cloning */
-    virtual BinaryLBModelequalepsilon* Clone(){return new BinaryLBModelequalepsilon(*this);}
-    virtual void LogSumRows(MatrixReal & _m_sum);
-    virtual void LogSumCols(MatrixReal & _m_sum);
-    virtual void MStepFull();
-    virtual bool EMRows();
-    virtual bool CEMRows();
-    virtual bool EMCols();
-    virtual bool CEMCols();
-    virtual bool SEMRows();
-    virtual bool SEMCols();
-    virtual void likelihoodStopCriteria();
-    virtual float EstimateLikelihood();
-    virtual void ParameterStopCriteria();
-    virtual bool CEMInit();
-    virtual void FinalizeOutput();
-    virtual void ConsoleOut();
-    virtual float ICLCriteriaValue();
+    virtual BinaryLBModelequalepsilon* clone(){return new BinaryLBModelequalepsilon(*this);}
+    virtual void logSumRows(MatrixReal & _m_sum);
+    virtual void logSumCols(MatrixReal & _m_sum);
+    virtual void mStepFull();
+    virtual bool emRows();
+    virtual bool cemRows();
+    virtual bool emCols();
+    virtual bool cemCols();
+    virtual bool semRows();
+    virtual bool semCols();
+    virtual STK::Real estimateLikelihood();
+    virtual void parameterStopCriteria();
+    virtual bool cemInitStep();
+    virtual void finalizeOutput();
+    virtual void consoleOut();
+    virtual STK::Real iclCriteriaValue();
     //virtual void UpdateAllUsingConditionalProbabilities();
-    virtual void Modify_theta_start();
-    virtual void Copy_theta_start();
-    virtual void Copy_theta_max();
-    virtual void Modify_theta_max();
+    virtual void modifyThetaStart();
+    virtual void copyThetaStart();
+    virtual void copyThetaMax();
+    virtual void modifyThetaMax();
     /**Return class mean BinaryLBModelequalepsilon::m_akl_ for all the blocks (co-clusters)*/
-    const MatrixBinary& Getmean() const;
+    MatrixBinary const& mean() const;
     /**Return Class despersion BinaryLBModelequalepsilon::m_epsilonkl_ for all the blocks (co-clusters) */
-    float Getdispersion() const;
+    STK::Real dispersion() const;
     /**Destructor*/
     virtual ~BinaryLBModelequalepsilon(){};
 
-    const MatrixBinary& GetArrangedDataClusters();
+    MatrixBinary const& arrangedDataClusters();
 #ifndef RPACKAGE
     /**This function display co-clusters for Binary data.*/
-    void DisplayCluster();
+    void displayCluster();
 #endif
 
   protected:
     //Variables involved in Bernoulli model
     int a_,b_;//hyper-parameters
-    MatrixBinary const& m_Dataij_;
+    MatrixBinary const&  m_Dataij_;
     MatrixBinary m_ClusterDataij_;
     MatrixReal m_Xjl_,m_Xik_,m_Tk_Rl_;
-    float dimprod_;
+    STK::Real dimprod_;
     MatrixReal m_Vjk_;
     MatrixReal m_Uil_,m_Ukl_;
     VectorReal v_Ui_;
     MatrixReal m_Ykl_,m_Ykl_old2_,m_Ykl_old1_;
     MatrixBinary m_Akl_,m_Aklstart_,m_Aklmax_;
-    float Epsilon_,Epsilonstart_,Epsilonmax_;
-    float Likelihood_old;
-    float W1_,W1_old_;
+    STK::Real Epsilon_,Epsilonstart_,Epsilonmax_;
+    STK::Real W1_,W1_old_;
 
     //M-steps
-    void MStepRows();
-    void MStepCols();
+    void mStepRows();
+    void mStepCols();
 
     // Functions used to operate on data in intermediate steps when running the Initialization
-    bool InitCEMRows();
-    bool InitCEMCols();
-    void InitBernoulliLogsumRows(MatrixReal & m_sum);
-    void InitBernoulliLogsumCols(MatrixReal & m_sum);
-    void SelectRandomColsfromdata(MatrixReal& m,int col);
+    bool initCEMRows();
+    bool initCEMCols();
+    void initBernoulliLogSumRows(MatrixReal & m_sum);
+    void initBernoulliLogSumCols(MatrixReal & m_sum);
+    void selectRandomColsFromData(MatrixReal& m,int col);
     void SelectRandomRows(MatrixReal& m_lk);
-    void GenerateRandomMean(MatrixBinary& m);
+    void generateRandomMean(MatrixBinary& m);
 };
 
 
-inline const MatrixBinary& BinaryLBModelequalepsilon::Getmean() const
-{
-  return m_Akl_;
-}
+inline MatrixBinary const& BinaryLBModelequalepsilon::mean() const
+{ return m_Akl_;}
 
-inline float BinaryLBModelequalepsilon::Getdispersion() const
+inline STK::Real BinaryLBModelequalepsilon::dispersion() const
 {
   return Epsilon_;
 }
 
-inline void BinaryLBModelequalepsilon::MStepRows()
+inline void BinaryLBModelequalepsilon::mStepRows()
 {
-  if(!Mparam_.fixedproportions_) {
-    v_logPiek_=(v_Tk_.array()/nbSample_).log();
-  }
+  if(!Mparam_.fixedproportions_) { v_logPiek_=(v_Tk_/nbSample_).log();}
 
-  m_Ykl_ = m_Tik_.transpose()*m_Uil_;
+  m_Ykl_   = m_Tik_.transpose()*m_Uil_;
   m_Tk_Rl_ = v_Tk_*v_Rl_.transpose()/2.0;
-  for ( int k = 0; k < Mparam_.nbrowclust_; ++k) {
-    for ( int l = 0; l < Mparam_.nbcolclust_; ++l) {
-      if(m_Ykl_(k,l)>=m_Tk_Rl_(k,l))
-      m_Akl_(k,l) = 1;
-      else
-        m_Akl_(k,l) = 0;
+  for ( int k = 0; k < Mparam_.nbrowclust_; ++k)
+  {
+    for ( int l = 0; l < Mparam_.nbcolclust_; ++l)
+    {
+      m_Akl_(k,l) = (m_Ykl_(k,l)>=m_Tk_Rl_(k,l)) ? 1 :0;
     }
   }
-  Epsilon_= (m_Ykl_.array()-(v_Tk_*v_Rl_.transpose()).array()*m_Akl_.cast<float>().array()).abs().sum()/dimprod_;
+  Epsilon_= (m_Ykl_- (v_Tk_*v_Rl_.transpose()).prod(m_Akl_.cast<STK::Real>()) ).abs().sum()/dimprod_;
 
 }
 
-inline void BinaryLBModelequalepsilon::MStepCols()
+inline void BinaryLBModelequalepsilon::mStepCols()
 {
-  if(!Mparam_.fixedproportions_) {
-    v_logRhol_=(v_Rl_.array()/nbVar_).log();
-  }
-  m_Ykl_ = m_Vjk_.transpose()*m_Rjl_;
+  if(!Mparam_.fixedproportions_) { v_logRhol_=(v_Rl_/nbVar_).log();}
+
+  m_Ykl_   = m_Vjk_.transpose()*m_Rjl_;
   m_Tk_Rl_ = v_Tk_*v_Rl_.transpose()/2.0;
-  for ( int k = 0; k < Mparam_.nbrowclust_; ++k) {
-    for ( int l = 0; l < Mparam_.nbcolclust_; ++l) {
-      if(m_Ykl_(k,l)>=m_Tk_Rl_(k,l))
-      m_Akl_(k,l) = 1;
-      else
-        m_Akl_(k,l) = 0;
+  for ( int k = 0; k < Mparam_.nbrowclust_; ++k)
+  {
+    for ( int l = 0; l < Mparam_.nbcolclust_; ++l)
+    {
+      m_Akl_(k,l) = (m_Ykl_(k,l)>=m_Tk_Rl_(k,l)) ? 1 : 0;
     }
   }
-  Epsilon_= (m_Ykl_.array()-(v_Tk_*v_Rl_.transpose()).array()*m_Akl_.cast<float>().array()).abs().sum()/dimprod_;
+  Epsilon_= (m_Ykl_- (v_Tk_*v_Rl_.transpose()).prod(m_Akl_.cast<STK::Real>()) ).abs().sum()/dimprod_;
 
 }
 

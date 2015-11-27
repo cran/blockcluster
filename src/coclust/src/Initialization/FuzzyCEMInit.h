@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------------*/
-/*     Copyright (C) 2011-2013  Parmeet Singh Bhatia
+/*     Copyright (C) 2011-2015  <MODAL team @INRIA,Lille & U.M.R. C.N.R.S. 6599 Heudiasyc, UTC>
 
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as
@@ -22,8 +22,8 @@
  Contact : parmeet.bhatia@inria.fr , bhatia.parmeet@gmail.com
  */
 
-/** @file FuzzyCEMInit.h
- *  @brief Declares Fuzzy CEM initialization class FuzzyCEMInit derived from IInit.
+/** @file FuzzyCemInit.h
+ *  @brief Declares Fuzzy CEM initialization class FuzzyCemInit derived from IInit.
  **/
 
 #ifndef FUZZYCEMINIT_H_
@@ -35,16 +35,16 @@
  */
 #include "IInit.h"
 
-class FuzzyCEMInit: public IInit
+class FuzzyCemInit: public IInit
 {
   public:
-    inline FuzzyCEMInit(){};
+    inline FuzzyCemInit(){};
     virtual bool run();
-    inline virtual ~FuzzyCEMInit(){};
+    inline virtual ~FuzzyCemInit(){};
 };
 
-inline bool FuzzyCEMInit::run()
+inline bool FuzzyCemInit::run()
 {
-  return p_Model_->FuzzyCEMInit();
+  return p_Model_->fuzzyCemInitStep();
 }
 #endif /* FUZZYCEMINIT_H_ */
