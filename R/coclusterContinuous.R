@@ -51,7 +51,7 @@ NULL
 #' 
 coclusterContinuous<-function( data, semisupervised = FALSE
                              , rowlabels = numeric(0), collabels = numeric(0)
-                             , model = character(0), nbcocluster
+                             , model = NULL, nbcocluster
                              , strategy = coclusterStrategy()) 
 {
 	#Check for data
@@ -122,7 +122,7 @@ coclusterContinuous<-function( data, semisupervised = FALSE
 	if(strategy@stopcriteria!="Parameter" && strategy@stopcriteria!="Likelihood")
 		stop("Incorrect stopping criteria, Valid stopping criterians are: Parameter, Likelihood")
   #check for model  
-	if(missing(model)) { model = "pik_rhol_sigma2kl"}
+	if(is.null(model)) { model = "pik_rhol_sigma2kl"}
 	else 
   { 
     if(model!="pik_rhol_sigma2kl" && model!="pik_rhol_sigma2" && 
@@ -131,8 +131,15 @@ coclusterContinuous<-function( data, semisupervised = FALSE
       stop("Incorrect Model, Valid Continuous models are: pik_rhol_sigma2kl, pik_rhol_sigma2, pi_rho_sigma2kl, pi_rho_sigma2")
     }
   }
-	if(length(strategy@initmethod)==0){ strategy@initmethod = "cemInitStep"}
-    
+	# checking for strategy
+	if(length(strategy@initmethod)==0)
+	{strategy@initmethod = "emInitStep"}
+	else
+	{
+		if(strategy@initmethod!="cemInitStep" && strategy@initmethod!="emInitStep")
+			stop("In coclusterContinuous. Incorrect initialization method, valid method(s) are: cemInitStep, emInitStep")
+	}
+	
   inpobj<-new("ContinuousOptions",data = data,rowlabels = rowlabels, collabels = collabels, semisupervised = semisupervised, 
                   datatype = "continuous", model = model,nbcocluster = nbcocluster,strategy = strategy)
 

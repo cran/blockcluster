@@ -60,12 +60,17 @@ BinaryLBModelequalepsilon::BinaryLBModelequalepsilon(MatrixBinary const&  m_Data
 
 bool BinaryLBModelequalepsilon::cemInitStep()
 {
-#ifdef COVERBOSE
-  std::cout<<"Initializing Model Parameters.."<<std::endl;
-#endif
-
+  // initialize parameters
+  m_Tik_.resize(nbSample_,Mparam_.nbrowclust_) = 0;
+  v_Tk_.resize(Mparam_.nbrowclust_) = 0;
+  m_Rjl_.resize(nbVar_,Mparam_.nbcolclust_) = 0;
+  v_Rl_.resize(Mparam_.nbcolclust_) = 0;
   if (initCEMRows())
   {
+#ifdef COVERBOSE
+  std::cout << "BinaryLBModelequalepsilon::initCEMRows done with success."<<std::endl;
+  consoleOut();
+#endif
     if (initCEMCols())
     {
       m_Ykl_old1_ = m_Ykl_;
@@ -77,16 +82,52 @@ bool BinaryLBModelequalepsilon::cemInitStep()
       m_Wjl_.resize(nbVar_,Mparam_.nbcolclust_) = 0;
       v_logPiek_ = std::log(1.0/Mparam_.nbrowclust_)*(STK::Const::Vector<STK::Real>(Mparam_.nbrowclust_));
       v_logRhol_ = std::log(1.0/Mparam_.nbcolclust_)*(STK::Const::Vector<STK::Real>(Mparam_.nbcolclust_));
-
 #ifdef COVERBOSE
-  std::cout<<"Initialization over."<<std::endl;
+      std::cout<<"BinaryLBModelequalepsilon::cemInitStep. Initialization done with success."<<std::endl;
+      consoleOut();
 #endif
+
       return true;
     }
   }
   return false;
-
 }
+
+bool BinaryLBModelequalepsilon::emInitStep()
+{
+  // initialize parameters
+  m_Tik_.resize(nbSample_,Mparam_.nbrowclust_) = 0;
+  v_Tk_.resize(Mparam_.nbrowclust_) = 0;
+  m_Rjl_.resize(nbVar_,Mparam_.nbcolclust_) = 0;
+  v_Rl_.resize(Mparam_.nbcolclust_) = 0;
+  if (initEMRows())
+  {
+#ifdef COVERBOSE
+  std::cout << "BinaryLBModelequalepsilon::initEMRows done with success."<<std::endl;
+  consoleOut();
+#endif
+    if (initEMCols())
+    {
+      m_Ykl_old1_ = m_Ykl_;
+      m_Uil_.resize(nbSample_,Mparam_.nbcolclust_) = 0;
+      m_Vjk_.resize(nbVar_,Mparam_.nbrowclust_) = 0;
+      v_Zi_.resize(nbSample_) = 0;
+      v_Wj_.resize(nbVar_) = 0;
+      m_Zik_.resize(nbSample_,Mparam_.nbrowclust_) = 0;
+      m_Wjl_.resize(nbVar_,Mparam_.nbcolclust_) = 0;
+      v_logPiek_ = std::log(1.0/Mparam_.nbrowclust_)*(STK::Const::Vector<STK::Real>(Mparam_.nbrowclust_));
+      v_logRhol_ = std::log(1.0/Mparam_.nbcolclust_)*(STK::Const::Vector<STK::Real>(Mparam_.nbcolclust_));
+#ifdef COVERBOSE
+      std::cout<<"BinaryLBModelequalepsilon::emInitStep. Initialization done with success."<<std::endl;
+      consoleOut();
+#endif
+
+      return true;
+    }
+  }
+  return false;
+}
+
 
 void BinaryLBModelequalepsilon::finalizeOutput()
 {
@@ -247,6 +288,23 @@ bool BinaryLBModelequalepsilon::semCols()
   return true;
 }
 
+bool BinaryLBModelequalepsilon::GibbsRows()
+{
+  Error_msg_ = "Gibbs is not implemented for this model.";
+#ifdef COVERBOSE
+  std::cout<<Error_msg_<<"\n";
+#endif
+  return false;
+}
+
+bool BinaryLBModelequalepsilon::GibbsCols()
+{
+  Error_msg_ = "Gibbs is not implemented for this model.";
+#ifdef COVERBOSE
+  std::cout<<Error_msg_<<"\n";
+#endif
+  return false;
+}
 
 STK::Real BinaryLBModelequalepsilon::estimateLikelihood()
 {
@@ -256,6 +314,9 @@ STK::Real BinaryLBModelequalepsilon::estimateLikelihood()
               - (m_Rjl_.prod((RealMin + m_Rjl_).log()) ).sum())/dimprod_;
   return likelihood_;
 }
+/** @return the number of free parameters of the distribution of a block.*/
+int BinaryLBModelequalepsilon::nbFreeParameters() const
+{ return 1;}
 
 //Compute change in Alpha and set the terminate variable accordingly
 void BinaryLBModelequalepsilon::parameterStopCriteria()
@@ -315,15 +376,12 @@ void BinaryLBModelequalepsilon::displayCluster()
 bool BinaryLBModelequalepsilon::initCEMRows()
 {
   // Initialization of various parameters
-  int cols=std::min(100,int(nbVar_));
+//int cols=std::min(100, nbVar_);
+  int cols =  nbVar_;
   m_Uil_.resize(nbSample_,cols) = 0;
   selectRandomColsFromData(m_Uil_,cols);
   v_Ui_ = STK::sumByRow(m_Uil_);
   m_Vjk_.resize(nbVar_,Mparam_.nbrowclust_) = 0;
-  v_Rl_ = STK::Const::Vector<STK::Real>(cols);
-  v_Tk_.resize(Mparam_.nbrowclust_) = 0;
-  m_Tik_.resize(nbSample_,Mparam_.nbrowclust_) = 0;
-  m_Rjl_.resize(nbVar_,Mparam_.nbcolclust_) = 0;
   m_Akl_.resize(Mparam_.nbrowclust_,cols) = 0;
   generateRandomMean(m_Akl_);
   W1_ = RealMax;
@@ -435,6 +493,140 @@ bool BinaryLBModelequalepsilon::initCEMCols()
       }
     }
     Epsilon_ = W1_/dimprod_;
+  return true;
+}
+
+bool BinaryLBModelequalepsilon::initEMRows()
+{
+  // Initialization of various parameters
+//int cols=std::min(100, nbVar_);
+  int cols =  nbVar_;
+  m_Uil_.resize(nbSample_,cols) = 0;
+  selectRandomColsFromData(m_Uil_,cols);
+  v_Ui_ = STK::sumByRow(m_Uil_);
+  m_Vjk_.resize(nbVar_,Mparam_.nbrowclust_) = 0;
+  m_Akl_.resize(Mparam_.nbrowclust_,cols) = 0;
+  generateRandomMean(m_Akl_);
+  W1_ = RealMax;
+  //Determine row partition using CEM algorithm with equal proportions
+  MatrixReal m_sumik(nbSample_,Mparam_.nbrowclust_);
+  int minIndex;
+  std::pair<int,int> Label_pair;
+  for(int i = 0;i< (int)knownLabelsRows_.size();i++){
+    Label_pair = knownLabelsRows_[i];
+    m_Tik_(Label_pair.first,Label_pair.second) = 1;
+  }
+
+  for ( int itr = 0; itr < Mparam_.nbinititerations_; ++itr)
+  {
+    initBernoulliLogSumRows(m_sumik);
+    m_Tik_  = (m_sumik-STK::maxByRow(m_sumik)*STK::Const::PointX(Mparam_.nbrowclust_)).exp();
+    m_Tik_ /= STK::sumByRow(m_Tik_)*STK::Const::PointX(Mparam_.nbrowclust_);
+    // reinitialize known labels
+    for ( int i=0;i< (int)knownLabelsRows_.size();i++)
+    {
+      m_Tik_.row(knownLabelsRows_[i].first).setZeros();
+      m_Tik_(knownLabelsRows_[i].first, knownLabelsRows_[i].second)=1;
+    }
+    // check empty class
+    if( (empty_cluster_ = finalizeStepRows()) )
+    {
+      Error_msg_  = "In BinaryLBModelequalepsilon::InitEMRows(). Class size too small while estimating model.\n";
+#ifdef COVERBOSE
+      std::cout << Error_msg_;
+      std::cout << "v_Tk_= " << v_Tk_.transpose();
+      std::cout << "v_Rl_= " << v_Rl_.transpose();
+#endif
+      return false;
+    }
+
+    // M-step
+    W1_old_ = W1_;
+    W1_ = (m_Tik_.prod(m_sumik)).sum();
+    m_Ukl_ = m_Tik_.transpose()*m_Uil_;
+    for ( int k = 0; k < Mparam_.nbrowclust_; ++k)
+    {
+      for ( int l = 0; l < cols; ++l)
+      {
+        m_Akl_(k,l)  = (m_Ukl_(k,l)>=v_Tk_[k]/2) ? 1 : 0;
+      }
+    }
+    //m_Akl_ = m_Ukl_ >=(v_Tk_*MatrixReal(1,cols)/2);
+    if (std::abs((W1_-W1_old_)/W1_)<Mparam_.initepsilon_)
+    { break;}
+  }
+  return true;
+}
+
+bool BinaryLBModelequalepsilon::initEMCols()
+{
+  //Determine row partition using CEM algorithm with equal proportions
+  MatrixReal m_sumjl(nbVar_, Mparam_.nbcolclust_);
+  MatrixReal m_Tk_Rl(Mparam_.nbrowclust_,Mparam_.nbcolclust_);
+  MatrixReal m_Ulk(Mparam_.nbcolclust_,Mparam_.nbrowclust_);
+  int minIndex;
+  m_Vjk_=m_Dataij_.cast<STK::Real>().transpose()*m_Tik_;
+  SelectRandomRows(m_Ulk);
+  m_Ukl_ = m_Ulk.transpose();
+  m_Akl_.resize(Mparam_.nbrowclust_,Mparam_.nbcolclust_);
+  for ( int k = 0; k < Mparam_.nbrowclust_; ++k)
+  {
+    for ( int l = 0; l < Mparam_.nbcolclust_; ++l)
+    {
+      m_Akl_(k,l) = (m_Ukl_(k,l)>=v_Tk_[k]/2) ? 1: 0;
+    }
+  }
+
+  std::pair<int,int> Label_pair;
+  for ( int j=0;j< (int)knownLabelsCols_.size();j++ )
+  {
+    Label_pair = knownLabelsCols_[j];
+    m_Rjl_(Label_pair.first,Label_pair.second)=1;
+  }
+  for ( int itr = 0; itr < Mparam_.nbinititerations_; ++itr)
+  {
+    // E-step
+    initBernoulliLogSumCols(m_sumjl);
+    m_Rjl_ = (m_sumjl-STK::maxByRow(m_sumjl)*STK::Const::PointX(Mparam_.nbcolclust_)).exp();
+    m_Rjl_ /= (STK::sumByRow(m_Rjl_)*STK::Const::PointX(Mparam_.nbcolclust_));
+    //
+    for ( int j=0;j< (int)knownLabelsCols_.size();j++)
+    {
+      m_Rjl_.row(knownLabelsCols_[j].first).setZeros();
+      m_Rjl_(knownLabelsCols_[j].first,knownLabelsCols_[j].second)=1;
+    }
+    // check empty class
+    if( (empty_cluster_ = finalizeStepCols()) )
+    {
+      Error_msg_  = "In BinaryLBModelequalepsilon::InitEMCols(). Class size too small while running model.\n";
+#ifdef COVERBOSE
+      std::cout << Error_msg_;
+      std::cout << "v_Tk_= " << v_Tk_.transpose();
+      std::cout << "v_Rl_= " << v_Rl_.transpose();
+#endif
+      return false;
+    }
+
+    // M-step
+    W1_old_ = W1_;
+    W1_ = (m_Rjl_.prod(m_sumjl)).sum();
+    m_Ykl_ = m_Vjk_.transpose()*m_Rjl_;
+    m_Tk_Rl = v_Tk_*v_Rl_.transpose()/2.0;
+    for ( int k = 0; k < Mparam_.nbrowclust_; ++k)
+    {
+      for ( int l = 0; l < Mparam_.nbcolclust_; ++l)
+      {
+        m_Akl_(k,l) = (m_Ykl_(k,l)>=m_Tk_Rl(k,l)) ? 1 : 0;
+      }
+    }
+    //m_Akl_ = m_Ykl_>=(v_Tk_*v_Rl_.transpose()/2);
+    if (std::abs((W1_-W1_old_)/W1_)<Mparam_.initepsilon_)
+    {
+      Epsilon_ = W1_/dimprod_;
+      break;
+    }
+  }
+  Epsilon_ = W1_/dimprod_;
   return true;
 }
 

@@ -107,3 +107,78 @@ NULL
 #' @exportMethod plot
 NULL
 
+#' Simulated Gaussian Data-set
+#'
+#' It is a Continuous data-set simulated using Gaussian distribution. It consist of two clusters
+#' in rows and three clusters in columns.
+#'
+#' @name gaussiandata
+#' @docType data
+#' @keywords datasets
+#' @format A data matrix with 1000 rows and 100 columns.
+#'
+#' @examples
+#'   data(gaussianData)
+NULL
+
+#' Simulated Binary Data-set
+#'
+#' It is a binary data-set simulated using Bernoulli distribution. It consist of two clusters in rows and three 
+#' clusters in columns.  
+#'
+#' @name binarydata
+#' @docType data
+#' @keywords datasets
+#' @format A data matrix with 1000 rows and 100 columns.
+#'
+#' @examples
+#'   data(binaryData)
+NULL
+
+#' Simulated categorical Data-set
+#'
+#' It is a categorical data-set simulated using Categorical distribution with 5 modalities. It consist of three clusters in rows and two 
+#' clusters in columns.  
+#'
+#' @name categoricaldata
+#' @docType data
+#' @keywords datasets
+#' @format A data matrix with 1000 rows and 100 columns.
+#'
+#' @examples
+#'   data(categoricalData)
+NULL
+
+#' Simulated Contingency Data-set 
+#'
+#' It is a contingency data-set simulated using Poisson distribution. The row and column effects is unknown for  
+#' this data-set. It consist of two clusters in rows and three clusters in columns.  
+#'
+#' @name contingencydataunknown
+#' @docType data
+#' @keywords datasets
+#' @format A data matrix with 1000 rows and 100 columns.
+#'
+#' @examples
+#'   data(contingencydataunknown)
+NULL
+
+#' Simulated Contingency Data-set 
+#'
+#' It is a contingency data-set simulated using Poisson distribution. The row and column effects is unknown for  
+#' this data-set. It consist of two clusters in rows and three clusters in columns.  
+#'
+#' @name contingencydatalist
+#' @docType data
+#' @keywords datasets
+#' @format A data list consisting of following data:
+#' \describe{
+#'   \item{data}{A data matrix consisting of 1000 rows and 100 columns.}
+#'   \item{roweffects}{A numeric vector of size 1000. Each value represent row effect of corresponding row.}
+#'   \item{columneffects}{A numeric vector of size 100. Each value represent column effect of corresponding column.}
+#' }
+#'
+#' @examples
+#'   data(contingencydatalist)
+NULL
+

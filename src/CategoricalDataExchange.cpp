@@ -50,9 +50,9 @@ void CategoricalDataExchange::dataInput(Rcpp::S4& obj)
   Mparam_.nbcoldata_ = m_Dataij_.sizeCols();
 
   //Get Strategy
-  Rcpp::S4 strategy(obj.slot("strategy"));
+  //Rcpp::S4 strategy(obj.slot("strategy"));
   //get hyper-parameters
-  Rcpp::IntegerVector hyperparam(SEXP(strategy.slot("hyperparam")));
+  Rcpp::IntegerVector hyperparam(obj.slot("hyperparam"));
   a_ = hyperparam(0);
   b_ = hyperparam(1);
 }

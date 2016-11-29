@@ -28,61 +28,464 @@
 
 #include "ContingencyLBModel.h"
 
-ContingencyLBModel::ContingencyLBModel(MatrixReal const& m_Dataij,ModelParameters const& Mparam)
-                           : ICoClustModel(Mparam)
-                           , m_Dataij_(m_Dataij)
+ContingencyLBModel::ContingencyLBModel( MatrixReal const& m_Dataij
+                                      , ModelParameters const& Mparam)
+                                      : ICoClustModel(Mparam)
+                                      , m_Dataij_(m_Dataij)
+                                      , DataSum_(m_Dataij.sum())
 {
-  DataSum_ = m_Dataij.sum();
+#ifdef COVERBOSE
+  std::cout << "ContingencyLBModel created with parameters:"<<std::endl;
+  std::cout << Mparam;
+#endif
 };
 
-ContingencyLBModel::ContingencyLBModel(MatrixReal const& m_Dataij,VectorInteger const & rowlabels,
-                                       VectorInteger const & collabels,ModelParameters const& Mparam)
-                           : ICoClustModel(Mparam,rowlabels,collabels)
-                           , m_Dataij_(m_Dataij)
+ContingencyLBModel::ContingencyLBModel( MatrixReal const& m_Dataij
+                                      , VectorInteger const& rowlabels
+                                      , VectorInteger const& collabels
+                                      , ModelParameters const& Mparam)
+                                      : ICoClustModel(Mparam,rowlabels,collabels)
+                                      , m_Dataij_(m_Dataij)
+                                      , DataSum_(m_Dataij.sum())
 {
-  DataSum_ = m_Dataij.sum();
+#ifdef COVERBOSE
+  std::cout << "ContingencyLBModel created with parameters:"<<std::endl;
+  std::cout << Mparam;
+#endif
 };
 
 
 bool ContingencyLBModel::cemInitStep()
 {
 #ifdef COVERBOSE
-  std::cout<<"Initializing Model Parameters.."<<std::endl;
+  std::cout<<"ContingencyLBModel::cemInitStep. Initializing Model Parameters."<<std::endl;
 #endif
+  // log proportions in rows and columns
+//v_logPiek_ = -std::log(Mparam_.nbrowclust_)*(STK::Const::VectorX(Mparam_.nbrowclust_));
+//v_logRhol_ = -std::log(Mparam_.nbcolclust_)*(STK::Const::VectorX(Mparam_.nbcolclust_));
 
-  if (initCEMRows())
-  {
-    if (initCEMCols())
+//// block posterior probabilities for individuals and variables
+//m_Tik_.resize(nbSample_,Mparam_.nbrowclust_);
+//m_Rjl_.resize(nbVar_,Mparam_.nbcolclust_);
+
+//// initialize Tik and Rjl
+//randomFuzzyTik();
+//randomFuzzyRjl();
+//// create initial parameters
+//if (m_Tik_.sizeCols() < m_Rjl_.sizeCols())
+//{ m_Ykl_   = (m_Tik_.transpose()*m_Dataij_)*m_Rjl_;}
+//else
+//{ m_Ykl_   = m_Tik_.transpose()*(m_Dataij_*m_Rjl_);}
+//m_Gammakl_ = m_Ykl_/(v_Tk_* v_Rl_.transpose());
+//#ifdef COVERBOSE
+//consoleOut();
+//#endif
+//bool fixedprop = Mparam_.fixedproportions_;
+//Mparam_.fixedproportions_ = true;
+
+    // start cem iterations
+    if (initCEMRows())
     {
-      m_Gammakl1_ = m_Gammakl_;
-      m_Gammakl1old_.resize(Mparam_.nbrowclust_,Mparam_.nbcolclust_) = 0;
-      m_Gammaklold_.resize(Mparam_.nbrowclust_,Mparam_.nbcolclust_) = 0;
-      m_Uil_.resize(nbSample_,Mparam_.nbcolclust_) = 0;
-      m_Vjk_.resize(nbVar_,Mparam_.nbrowclust_) = 0;
-      v_logPiek_ = std::log(1.0/Mparam_.nbrowclust_)*(STK::Const::Vector<STK::Real>(Mparam_.nbrowclust_));
-      v_logRhol_ = std::log(1.0/Mparam_.nbcolclust_)*(STK::Const::Vector<STK::Real>(Mparam_.nbcolclust_));
-#ifdef COVERBOSE
-  std::cout<<"Initialization over."<<std::endl;
-#endif
-      return true;
+  #ifdef COVERBOSE
+      std::cout << "ContingencyLBModel::initCEMRows done with success."<<std::endl;
+      consoleOut();
+  #endif
+      if (initCEMCols())
+      {
+          m_Gammakl1_ = m_Gammakl_;
+          m_Gammakl1old_.resize(Mparam_.nbrowclust_,Mparam_.nbcolclust_) = 0;
+          m_Gammaklold_.resize(Mparam_.nbrowclust_,Mparam_.nbcolclust_) = 0;
+          m_Uil_.resize(nbSample_,Mparam_.nbcolclust_) = 0;
+          m_Vjk_.resize(nbVar_,Mparam_.nbrowclust_) = 0;
+          v_logPiek_ = std::log(1.0/Mparam_.nbrowclust_)*(STK::Const::VectorX(Mparam_.nbrowclust_));
+          v_logRhol_ = std::log(1.0/Mparam_.nbcolclust_)*(STK::Const::VectorX(Mparam_.nbcolclust_));
+    
+  #ifdef COVERBOSE
+    std::cout<<"ContingencyLBModel::cemInitStep. Initialization done with success."<<std::endl;
+    consoleOut();
+  #endif
+//      Mparam_.fixedproportions_ = fixedprop;
+        return true;
+      }
     }
-  }
+
+//Mparam_.fixedproportions_ = fixedprop;
   return false;
+}
+
+bool ContingencyLBModel::initCEMRows()
+{
+////Initialization
+//m_Uil_ = m_Dataij_*m_Rjl_;
+////Determine row partition using EM algorithm with equal proportions
+//for ( int itr = 0; itr < Mparam_.nbinititerations_; ++itr)
+//{
+//  if(!eStepRows()) return false;
+//  //M-step
+//  m_Gammaklold_ = m_Gammakl_;
+//  mStepRows();
+//  //Termination check
+//  if((((m_Gammakl_-m_Gammaklold_)/m_Gammakl_).abs().sum())<Mparam_.initepsilon_)
+//  { break;}
+//}
+//return true;
+
+
+//Temporary variables, reduce the number of column
+//int cols=std::min(100, nbVar_);
+  int cols = nbVar_;
+
+  MatrixReal m_Akl(Mparam_.nbrowclust_,cols), m_Aklold(Mparam_.nbrowclust_,cols);
+  MatrixReal m_sumik(Mparam_.nbrowdata_,Mparam_.nbrowclust_);
+  int maxIndex;
+
+  //Model parameters
+  m_Tik_.resize(nbSample_,Mparam_.nbrowclust_) = 0;
+  m_Vjk_.resize(nbVar_,Mparam_.nbrowclust_) = 0;
+  v_Tk_.resize(Mparam_.nbrowclust_) = 0;
+
+  m_Rjl_.resize(nbVar_,Mparam_.nbcolclust_) = 0;
+  v_Rl_ = STK::Const::Vector<STK::Real>(cols);
+
+  // Initializations. m_Uil_ will contain cols columns of the original data set
+  m_Uil_.resize(nbSample_, cols) = 0;
+  selectRandomColsFromData(m_Uil_, cols);
+  v_Ui_ = STK::sumByRow(m_Uil_);
+  //
+  randomPoissonParameterRows(m_Akl,cols);
+
+  std::pair<int,int> Label_pair;
+  for(int i=0;i<knownLabelsRows_.size();i++)
+  {
+    Label_pair = knownLabelsRows_[i];
+    m_Tik_(Label_pair.first,Label_pair.second) = 1;
+  }
+
+  //Determine row partition using CEM algorithm with equal proportions
+  for ( int itr = 0; itr < Mparam_.nbinititerations_; ++itr)
+  {
+    m_sumik = m_Uil_*m_Akl.transpose();
+    for ( int i =0;i< UnknownLabelsRows_.size();i++)
+    {
+      m_sumik.row(UnknownLabelsRows_[i]).maxElt(maxIndex);
+      m_Tik_.row(UnknownLabelsRows_[i]).setZeros();
+      m_Tik_(UnknownLabelsRows_[i], maxIndex)=1;
+    }
+    // check empty class
+    if( (empty_cluster_ = finalizeStepRows()) )
+    {
+      Error_msg_  = "In ContingencyLBModel::initCEMRows(). Class size too small while estimating model.\n";
+#ifdef COVERBOSE
+      std::cout << Error_msg_;
+#endif
+      return false;
+    }
+    // M-step
+    m_Aklold = m_Akl;
+    m_Akl = ( (m_Tik_.transpose()*m_Uil_)
+        /( (m_Tik_.transpose()*v_Ui_)*STK::Const::PointX(cols))+RealMin).log();
+    // check convergence
+    if((((m_Akl-m_Aklold).abs()/m_Akl).sum())<Mparam_.initepsilon_) { break;}
+  }
+  return true;
+}
+
+bool ContingencyLBModel::initCEMCols()
+{
+  //Initializations
+//m_Vjk_ = m_Dataij_.transpose()*m_Tik_;
+////Determine column partition using EM algorithm with equal proportions
+//for ( int itr = 0; itr < Mparam_.nbinititerations_; ++itr)
+//{
+//  if(!eStepCols()) return false;
+//  //M-step
+//  m_Gammaklold_ = m_Gammakl_;
+//  mStepCols();
+//  //Termination check
+//  if((((m_Gammakl_-m_Gammaklold_)/m_Gammakl_).abs().sum())<Mparam_.initepsilon_)
+//  { break;}
+//}
+//m_Gammakl1old_ = m_Gammakl1_;
+//m_Gammakl1_    = m_Gammakl_;
+//return true;
+
+    //Temporary variables
+    MatrixReal m_Alk(Mparam_.nbcolclust_,Mparam_.nbrowclust_)
+             , m_Alkold(Mparam_.nbcolclust_,Mparam_.nbrowclust_);
+    MatrixReal m_sumjl(nbVar_, Mparam_.nbcolclust_);
+    int maxIndex;
+  
+    //Initializations
+    m_Vjk_ = m_Dataij_.transpose()*m_Tik_;
+    v_Vj_  = STK::sumByRow(m_Vjk_);
+    randomPoissonParameterCols(m_Alk);
+    std::pair<int,int> Label_pair;
+    for ( int j=0;j<knownLabelsCols_.size();j++)
+    {
+      Label_pair = knownLabelsCols_[j];
+      m_Rjl_(Label_pair.first,Label_pair.second)=1;
+    }
+    for ( int itr = 0; itr < Mparam_.nbinititerations_; ++itr)
+    {
+      // CE-step
+      m_sumjl = m_Vjk_*(m_Alk.transpose());
+      for ( int j =0;j< UnknownLabelsCols_.size();j++)
+      {
+        m_sumjl.row(UnknownLabelsCols_[j]).maxElt(maxIndex);
+        m_Rjl_.row(UnknownLabelsCols_[j]).setZeros();
+        m_Rjl_(UnknownLabelsCols_[j],maxIndex)=1;
+      }
+      // compute v_Rl_ and check empty class
+      if( (empty_cluster_ = finalizeStepCols()) )
+      {
+        Error_msg_  = "In ContingencyLBModel::initCEMCols(). Class size too small while estimating model.\n";
+  #ifdef COVERBOSE
+        std::cout << Error_msg_;
+  #endif
+        return false;
+      }
+      // M-step
+      m_Alkold = m_Alk;
+      m_Alk = ( (m_Rjl_.transpose()*m_Vjk_)
+               /( ( m_Rjl_.transpose()*v_Vj_)*STK::Const::PointX(Mparam_.nbrowclust_))
+                  + RealMin).log();
+      if((((m_Alk-m_Alkold).abs()/m_Alk).sum())<Mparam_.initepsilon_)
+      { break;}
+    }
+    // try some optimization
+    if (m_Tik_.sizeCols() < m_Rjl_.sizeCols())
+    { m_Gammakl_ = (m_Tik_.transpose()*m_Dataij_)*m_Rjl_;}
+    else
+    { m_Gammakl_ = (m_Tik_.transpose()* (m_Dataij_*m_Rjl_));}
+    m_Gammakl_ /= STK::sumByRow(m_Gammakl_)*STK::sum(m_Gammakl_);
+    return true;
+}
+
+bool ContingencyLBModel::emInitStep()
+{
+#ifdef COVERBOSE
+  std::cout<<"ContingencyLBModel::emInitStep. Initializing Model Parameters."<<std::endl;
+#endif
+  // log proportions in rows and columns
+//v_logPiek_ = -std::log(Mparam_.nbrowclust_)*(STK::Const::VectorX(Mparam_.nbrowclust_));
+//v_logRhol_ = -std::log(Mparam_.nbcolclust_)*(STK::Const::VectorX(Mparam_.nbcolclust_));
+
+//// block posterior probabilities for individuals and variables
+//m_Tik_.resize(nbSample_,Mparam_.nbrowclust_);
+//m_Rjl_.resize(nbVar_,Mparam_.nbcolclust_);
+
+//// initialize Tik and Rjl
+//randomFuzzyTik();
+//randomFuzzyRjl();
+//// create initial parameters
+//if (m_Tik_.sizeCols() < m_Rjl_.sizeCols())
+//{ m_Ykl_   = (m_Tik_.transpose()*m_Dataij_)*m_Rjl_;}
+//else
+//{ m_Ykl_   = m_Tik_.transpose()*(m_Dataij_*m_Rjl_);}
+//m_Gammakl_ = m_Ykl_/(v_Tk_* v_Rl_.transpose());
+//#ifdef COVERBOSE
+//consoleOut();
+//#endif
+//bool fixedprop = Mparam_.fixedproportions_;
+//Mparam_.fixedproportions_ = true;
+
+    // start cem iterations
+    if (initEMRows())
+    {
+  #ifdef COVERBOSE
+      std::cout << "ContingencyLBModel::initEMRows done with success."<<std::endl;
+      consoleOut();
+  #endif
+      if (initEMCols())
+      {
+          m_Gammakl1_ = m_Gammakl_;
+          m_Gammakl1old_.resize(Mparam_.nbrowclust_,Mparam_.nbcolclust_) = 0;
+          m_Gammaklold_.resize(Mparam_.nbrowclust_,Mparam_.nbcolclust_) = 0;
+          m_Uil_.resize(nbSample_,Mparam_.nbcolclust_) = 0;
+          m_Vjk_.resize(nbVar_,Mparam_.nbrowclust_) = 0;
+          v_logPiek_ = std::log(1.0/Mparam_.nbrowclust_)*(STK::Const::VectorX(Mparam_.nbrowclust_));
+          v_logRhol_ = std::log(1.0/Mparam_.nbcolclust_)*(STK::Const::VectorX(Mparam_.nbcolclust_));
+    
+  #ifdef COVERBOSE
+    std::cout<<"ContingencyLBModel::emInitStep. Initialization done with success."<<std::endl;
+    consoleOut();
+  #endif
+//      Mparam_.fixedproportions_ = fixedprop;
+        return true;
+      }
+    }
+
+//Mparam_.fixedproportions_ = fixedprop;
+  return false;
+}
+
+bool ContingencyLBModel::initEMRows()
+{
+////Initialization
+//m_Uil_ = m_Dataij_*m_Rjl_;
+////Determine row partition using EM algorithm with equal proportions
+//for ( int itr = 0; itr < Mparam_.nbinititerations_; ++itr)
+//{
+//  if(!eStepRows()) return false;
+//  //M-step
+//  m_Gammaklold_ = m_Gammakl_;
+//  mStepRows();
+//  //Termination check
+//  if((((m_Gammakl_-m_Gammaklold_)/m_Gammakl_).abs().sum())<Mparam_.initepsilon_)
+//  { break;}
+//}
+//return true;
+
+
+//Temporary variables, reduce the number of column
+//int cols=std::min(100, nbVar_);
+  int cols = nbVar_;
+
+  MatrixReal m_Akl(Mparam_.nbrowclust_,cols), m_Aklold(Mparam_.nbrowclust_,cols);
+  MatrixReal m_sumik(Mparam_.nbrowdata_,Mparam_.nbrowclust_);
+  int maxIndex;
+
+  //Model parameters
+  m_Tik_.resize(nbSample_,Mparam_.nbrowclust_) = 0;
+  m_Vjk_.resize(nbVar_,Mparam_.nbrowclust_) = 0;
+  v_Tk_.resize(Mparam_.nbrowclust_) = 0;
+
+  m_Rjl_.resize(nbVar_,Mparam_.nbcolclust_) = 0;
+  v_Rl_ = STK::Const::Vector<STK::Real>(cols);
+
+  // Initializations. m_Uil_ will contain cols columns of the original data set
+  m_Uil_.resize(nbSample_, cols) = 0;
+  selectRandomColsFromData(m_Uil_, cols);
+  v_Ui_ = STK::sumByRow(m_Uil_);
+  //
+  randomPoissonParameterRows(m_Akl,cols);
+
+  std::pair<int,int> Label_pair;
+  for(int i=0;i<knownLabelsRows_.size();i++)
+  {
+    Label_pair = knownLabelsRows_[i];
+    m_Tik_(Label_pair.first,Label_pair.second) = 1;
+  }
+
+  //Determine row partition using EM algorithm with equal proportions
+  for ( int itr = 0; itr < Mparam_.nbinititerations_; ++itr)
+  {
+    //E-Step
+    m_sumik = m_Uil_*m_Akl.transpose();
+    m_Tik_  = (m_sumik-STK::maxByRow(m_sumik)*STK::Const::PointX(Mparam_.nbrowclust_)).exp();
+    m_Tik_ /= STK::sumByRow(m_Tik_)*STK::Const::PointX(Mparam_.nbrowclust_);
+    // reinitialize known labels
+    for ( int i=0;i< (int)knownLabelsRows_.size();i++)
+    {
+      m_Tik_.row(knownLabelsRows_[i].first).setZeros();
+      m_Tik_(knownLabelsRows_[i].first, knownLabelsRows_[i].second)=1;
+    }
+    // check empty class
+    if( (empty_cluster_ = finalizeStepRows()) )
+    {
+      Error_msg_  = "In ContingencyLBModel::InitEMRows(). Class size too small while estimating model.\n";
+#ifdef COVERBOSE
+      std::cout << Error_msg_;
+      std::cout << "v_Tk_= " << v_Tk_.transpose();
+      std::cout << "v_Rl_= " << v_Rl_.transpose();
+#endif
+      return false;
+    }
+    // M-step
+    m_Aklold = m_Akl;
+    m_Akl = ( (m_Tik_.transpose()*m_Uil_)
+        /( (m_Tik_.transpose()*v_Ui_)*STK::Const::PointX(cols))+RealMin).log();
+    // check convergence
+    if((((m_Akl-m_Aklold).abs()/m_Akl).sum())<Mparam_.initepsilon_) { break;}
+  }
+  return true;
+}
+
+bool ContingencyLBModel::initEMCols()
+{
+  //Initializations
+//m_Vjk_ = m_Dataij_.transpose()*m_Tik_;
+////Determine column partition using EM algorithm with equal proportions
+//for ( int itr = 0; itr < Mparam_.nbinititerations_; ++itr)
+//{
+//  if(!eStepCols()) return false;
+//  //M-step
+//  m_Gammaklold_ = m_Gammakl_;
+//  mStepCols();
+//  //Termination check
+//  if((((m_Gammakl_-m_Gammaklold_)/m_Gammakl_).abs().sum())<Mparam_.initepsilon_)
+//  { break;}
+//}
+//m_Gammakl1old_ = m_Gammakl1_;
+//m_Gammakl1_    = m_Gammakl_;
+//return true;
+
+    //Temporary variables
+    MatrixReal m_Alk(Mparam_.nbcolclust_,Mparam_.nbrowclust_)
+             , m_Alkold(Mparam_.nbcolclust_,Mparam_.nbrowclust_);
+    MatrixReal m_sumjl(nbVar_, Mparam_.nbcolclust_);
+    int maxIndex;
+  
+    //Initializations
+    m_Vjk_ = m_Dataij_.transpose()*m_Tik_;
+    v_Vj_  = STK::sumByRow(m_Vjk_);
+    randomPoissonParameterCols(m_Alk);
+    std::pair<int,int> Label_pair;
+    for ( int j=0;j<knownLabelsCols_.size();j++)
+    {
+      Label_pair = knownLabelsCols_[j];
+      m_Rjl_(Label_pair.first,Label_pair.second)=1;
+    }
+    for ( int itr = 0; itr < Mparam_.nbinititerations_; ++itr)
+    {
+      //E-step
+      m_sumjl = m_Vjk_*(m_Alk.transpose());
+      m_Rjl_ = (m_sumjl-STK::maxByRow(m_sumjl)*STK::Const::PointX(Mparam_.nbcolclust_)).exp();
+      m_Rjl_ /= (STK::sumByRow(m_Rjl_)*STK::Const::PointX(Mparam_.nbcolclust_));
+      //
+      for ( int j=0;j< (int)knownLabelsCols_.size();j++)
+      {
+        m_Rjl_.row(knownLabelsCols_[j].first).setZeros();
+        m_Rjl_(knownLabelsCols_[j].first,knownLabelsCols_[j].second)=1;
+      }
+      // check empty class
+      if( (empty_cluster_ = finalizeStepCols()) )
+      {
+        Error_msg_  = "In ContingencyLBModel::InitEMCols(). Class size too small while running model.\n";
+#ifdef COVERBOSE
+        std::cout << Error_msg_;
+        std::cout << "v_Tk_= " << v_Tk_.transpose();
+        std::cout << "v_Rl_= " << v_Rl_.transpose();
+#endif
+        return false;
+      }
+      // M-step
+      m_Alkold = m_Alk;
+      m_Alk = ( (m_Rjl_.transpose()*m_Vjk_)
+               /( ( m_Rjl_.transpose()*v_Vj_)*STK::Const::PointX(Mparam_.nbrowclust_))
+                  + RealMin).log();
+      if((((m_Alk-m_Alkold).abs()/m_Alk).sum())<Mparam_.initepsilon_)
+      { break;}
+    }
+    // try some optimization
+    if (m_Tik_.sizeCols() < m_Rjl_.sizeCols())
+    { m_Gammakl_ = (m_Tik_.transpose()*m_Dataij_)*m_Rjl_;}
+    else
+    { m_Gammakl_ = (m_Tik_.transpose()* (m_Dataij_*m_Rjl_));}
+    m_Gammakl_ /= STK::sumByRow(m_Gammakl_)*STK::sum(m_Gammakl_);
+    return true;
 }
 
 bool ContingencyLBModel::emRows()
 {
   //Initialization
   m_Uil_ = m_Dataij_*m_Rjl_;
-  v_Yl_ = STK::sum(m_Uil_).transpose();
-
   for ( int itr = 0; itr < Mparam_.nbiterations_int_; ++itr)
   {
     if(!eStepRows()) return false;
     //M-step
     m_Gammaklold_ = m_Gammakl_;
     mStepRows();
-
     //Termination check
     if((((m_Gammakl_-m_Gammaklold_)/m_Gammakl_).abs().sum())<Mparam_.epsilon_int_)
     { break;}
@@ -94,8 +497,6 @@ bool ContingencyLBModel::semRows()
 {
   //Initialization
   m_Uil_ = m_Dataij_*m_Rjl_;
-  v_Yl_ = STK::sum(m_Uil_).transpose();
-
   if(!seStepRows()) return false;
   //M-step
   mStepRows();
@@ -104,9 +505,8 @@ bool ContingencyLBModel::semRows()
 
 bool ContingencyLBModel::cemRows()
 {
+  //Initialization
   m_Uil_ = m_Dataij_*m_Rjl_;
-  v_Yl_ = STK::sum(m_Uil_).transpose();
-
   for ( int itr = 0; itr < Mparam_.nbiterations_int_; ++itr)
   {
     if(!ceStepRows()) return false;
@@ -124,7 +524,6 @@ bool ContingencyLBModel::emCols()
 {
   //Initializations
   m_Vjk_ = m_Dataij_.transpose()*m_Tik_;
-  v_Yk_  = STK::sum(m_Vjk_).transpose();
   for ( int itr = 0; itr < Mparam_.nbiterations_int_; ++itr)
   {
     if(!eStepCols()) return false;
@@ -144,8 +543,6 @@ bool ContingencyLBModel::semCols()
 {
   //Initializations
   m_Vjk_ = m_Dataij_.transpose()*m_Tik_;
-  v_Yk_  = STK::sum(m_Vjk_).transpose();
-
   if(!seStepCols()) return false;
   //M-step
   mStepCols();
@@ -156,8 +553,6 @@ bool ContingencyLBModel::cemCols()
 {
   //Initializations
   m_Vjk_ = m_Dataij_.transpose()*m_Tik_;
-  v_Yk_  = STK::sum(m_Vjk_).transpose();
-
   for ( int itr = 0; itr < Mparam_.nbiterations_int_; ++itr)
   {
     if(!ceStepCols()) return false;
@@ -173,174 +568,84 @@ bool ContingencyLBModel::cemCols()
   return true;
 }
 
+bool ContingencyLBModel::GibbsRows()
+{
+  Error_msg_ = "Gibbs is not implemented for this model.";
+#ifdef COVERBOSE
+  std::cout<<Error_msg_<<"\n";
+#endif
+  return false;
+}
+
+bool ContingencyLBModel::GibbsCols()
+{
+  Error_msg_ = "Gibbs is not implemented for this model.";
+#ifdef COVERBOSE
+  std::cout<<Error_msg_<<"\n";
+#endif
+  return false;
+}
+
 STK::Real ContingencyLBModel::estimateLikelihood()
 {
   likelihood_ = (m_Ykl_.prod((m_Gammakl_).log()) ).sum()
-              - DataSum_ + v_Tk_.dot(v_logPiek_) + v_Rl_.dot(v_logRhol_)
-              -(m_Tik_.prod((RealMin + m_Tik_).log()) ).sum()
-              -(m_Rjl_.prod((RealMin + m_Rjl_).log()) ).sum();
+              - DataSum_
+              + v_Tk_.dot(v_logPiek_)
+              + v_Rl_.dot(v_logRhol_)
+              - (m_Tik_.prod( (RealMin + m_Tik_).log()) ).sum()
+              - (m_Rjl_.prod( (RealMin + m_Rjl_).log()) ).sum();
   return likelihood_;
+}
+/* @return the number of free parameters of the distribution of a block.*/
+int ContingencyLBModel::nbFreeParameters() const
+{
+  return Mparam_.nbcolclust_ * Mparam_.nbrowclust_;
 }
 
 void ContingencyLBModel::parameterStopCriteria()
-{
-  STK::Real relativechange = (((m_Gammakl1_-m_Gammakl1old_)/m_Gammakl1_).abs().sum());
-  if(relativechange<Mparam_.epsilon_)
-    stopAlgo_ = true;
-  else
-    stopAlgo_ = false;
-}
+{ stopAlgo_ = ((((m_Gammakl1_-m_Gammakl1old_)/m_Gammakl1_).abs().sum())<Mparam_.epsilon_);}
 
 void ContingencyLBModel::selectRandomColsFromData(MatrixReal& _m_il,int cols)
 {
-  if(cols==nbVar_)
-    _m_il = m_Dataij_;
-  else{
+  if(cols==nbVar_) {  _m_il = m_Dataij_;}
+  else
+  {
     //random shuffle Algorithm
-    int random,index,temp;
     VectorInteger _v_temp(Mparam_.nbcoldata_);
-    for ( int j = 0; j < Mparam_.nbcoldata_; ++j)
-    { _v_temp[j]=j;}
+    for ( int j = 0; j < Mparam_.nbcoldata_; ++j) { _v_temp[j]=j;}
     for ( int l = 0; l < cols; ++l)
     {
-      random=std::rand()%(Mparam_.nbcoldata_-l);
-      index=_v_temp[random];
+//    int random=std::rand()%(Mparam_.nbcoldata_-l);
+      int random;
+#pragma omp critical
+      random = STK::Law::UniformDiscrete::rand(0, Mparam_.nbcoldata_-l - 1);
+      int index=_v_temp[random];
       _m_il.col(l)=m_Dataij_.col(index);
       //swap elements
-      temp=_v_temp[Mparam_.nbcoldata_-l-1];
-      _v_temp[Mparam_.nbcoldata_-l-1]=_v_temp[random];
-      _v_temp[random]=temp;
+      std::swap(_v_temp[Mparam_.nbcoldata_-l-1], _v_temp[random]);
     }
   }
-}
-
-bool ContingencyLBModel::initCEMRows()
-{
-  //Temporary variables
-  int cols=std::min(100,int(nbVar_));
-  MatrixReal m_Akl(Mparam_.nbrowclust_,cols),m_Aklold(Mparam_.nbrowclust_,cols);
-  MatrixReal m_sumik(Mparam_.nbrowdata_,Mparam_.nbrowclust_);
-  int maxIndex;
-
-  //Model parameters
-  m_Vjk_.resize(nbVar_,Mparam_.nbrowclust_) = 0;
-  v_Rl_ = STK::Const::Vector<STK::Real>(cols);
-  v_Tk_.resize(Mparam_.nbrowclust_) = 0;
-  m_Tik_.resize(nbSample_,Mparam_.nbrowclust_) = 0;
-  m_Rjl_.resize(nbVar_,Mparam_.nbcolclust_) = 0;
-  // Initializations
-  m_Uil_.resize(nbSample_,cols) = 0;
-  selectRandomColsFromData(m_Uil_,cols);
-  v_Ui_ = STK::sumByRow(m_Uil_);
-  randomPoissonParameterRows(m_Akl,cols);
-  std::pair<int,int> Label_pair;
-  for(int i=0;i<knownLabelsRows_.size();i++)
-  {
-    Label_pair = knownLabelsRows_[i];
-    m_Tik_(Label_pair.first,Label_pair.second) = 1;
-  }
-  //Determine row partition using CEM algorithm with equal proportions
-  for ( int itr = 0; itr < Mparam_.nbinititerations_; ++itr)
-  {
-    m_sumik = m_Uil_*(m_Akl.transpose());
-    for ( int i =0;i< UnknownLabelsRows_.size();i++)
-    {
-      m_sumik.row(UnknownLabelsRows_[i]).maxElt(maxIndex);
-      m_Tik_.row(UnknownLabelsRows_[i]).setZeros();
-      m_Tik_(UnknownLabelsRows_[i],maxIndex)=1;
-    }
-    // check empty class
-    if( (empty_cluster_ = finalizeStepRows()) )
-    {
-      Error_msg_  = "In ContingencyLBModel::initCEMRows(). Class size too small while estimating model.\n";
-#ifdef COVERBOSE
-      std::cout << Error_msg_;
-#endif
-      return false;
-    }
-    // M-step
-    m_Aklold = m_Akl;
-    m_Akl = ( (m_Tik_.transpose()*m_Uil_)
-             /( (m_Tik_.transpose()*v_Ui_)*STK::Const::Point<STK::Real>(cols))+RealMin).log();
-
-    if((((m_Akl-m_Aklold).abs()/m_Akl).sum())<Mparam_.initepsilon_)
-    { break;}
-  }
-  return true;
-}
-
-bool ContingencyLBModel::initCEMCols()
-{
-  //Temporary variables
-  MatrixReal m_Alk(Mparam_.nbcolclust_,Mparam_.nbrowclust_) , m_Alkold(Mparam_.nbcolclust_,Mparam_.nbrowclust_);
-  MatrixReal m_sumjl(nbVar_, Mparam_.nbcolclust_);
-  int maxIndex;
-
-  //Initializations
-  m_Vjk_ = (m_Dataij_.transpose())*m_Tik_;
-  v_Vj_  = STK::sumByRow(m_Vjk_);
-  randomPoissonParameterCols(m_Alk);
-  std::pair<int,int> Label_pair;
-  for ( int j=0;j<knownLabelsCols_.size();j++)
-  {
-    Label_pair = knownLabelsCols_[j];
-    m_Rjl_(Label_pair.first,Label_pair.second)=1;
-  }
-  for ( int itr = 0; itr < Mparam_.nbinititerations_; ++itr)
-  {
-    // CE-step
-    m_sumjl = m_Vjk_*(m_Alk.transpose());
-    for ( int j =0;j< UnknownLabelsCols_.size();j++)
-    {
-      m_sumjl.row(UnknownLabelsCols_[j]).maxElt(maxIndex);
-      m_Rjl_.row(UnknownLabelsCols_[j]).setZeros();
-      m_Rjl_(UnknownLabelsCols_[j],maxIndex)=1;
-    }
-    // check empty class
-    if( (empty_cluster_ = finalizeStepCols()) )
-    {
-      Error_msg_  = "In ContingencyLBModel::initCEMCols(). Class size too small while estimating model.\n";
-#ifdef COVERBOSE
-      std::cout << Error_msg_;
-#endif
-      return false;
-    }
-    // M-step
-    m_Alkold = m_Alk;
-    m_Alk = ( (m_Rjl_.transpose()*m_Vjk_)
-             /( (m_Rjl_.transpose()*v_Vj_)*STK::Const::Point<STK::Real>(Mparam_.nbrowclust_))+RealMin).log();
-    if((((m_Alk-m_Alkold).abs()/m_Alk).sum())<Mparam_.initepsilon_)
-    { break;}
-  }
-  // try some optimization
-  if (m_Tik_.sizeCols() < m_Rjl_.sizeCols())
-  { m_Gammakl_ = (m_Tik_.transpose()*m_Dataij_)*m_Rjl_;}
-  else
-  { m_Gammakl_ = (m_Tik_.transpose()* (m_Dataij_)*m_Rjl_);}
-  m_Gammakl_ /= STK::sumByRow(m_Gammakl_)*STK::sum(m_Gammakl_);
-  return true;
 }
 
 void ContingencyLBModel::logSumRows(MatrixReal & m_ik)
 {
-  m_ik = STK::Const::Vector<STK::Real>(nbSample_)*v_logPiek_.transpose()
+  m_ik = STK::Const::VectorX(nbSample_)*v_logPiek_.transpose()
        + m_Uil_* m_Gammakl_.log().transpose();
 }
 
 void ContingencyLBModel::logSumCols(MatrixReal & m_jl)
 {
-  m_jl = STK::Const::Vector<STK::Real>(nbVar_)*v_logRhol_.transpose()
+  m_jl = STK::Const::VectorX(nbVar_)*v_logRhol_.transpose()
        + m_Vjk_* m_Gammakl_.log();
 }
 
 void ContingencyLBModel::randomPoissonParameterRows(MatrixReal& m_kl,int cols)
 {
-  int index;
-  VectorInteger _v_temp = randSample(nbSample_,Mparam_.nbrowclust_);
+  // sample nbrowclust_ integer form [1..nbSample]
+  VectorInteger _v_temp = randSample(nbSample_, Mparam_.nbrowclust_);
   for ( int k = 0; k < Mparam_.nbrowclust_; ++k)
   {
-    index=_v_temp[k];
-    //index=k;
+    int index=_v_temp[k];
     for ( int l = 0; l < cols; ++l)
     {
       m_kl(k,l)=std::log(m_Uil_(index,l)/v_Ui_[index]+RealMin);
@@ -350,11 +655,10 @@ void ContingencyLBModel::randomPoissonParameterRows(MatrixReal& m_kl,int cols)
 
 void ContingencyLBModel::randomPoissonParameterCols(MatrixReal& m_lk)
 {
-  int index;
   VectorInteger _v_temp = randSample(nbVar_,Mparam_.nbcolclust_);
   for ( int l = 0; l < Mparam_.nbcolclust_; ++l)
   {
-    index=_v_temp[l];
+    int index=_v_temp[l];
     //index=l;
     for ( int k = 0; k < Mparam_.nbrowclust_; ++k)
     {
@@ -364,53 +668,50 @@ void ContingencyLBModel::randomPoissonParameterCols(MatrixReal& m_lk)
 }
 
 void ContingencyLBModel::finalizeOutput()
-{
-  commonFinalizeOutput();
-}
+{ commonFinalizeOutput();}
 
 void ContingencyLBModel::consoleOut()
 {
-#ifndef COVERBOSE
-  std::cout<<"Output Model parameter:"<<"\ngammakl:\n"<<m_Gammakl_<<"\npiek: "<<
-      v_Piek_.transpose()<<"\nRhol: "<<v_Rhol_.transpose()<<std::endl;
+#ifdef COVERBOSE
+  std::cout<< "Output Model parameter:\ngammakl:\n" << m_Gammakl_
+           << "v_Tk_: "      << v_Tk_.transpose()
+           << "v_Rl_: "      << v_Rl_.transpose()
+           << "v_logPiek_: " << v_logPiek_.transpose()
+           << "v_logRhol_: " << v_logRhol_.transpose();
 #endif
 }
+
 MatrixReal const& ContingencyLBModel::arrangedDataClusters()
 {
-  arrangedDataCluster<MatrixReal>(m_ClusterDataij_,m_Dataij_);
+  arrangedDataCluster(m_ClusterDataij_, m_Dataij_);
   return m_ClusterDataij_;
 }
 
 void ContingencyLBModel::modifyThetaStart()
 {
   m_Gammaklstart_ = m_Gammakl_;
+
   v_logPiekstart_ = v_logPiek_;
   v_logRholstart_ = v_logRhol_;
+
   m_Rjlstart_ = m_Rjl_;
+  m_Tikstart_ = m_Tik_;
 }
 
 void ContingencyLBModel::copyThetaStart()
 {
   m_Gammakl_ = m_Gammaklstart_;
+  m_Gammakl1_ = m_Gammakl_;
+
   v_logPiek_ = v_logPiekstart_;
   v_logRhol_ = v_logRholstart_;
 
   m_Rjl_ = m_Rjlstart_;
+  m_Tik_ = m_Tikstart_;
 
-  //initialization
   v_Rl_ = STK::sum(m_Rjl_);
-  m_Gammakl1_ = m_Gammakl_;
-}
+  v_Tk_ = STK::sum(m_Tik_);
 
-void ContingencyLBModel::copyThetaMax()
-{
-  m_Gammakl_ = m_Gammaklmax_;
-  v_logPiek_ = v_logPiekmax_;
-  v_logRhol_ = v_logRholmax_;
-
-  m_Tik_ = m_Tikmax_;
-  m_Rjl_ = m_Rjlmax_;
-  likelihood_ = Lmax_;
 }
 
 void ContingencyLBModel::modifyThetaMax()
@@ -421,7 +722,23 @@ void ContingencyLBModel::modifyThetaMax()
 
   m_Rjlmax_ = m_Rjl_;
   m_Tikmax_ = m_Tik_;
+
   Lmax_ = likelihood_;
+}
+
+void ContingencyLBModel::copyThetaMax()
+{
+  m_Gammakl_ = m_Gammaklmax_;
+  v_logPiek_ = v_logPiekmax_;
+  v_logRhol_ = v_logRholmax_;
+
+  m_Tik_ = m_Tikmax_;
+  m_Rjl_ = m_Rjlmax_;
+
+  v_Rl_ = STK::sum(m_Rjl_);
+  v_Tk_ = STK::sum(m_Tik_);
+
+  likelihood_ = Lmax_;
 }
 
 void ContingencyLBModel::mStepFull()
@@ -436,5 +753,6 @@ void ContingencyLBModel::mStepFull()
   { m_Ykl_     = (m_Tik_.transpose()*m_Dataij_)*m_Rjl_;}
   else
   { m_Ykl_     = m_Tik_.transpose()*(m_Dataij_*m_Rjl_);}
-  m_Gammakl_ = m_Ykl_/( STK::sumByRow(m_Ykl_)* STK::sum(m_Dataij_*m_Rjl_));
+  m_Gammakl_ = m_Ykl_/(v_Tk_* v_Rl_.transpose());
+  //m_Gammakl_ = m_Ykl_/( STK::sumByRow(m_Ykl_)* STK::sum(m_Dataij_*m_Rjl_));
 }

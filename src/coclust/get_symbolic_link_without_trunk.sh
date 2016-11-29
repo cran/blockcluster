@@ -32,11 +32,11 @@ ln -sf ../../$file $link
 done
 
 }
-make_symbolic_link ../../../../coclust/trunk/src/Algorithms
-make_symbolic_link ../../../../coclust/trunk/src/CoClustFacade
-make_symbolic_link ../../../../coclust/trunk/src/InputParameters
-make_symbolic_link ../../../../coclust/trunk/src/Models
-make_symbolic_link ../../../../coclust/trunk/src/Strategy
-make_symbolic_link_only_headers ../../../../coclust/trunk/src/enumerations
-make_symbolic_link_only_headers ../../../../coclust/trunk/src/Initialization
-make_symbolic_link_only_headers ../../../../coclust/trunk/src/typedefs
+make_symbolic_link ../../../coclust/src/Algorithms
+make_symbolic_link ../../../coclust/src/CoClustFacade
+make_symbolic_link ../../../coclust/src/InputParameters
+make_symbolic_link ../../../coclust/src/Models
+make_symbolic_link ../../../coclust/src/Strategy
+make_symbolic_link_only_headers ../../../coclust/src/enumerations
+make_symbolic_link_only_headers ../../../coclust/src/Initialization
+make_symbolic_link_only_headers ../../../coclust/src/typedefs

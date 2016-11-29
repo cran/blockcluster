@@ -5,7 +5,7 @@
 \title{Co-Clustering function.}
 \usage{
 coclusterContingency(data, semisupervised = FALSE, rowlabels = numeric(0),
-  collabels = numeric(0), model = character(0), nbcocluster,
+  collabels = numeric(0), model = NULL, nbcocluster,
   strategy = coclusterStrategy())
 }
 \arguments{

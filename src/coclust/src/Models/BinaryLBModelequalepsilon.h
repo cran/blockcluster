@@ -38,7 +38,7 @@
 #include "../typedefs/typedef.h"
 #include "../Models/ICoClustModel.h"
 #ifndef RPACKAGE
-#include "../../../CImg/CImg.h"
+#include "../../CImg/CImg.h"
 #endif
 class BinaryLBModelequalepsilon : public ICoClustModel
 {
@@ -75,9 +75,12 @@ class BinaryLBModelequalepsilon : public ICoClustModel
     virtual bool cemCols();
     virtual bool semRows();
     virtual bool semCols();
+    virtual bool GibbsRows();
+    virtual bool GibbsCols();
     virtual STK::Real estimateLikelihood();
     virtual void parameterStopCriteria();
     virtual bool cemInitStep();
+    virtual bool emInitStep();
     virtual void finalizeOutput();
     virtual void consoleOut();
     virtual STK::Real iclCriteriaValue();
@@ -86,6 +89,8 @@ class BinaryLBModelequalepsilon : public ICoClustModel
     virtual void copyThetaStart();
     virtual void copyThetaMax();
     virtual void modifyThetaMax();
+    /** @return the number of free parameters of the distribution of a block.*/
+    virtual int nbFreeParameters() const;
     /**Return class mean BinaryLBModelequalepsilon::m_akl_ for all the blocks (co-clusters)*/
     MatrixBinary const& mean() const;
     /**Return Class despersion BinaryLBModelequalepsilon::m_epsilonkl_ for all the blocks (co-clusters) */
@@ -121,6 +126,8 @@ class BinaryLBModelequalepsilon : public ICoClustModel
     // Functions used to operate on data in intermediate steps when running the Initialization
     bool initCEMRows();
     bool initCEMCols();
+    bool initEMRows();
+    bool initEMCols();
     void initBernoulliLogSumRows(MatrixReal & m_sum);
     void initBernoulliLogSumCols(MatrixReal & m_sum);
     void selectRandomColsFromData(MatrixReal& m,int col);

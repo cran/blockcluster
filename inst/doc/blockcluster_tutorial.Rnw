@@ -34,6 +34,7 @@
     keywordstyle=\color{blue},
     commentstyle=\ttfamily\color{dkgreen},
     backgroundcolor=\color{white},
+    stringstyle=\color{orange},
     showspaces=false,
     showstringspaces=false,
     showtabs=false,
@@ -46,6 +47,7 @@
     keywordstyle={},
     morekeywords={}
     }
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Diverses commandes
@@ -161,7 +163,7 @@ bc.date <- packageDescription("blockcluster")$Date
 \title{A tutorial for {\bf blockcluster} R package\\Version 4}
 \author{Parmeet Singh Bhatia\footnote{Siemens, bhatia.parmeet@gmail.com},
 Serge Iovleff \footnote{INRIA-Lille, serge.iovleff@inria.fr}}
-\date{}
+\date{\today}
 
 
 \begin{document}
@@ -214,17 +216,17 @@ the library for handling very huge data sets in reasonable time. The R package
 is already available on CRAN at \url{http://cran.r-project.org/web/packages/blockcluster/index.html}.
 
 This aim of this tutorial is to elaborate the usage of R package {\bf
-blockcluster} and to familiarize its users with its various capabilties. The
+blockcluster} and to familiarize its users with its various capabilities. The
 rest of the article is organized as follows. Section \ref{sec:usingblockcluster}
 gives various details of the package as well as demonstrate it's usage on
-similated binary data-set. Section \ref{sec:applications} provides two examples
+simulated binary data-set. Section \ref{sec:applications} provides two examples
 with real data-sets.
 
 \section{Package details}
 \label{sec:usingblockcluster}
 This package contains two main functions namely {\bf cocluster} and
 {\bf coclusterStrategy} to perform co-clustering and to set various input
-parameters respectively. The convenient functions {\bf colclusterBinary}, {\bf
+parameters respectively. The convenient functions {\bf coclusterBinary}, {\bf
 coclusterCategorical}, {\bf coclusterContingency} and {\bf coclusterContinuous}
 are specialized versions of the {\bf cocluster} function. The package also
 contains two helper functions namely {\bf summary} and {\bf plot} to get the
@@ -241,7 +243,7 @@ data. The prototype of the function is as follows:
 \begin{lstlisting}
 cocluster( data, datatype, semisupervised = FALSE
          , rowlabels = numeric(0), collabels = numeric(0)
-         , model = character(0), nbcocluster, strategy = coclusterStrategy())
+         , model = NULL, nbcocluster, strategy = coclusterStrategy())
 \end{lstlisting}
 
 The various inputs of {\bf cocluster} functions are as follows:
@@ -263,7 +265,7 @@ available in package are given in tables~\ref{tab:binarymodeltypes},
 \ref{tab:contingencymodeltypes}.
 \item {\bf nbcocluster:} Integer vector specifying the number of row and column
 clusters respectively.
-\item {\bf strategy:} This inpu  can use to control various input parameters. It
+\item {\bf strategy:} This input can be used to control various input parameters. It
 can be created using the function {\bf coclusterStrategy} as explained in
 Section~\ref{sec:coclusterStrategy}.
 
@@ -274,32 +276,33 @@ the most general model with free row and column proportions and unequal
 dispersion/variance for each block. Furthermore we have default set of input
 parameters which works well in most cases which are explained in further
 details in Section~\ref{sec:coclusterStrategy}. The package also comes with OpenMP
-support (If supported by your Operating system and R). OpenMP will automatically
-set the number of threads depending on your system. 
+support (If supported by your Operating system and R). You need to set the number of
+threads in you environment (export OMP\_NUM\_THREADS).
 
 \subsubsection{The coclusterBinary function}
 The \verb+coclusterBinary+ function is a specialization of the \verb+cocluster+
 function for binary data. The prototype of the function is as follows:
 \begin{lstlisting}
+# cocluster for binary data
 coclusterBinary( data, semisupervised = FALSE
    , rowlabels = numeric(0), collabels = numeric(0)
-   , model = character(0), nbcocluster, strategy = coclusterStrategy()
+   , model = NULL, nbcocluster, strategy = coclusterStrategy()
    , a=1, b=1)
 \end{lstlisting}
 This function has two
 additional parameters $a$ and $b$ corresponding to the bayesian form of the
 likelihood function. The default value correspond to the case "no prior".
-The availables binary models are given in the table~\ref{tab:binarymodeltypes}.
+The available binary models are given in the table~\ref{tab:binarymodeltypes}.
 \begin{table}[h!]
 \centering
  \begin{tabular}{|c|c|c|c|c|}
 \hline
      Model  & Datatype & Proportions & Dispersion/Variance & Initialization\\
 \hline
-     {\bf pik\_rhol\_epsilonkl} & binary & unequal & unequal & CEM\\
-     {\bf pik\_rhol\_epsilon} & binary & unequal & equal & CEM\\
-     {\bf pi\_rho\_epsilonkl} & binary & equal & unequal & CEM\\
-     {\bf pi\_rho\_epsilon} & binary & equal & equal & CEM\\
+     {\bf pik\_rhol\_epsilonkl} & binary & unequal & unequal & CEM/EM\\
+     {\bf pik\_rhol\_epsilon} & binary & unequal & equal & CEM/EM\\
+     {\bf pi\_rho\_epsilonkl} & binary & equal & unequal & CEM/EM\\
+     {\bf pi\_rho\_epsilon} & binary & equal & equal & CEM/EM\\
 \hline
  \end{tabular}
 \caption{Binary models available in package {\bf blockcluster}.}
@@ -314,7 +317,7 @@ function for categorical data. The prototype of the function is as follows:
 # cocluster for categorical data
 coclusterCategorical( data, semisupervised = FALSE
    , rowlabels = numeric(0), collabels = numeric(0)
-   , model = character(0), nbcocluster, strategy = coclusterStrategy()
+   , model = NULL, nbcocluster, strategy = coclusterStrategy()
    , a=1, b=1)
 \end{lstlisting}
 This function has two additional parameters $a$ and $b$ corresponding to the
@@ -331,18 +334,18 @@ table~\ref{tab:categoricalmodeltypes}.
  {\bf pi\_rho\_multi}  & categorical & equal & N.A & Random\\
 \hline
  \end{tabular}
-\caption{Catgorical models available in package {\bf blockcluster}.}
+\caption{Categorical models available in package {\bf blockcluster}.}
 \label{tab:categoricalmodeltypes}
 \end{table}
 
 \subsubsection{The coclusterContinuous function}
-The \verb+coclusterCategorical+ function is a specialization of the \verb+cocluster+
+The \verb+coclusterContinuous+ function is a specialization of the \verb+cocluster+
 function for continuous data. The prototype of the function is as follows:
 \begin{lstlisting}
 # cocluster for continuous data (Gaussian models)
 coclusterContinuous( data, semisupervised = FALSE
    , rowlabels = numeric(0), collabels = numeric(0)
-   , model = character(0), nbcocluster, strategy = coclusterStrategy())
+   , model = NULL, nbcocluster, strategy = coclusterStrategy())
 \end{lstlisting}
 The availables continuous models are given in the table~\ref{tab:continuousmodeltypes}.
 \begin{table}[h!]
@@ -351,13 +354,13 @@ The availables continuous models are given in the table~\ref{tab:continuousmodel
 \hline
      Model  & Datatype & Proportions & Dispersion/Variance & Initialization\\
 \hline
-     {\bf pik\_rhol\_sigma2kl} & continuous & unequal & unequal & CEM\\
-     {\bf pik\_rhol\_sigma} & continuous & unequal & equal & CEM\\
-     {\bf pi\_rho\_sigma2kl} & continuous & equal & unequal & CEM\\
-     {\bf pi\_rho\_sigma2} & continuous & equal & equal & CEM\\
+     {\bf pik\_rhol\_sigma2kl} & continuous & unequal & unequal & CEM/EM\\
+     {\bf pik\_rhol\_sigma} & continuous & unequal & equal & CEM/EM\\
+     {\bf pi\_rho\_sigma2kl} & continuous & equal & unequal & CEM/EM\\
+     {\bf pi\_rho\_sigma2} & continuous & equal & equal & CEM/EM\\
 \hline
  \end{tabular}
-\caption{Conatinuous models available in package {\bf blockcluster}.}
+\caption{Continuous models available in package {\bf blockcluster}.}
 \label{tab:continuousmodeltypes}
 \end{table}
 
@@ -368,7 +371,7 @@ function for contingency data. The prototype of the function is as follows:
 # cocluster for contingency data (Poisson models)
 coclusterContingency( data, semisupervised = FALSE
    , rowlabels = numeric(0), collabels = numeric(0)
-   , model = character(0), nbcocluster, strategy = coclusterStrategy())
+   , model = NULL, nbcocluster, strategy = coclusterStrategy())
 \end{lstlisting}
 The availables contingency models are given in the table~\ref{tab:contingencymodeltypes}.
 \begin{table}[h!]
@@ -377,8 +380,8 @@ The availables contingency models are given in the table~\ref{tab:contingencymod
 \hline
      Model  & Datatype & Proportions & Dispersion/Variance & Initialization\\
 \hline
-     {\bf pik\_rhol\_unknown} & contingency & unequal & N.A & CEM\\
-     {\bf pi\_rho\_unknown} & contingency & equal & N.A & CEM\\
+     {\bf pik\_rhol\_unknown} & contingency & unequal & N.A & CEM/EM\\
+     {\bf pi\_rho\_unknown} & contingency & equal & N.A & CEM/EM\\
      {\bf pik\_rhol\_known} & contingency & unequal & N.A & Random\\
      {\bf pi\_rho\_known} & contingency & equal & N.A & Random\\
 \hline
@@ -398,9 +401,9 @@ coclusterStrategy( algo = "BEM", initmethod = character()
                  , stopcriteria = "Parameter", semisupervised = FALSE
                  , nbiterationsxem = 50,  nbiterationsXEM = 500
                  , nbinititerations = 10, initepsilon = 0.01
-                 , nbiterations\_int = 5, epsilon\_int = 0.01
+                 , nbiterations_int = 5, epsilon_int = 0.01
                  , epsilonxem = 1e-04, epsilonXEM = 1e-10, nbtry = 2
-                 , nbxem = 5, hyperparam = c(1,1))
+                 , nbxem = 5)
 \end{lstlisting}
 
 In the following example, we call the function {\bf coclusterStrategy} without any arguments and
@@ -423,16 +426,14 @@ perform Co-clustering using the newly set input parameters. The various input
 arguments for the function {\bf coclusterStrategy} are as follows:
 \begin{itemize}
 \item {\bf algo:} The valid values for this parameter are "BEM" (Default),
-"BCEM" and "BSEM" which are respectively Block EM, Block Classification EM and
-Block Stochastic EM algorithms.
+"BCEM", "BSEM" and "BGibbs" (only for Binary model) which are respectively Block EM, Block Classification EM,
+Block Stochastic EM algorithms and Gibbs sampling.
 \item {\bf stopcriteria:} It specifies the stopping criteria. It can be based
 on either relative change in parameters value (preferred) or relative change in
 log-likelihood. Valid criterion values are "Parameter" and "Likelihood".
 Default criteria is "Parameter".
 \item{\bf initmethod:} Method to initialize model parameters. The valid values
-are "cemInitStep", "fuzzyCemInitStep" and "randomInit". For now only one kind
-of initialization exist for every model currently available in the package.
-Hence default value for initialization is set according to the model.
+are "cemInitStep", "emInitStep" and "randomInit" depending on the data type (See previous Tables).
 \item{\bf nbinititerations:} Number of Global iterations used in initialization
 step. Default value is 10.
 \item{\bf initepsilon:} Tolerance value used inside initialization. Default
@@ -444,17 +445,17 @@ Parameter/likelihood for internal E-step. Default value is 1e-2.
 \item{\bf nbtry:} Number of tries (XEM steps). Default value is 2.
 \item{\bf nbxem:} Number of xem steps. Default value is 5.
 \item{\bf nbiterationsxem:} Number of EM iterations used during xem step. Default value is 50.
-\item{\bf nbiterationsXEM:} Number of EM iterations used during XEM step. Deafault value is 500.
+\item{\bf nbiterationsXEM:} Number of EM iterations used during XEM step. Default value is 500.
 \item{\bf epsilonxem:} Tolerance value used during xem step. Default value is 1e-4.
 \item{\bf epsilonXEM:} Tolerance value used during XEM step. Default value is 1e-10.
 \end{itemize}
 To understand many of the above input parameters, we need to have some basic idea about
-the algorithms and the way they are run inside package {\bf blockcluster}, which is why there is a separate dedicated 
+the algorithms and the way they run inside the package {\bf blockcluster}, which is why there is a separate dedicated 
 section ~\ref{sec:inputarguments} for the same.
 
 \subsubsection{Understanding various input parameters}
 \label{sec:inputarguments}
-You might be wondering why there are so many types of iterations and tolerances inside the package. Well, to get some basic understanding about various input parameters, it is important to know a bit about the algorithms. We will not go through full fledged theory of these algorithms here but will provide enough details to make you understand the meaning of all the input parameters. From now on everything will be explained using BEM but it is applicable in same way to BCEM as well as to BSEM algorithm. The BEM algorithm can be defined as follows in laymen language.
+You might be wondering why there are so many types of iterations and tolerances inside the package. Well, to get some basic understanding about various input parameters, it is important to know a bit about the algorithms. We will not go through full fledged theory of these algorithms here but will provide enough details to make you understand the meaning of all the input parameters. From now on everything will be explained using BEM but it is applicable in same way to BCEM as well as to BSEM/BGibbs algorithm. The BEM algorithm can be defined as follows in laymen language.
 \begin{enumerate}
  \item Run EM algorithm on rows. 
 \item Run EM algorithm on columns.
@@ -463,9 +464,9 @@ You might be wondering why there are so many types of iterations and tolerances 
 The following strategy is employed to run various algorithms.
 \begin{enumerate}
 \item Run the BEM Algorithm for {\bf 'nbxem'} number of times (with high tolerance and low number of iterations) and keep the best model
-parameters (based on likelihood) among these runs. We can this step as {\bf 'xem'} step.
+parameters (based on likelihood) among these runs. We call this step {\bf 'xem'} step.
 \item Starting with the  best model parameters, run the algorithm again but this time with a low value of epsilon (low tolerance) 
-and a high number of iterations. We can this step as {\bf 'XEM'} step.
+and a high number of iterations. We call this step {\bf 'XEM'} step.
 \item Repeat above two steps for {\bf 'nbtry'} number of times and keep the best model estimation.
 \end{enumerate}
 With this background, the various input parameters are explained as follows. 
@@ -482,8 +483,6 @@ name suggests, they are respectively for {\bf 'xem'} and {\bf 'XEM'} steps.
 \item {\bf epsilonxem, epsilonXEM:} These are tolerance values for BEM algorithm during {\bf 'xem'} and {\bf 'XEM'} step respectively. 
 \item {\bf epsilon\_int:} This is the tolerance value for EM algorithm on rows/columns.
 \item {\bf initepsilon, nbinititerations:} These are the tolerance value and number of iterations respectively used during initialization of model parameters.
-\item {\bf bayesianform:} Boolean parameter to indicate whether to run algorithms in bayesian settings or not. Algorithms under bayesian settings are currently only implemented for binary and categorical models. Default value is false.
-\item {\bf hyperparam: } Hyper-parameters ("a" and "b") in case of Bayesian settings. If the assigned value of "a" and "b" is 1, then the algorithms are no different than their original form.  
 \end{itemize}
 
 \subsection{Model Parameters}
@@ -585,13 +584,14 @@ $\brho$&.3&.3&.4\\
 \end{table}
 
 << >>=
+library(blockcluster)
 data("binarydata")
 out<-coclusterBinary(binarydata, nbcocluster=c(2,3))
 summary(out)
 @
 
-Note that you also get the Integrated complete likelihood (ICL) value in case
-binary and categorical models. This value can be used for model selection. The
+Note that you also get the explicit Integrated Complete Likelihood (ICL) value in case of
+binary and categorical models, and asymptotic value otherwise. This value can be used for model selection. The
 following {\bf R} command is used to plot the original and co-clustered data
 (Figure~\ref{fig:binarydata}(a)) with default value of {\bf asp} which is $0$
 (FALSE). When {\bf asp} is FALSE, R graphics will optimize the output figure
@@ -753,7 +753,9 @@ co-clustering (b).}
 \end{figure}
 
 \section{Remarks}
-This tutorial gives a brief introduction about the {\bf blockcluster} R package. It demonstrates the use of package using Binary data-set but the package can be used in similar fashion for other types of data namely {\bf Contingency}, {\bf Continuous} and {\bf Categorical}. Please note that this tutorial is based on version 3. If you have any questions,suggestions or remarks, do not hesitate to put it on public forum at \url{https://gforge.inria.fr/forum/forum.php?forum_id=11190&group_id=3679}.
+This tutorial gives a brief introduction about the {\bf blockcluster} R package. It demonstrates the use of package using Binary data-set but the package can be used in similar fashion for other types of data namely {\bf Contingency}, {\bf Continuous} and {\bf Categorical}. Please note that this tutorial is based on version 4. If you have any
+questions, suggestions or remarks, do not hesitate to put it on public forum at
+\url{https://gforge.inria.fr/forum/forum.php?forum_id=11190&group_id=3679}.
 
 
 \bibliographystyle{plain}

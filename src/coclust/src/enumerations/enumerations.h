@@ -50,7 +50,8 @@ enum Algorithm
 {
     BEM = 1,
     BCEM = 2,
-    BSEM  = 3
+    BSEM  = 3,
+    BGibbs  = 4
 };
 
 /**
@@ -68,7 +69,7 @@ enum StopCriteria
 enum Initialization
 {
     e_CEMInit = 1,
-    e_FuzzyCEMInit = 2,
+    e_EMInit = 2,
     e_RandomInit = 3
 };
 

@@ -77,13 +77,14 @@ struct ModelParameters
     //proportion
     bool fixedproportions_;
 };
+
+std::ostream& operator<< (std::ostream& s, ModelParameters const& param);
+
 /**
  * @brief Structure to store various Strategy options.
  */
 struct Strategy
 {
-    Strategy()
-    {}
     Algorithm Algo_;
     StopCriteria stopcriteria_;
     Initialization Init_;
@@ -121,11 +122,11 @@ class InputParameters : public STK::IPage
     std::string GetDatafilename(){return datafilename_;}
     /**Get optionalfilenames*/
     std::list<std::string>& GetOptionalfilenames(){return optionalfilenames_;}
-    void SetModelparameters(ModelParameters const&);
+    void setModelparameters(ModelParameters const&);
     /**Set Algorithm parameters*/
-    void SetAlgoparameters(StrategyParameters const&);
+    void setAlgoparameters(StrategyParameters const&);
     /**Set strategy*/
-    void SetStrategy(Strategy const&);
+    void setStrategy(Strategy const&);
     /**Destructor*/
     ~InputParameters(){};
 
@@ -164,11 +165,11 @@ class InputParameters
     /**Get optionalfilenames*/
     std::list<std::string>& GetOptionalfilenames(){return optionalfilenames_;}
     /**Set Model parameters*/
-    void SetModelparameters(ModelParameters const&);
+    void setModelparameters(ModelParameters const&);
     /**Set Algorithm parameters*/
-    void SetAlgoparameters(StrategyParameters const&);
+    void setAlgoparameters(StrategyParameters const&);
     /**Set strategy*/
-    void SetStrategy(Strategy const&);
+    void setStrategy(Strategy const&);
     /**Destructor*/
     ~InputParameters(){};
 
@@ -203,17 +204,17 @@ inline const Strategy& InputParameters::GetStrategy()
   return strategy_;
 }
 
-inline void InputParameters::SetAlgoparameters(StrategyParameters const& Aparam)
+inline void InputParameters::setAlgoparameters(StrategyParameters const& Aparam)
 {
   Stratparam_ = Aparam;
 }
 
-inline void InputParameters::SetModelparameters(ModelParameters const& Mparam)
+inline void InputParameters::setModelparameters(ModelParameters const& Mparam)
 {
   Mparam_ = Mparam;
 }
 
-inline void InputParameters::SetStrategy(Strategy const& strat)
+inline void InputParameters::setStrategy(Strategy const& strat)
 {
   strategy_ = strat;
 }

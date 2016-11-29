@@ -47,12 +47,12 @@ class IInit
     /*
      * Refer IInit::p_Model_ to the instantiated model class inside CoClustermain.cpp
      */
-    void SetModel(ICoClustModel * model);
+    void setModel(ICoClustModel * model);
     /** Virtual Destructor*/
     virtual ~IInit(){};
 };
 
-inline void IInit::SetModel(ICoClustModel * model)
+inline void IInit::setModel(ICoClustModel * model)
 {
   p_Model_ = model;
 }

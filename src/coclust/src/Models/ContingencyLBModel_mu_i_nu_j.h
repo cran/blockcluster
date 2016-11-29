@@ -67,15 +67,21 @@ class ContingencyLBModel_mu_i_nu_j: public ICoClustModel
     virtual bool cemCols();
     virtual bool semRows();
     virtual bool semCols();
+    virtual bool GibbsRows();
+    virtual bool GibbsCols();
     virtual void parameterStopCriteria();
     virtual STK::Real estimateLikelihood();
     virtual bool randomInit();
+    virtual bool cemInitStep();
+    virtual bool emInitStep();
     virtual void finalizeOutput();
     virtual void consoleOut();
     virtual void modifyThetaStart();
     virtual void copyThetaStart();
     virtual void copyThetaMax();
     virtual void modifyThetaMax();
+    /** @return the number of free parameters of the distribution of a block.*/
+    virtual int nbFreeParameters() const;
     MatrixReal const& arrangedDataClusters();
     /**Return Poisson Parameters ContingencyLBModel_mu_i_nu_j::m_Gammakl_*/
     MatrixReal const& gamma() const;
@@ -92,11 +98,20 @@ class ContingencyLBModel_mu_i_nu_j: public ICoClustModel
     MatrixReal m_Gammakl_, m_Gammaklold_, m_Gammakl1_, m_Gammakl1old_,m_Gammaklstart_,m_Gammaklmax_;
     VectorReal v_nul_;
     VectorReal v_muk_;
+    VectorReal v_Ui_,v_Vj_;
     MatrixReal m_Ykl_;
 
     //M-steps
     void mStepRows();
     void mStepCols();
+    // Functions to be used for internal computation in model initialization
+    bool initCEMRows();
+    bool initCEMCols();
+    bool initEMRows();
+    bool initEMCols();
+    void selectRandomColsFromData(MatrixReal& m,int col);
+    void randomPoissonParameterRows(MatrixReal& m,int col);
+    void randomPoissonParameterCols(MatrixReal& m);
 };
 
 inline MatrixReal const& ContingencyLBModel_mu_i_nu_j::gamma() const

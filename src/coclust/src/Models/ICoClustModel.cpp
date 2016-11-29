@@ -32,10 +32,11 @@
 #define MINSIZE 3
 
 ICoClustModel::ICoClustModel( ModelParameters const& Mparam)
-                            : Mparam_(Mparam)
-                            , likelihood_(-STK::Arithmetic<STK::Real>::infinity())
-                            , nbSample_(Mparam.nbrowdata_)
+                            : nbSample_(Mparam.nbrowdata_)
                             , nbVar_(Mparam.nbcoldata_)
+                            , Mparam_(Mparam)
+                            , likelihood_(-STK::Arithmetic<STK::Real>::infinity())
+                            , Lmax_(-STK::Arithmetic<STK::Real>::infinity())
                             , empty_cluster_(false)
                             , stopAlgo_(false)
 {
@@ -56,10 +57,10 @@ ICoClustModel::ICoClustModel( ModelParameters const& Mparam)
 ICoClustModel::ICoClustModel( ModelParameters const& Mparam
                             , VectorInteger const& rowlabels
                             , VectorInteger const& collabels)
-                            : Mparam_(Mparam)
-                            , likelihood_(-STK::Arithmetic<STK::Real>::infinity())
-                            , nbSample_(Mparam.nbrowdata_)
+                            : nbSample_(Mparam.nbrowdata_)
                             , nbVar_(Mparam.nbcoldata_)
+                            , Mparam_(Mparam)
+                            , likelihood_(-STK::Arithmetic<STK::Real>::infinity())
                             , empty_cluster_(false)
                             , stopAlgo_(false)
 {
@@ -83,7 +84,10 @@ VectorInteger ICoClustModel::randSample(int n,int k)
   for ( int lfirst = 0, lend = n; lfirst < k; ++lfirst)
   {
     // get ramdom index
-    int irand=std::rand()%(lend);
+    int irand;
+#pragma omp critical
+    irand = STK::Law::UniformDiscrete::rand(0,lend - 1);
+//  int irand=std::rand()%(lend);
     v_randint[lfirst] = v_temp[irand];
     //swap elements
     --lend;
@@ -115,7 +119,6 @@ bool ICoClustModel::finalizeStepRows()
   // compute size of the blocks by column
   v_Tk_ = STK::sum(m_Tik_);
   // check empty class
-  //return ( (v_Tk_< MINSIZE).any() );
   return (v_Tk_ * v_Rl_.transpose() < MINSIZE).any();
 }
 /* compute the vector v_Rl_ and check if the size block is not too small
@@ -126,7 +129,6 @@ bool ICoClustModel::finalizeStepCols()
   // compute size of the blocks by column
   v_Rl_ = STK::sum(m_Rjl_);
   // check empty class
-  //return( (v_Rl_ < MINSIZE).any() );
   return (v_Tk_ * v_Rl_.transpose() < MINSIZE).any();
 }
 
@@ -149,6 +151,8 @@ bool ICoClustModel::eStepRows()
     Error_msg_  = "In ICoClustModel::eStepRows(). Class size too small while estimating model.\n";
 #ifdef COVERBOSE
     std::cout << Error_msg_;
+    std::cout << "v_Tk_= " << v_Tk_.transpose();
+    std::cout << "v_Rl_= " << v_Rl_.transpose();
 #endif
     return false;
   }
@@ -174,6 +178,8 @@ bool ICoClustModel::eStepCols()
     Error_msg_  = "In ICoClustModel::eStepCols(). Class size too small while running model.\n";
 #ifdef COVERBOSE
     std::cout << Error_msg_;
+    std::cout << "v_Tk_= " << v_Tk_.transpose();
+    std::cout << "v_Rl_= " << v_Rl_.transpose();
 #endif
     return false;
   }
@@ -297,7 +303,9 @@ void ICoClustModel::rowClassMatrixDraw()
   for ( int i = 0; i < nbSample_; ++i)
   {
     //std::srand(i);
-    randnumbers[i] = STK::Real(std::rand())/STK::Real(RAND_MAX);
+//  randnumbers[i] = STK::Real(std::rand())/STK::Real(RAND_MAX);
+#pragma omp critical
+    randnumbers[i] = STK::Law::Uniform::rand(0,1);
   }
 
   m_Zik_.setZeros();
@@ -327,7 +335,8 @@ void ICoClustModel::colClassMatrixDraw()
   for ( int j = 0; j < nbVar_; ++j)
   {
     //std::srand(j);
-    randnumbers[j] = STK::Real(std::rand())/STK::Real(RAND_MAX);
+//  randnumbers[j] = STK::Real(std::rand())/STK::Real(RAND_MAX);
+#pragma omp critical
     randnumbers[j] = STK::Law::Uniform::rand(0,1);
   }
   m_Wjl_.setZeros();
@@ -354,9 +363,9 @@ bool ICoClustModel::cemInitStep()
   return false;
 }
 
-bool ICoClustModel::fuzzyCemInitStep()
+bool ICoClustModel::emInitStep()
 {
-  Error_msg_ = "Fuzzy CEM initialization is not valid for this model.";
+  Error_msg_ = "EM initialization is not valid for this model.";
 #ifdef COVERBOSE
   std::cout<<Error_msg_<<"\n";
 #endif
@@ -374,13 +383,38 @@ bool ICoClustModel::randomInit()
 
 STK::Real ICoClustModel::iclCriteriaValue()
 {
-  Error_msg_ = "ICL creteria is not yet implemented for this model.";
+
+  STK::Real criteria = 0.0;
+  //  Error_msg_ = "ICL creteria is not yet implemented for this model.";
+  criteria =  likelihood_ - std::log(Mparam_.nbrowdata_)*(Mparam_.nbrowclust_-1.)/2.
+              - std::log(Mparam_.nbcoldata_)*(Mparam_.nbcolclust_-1.)/2.
+              - std::log(Mparam_.nbcoldata_*Mparam_.nbrowdata_) * nbFreeParameters()/2.;
 #ifdef COVERBOSE
   std::cout<<Error_msg_<<"\n";
 #endif
-  return -RealMax;
+  return criteria;
 }
-VectorInteger ICoClustModel::partRnd(int n,VectorReal proba)
+
+/* generate random tik_ */
+int ICoClustModel::randomFuzzyTik()
+{
+  m_Tik_.randUnif();
+  v_Tk_ = sum(m_Tik_);
+  m_Tik_ /= STK::Const::VectorX(nbSample_) * v_Tk_.transpose() ;
+  return v_Tk_.minElt();
+}
+
+/* generate random Rjl_ */
+int ICoClustModel::randomFuzzyRjl()
+{
+  m_Rjl_.randUnif();
+  v_Rl_ = sum(m_Rjl_);
+  m_Rjl_ /= STK::Const::VectorX(nbVar_) * v_Rl_.transpose();
+  return v_Rl_.minElt();
+}
+
+
+VectorInteger ICoClustModel::partRnd(int n, VectorReal proba)
 {
   int clusters = proba.sizeRows();
   VectorInteger v_Z(n, 0);
@@ -419,7 +453,9 @@ PointReal ICoClustModel::unifRnd(STK::Real a,STK::Real b, int col)
   PointReal m_temp(col);
   for ( int c = 0; c < col; ++c)
   {
-     m_temp[c] = (b-a)*(std::rand()/STK::Real(RAND_MAX)) + a;
+//   m_temp[c] = (b-a)*(std::rand()/STK::Real(RAND_MAX)) + a;
+#pragma omp critical
+     m_temp[c] = (b-a)*STK::Law::Uniform::rand(0,1) + a;
   }
   return m_temp;
 }

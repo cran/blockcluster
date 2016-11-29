@@ -41,9 +41,10 @@
  */
 class ICoClustModel
 {
-    public:
     /** Default constructor */
     inline ICoClustModel(){};
+
+  public:
     /** Constructor
      *  @param Mparam ModelParameters
      **/
@@ -79,6 +80,10 @@ class ICoClustModel
     virtual bool semRows() = 0;
     /**Interface for SEM Algorithm for columns*/
     virtual bool semCols() = 0;
+    /**Interface for Gibbs Algorithm for rows*/
+    virtual bool GibbsRows() = 0;
+    /**Interface for Gibbs Algorithm for columns*/
+    virtual bool GibbsCols() = 0;
     /**
      * Interface for calculating Stopping condition using percentage Change in Parameter values. This function will set the
      * ICoClustModel::stopAlgo_ parameter to either true or false depending on whether the change in Likelihood is less than
@@ -102,18 +107,20 @@ class ICoClustModel
      * false if the derived class does not overwrite this method.
      */
     virtual bool randomInit();
-    /** Interface function for CEM initialization . It will initialize model parameters
-     * using Fuzzy CEM algorithm.
+    /** Interface function for EM initialization . It will initialize model parameters
+     * using EM algorithm.
      * @return boolean value representing success or failure. By default, it will return
      * false if the derived class does not overwrite this method.
      */
-    virtual bool fuzzyCemInitStep();
+    virtual bool emInitStep();
     /** Interface function for calculating ICL criteria value.
      * @return ICL criteria.
      */
     virtual STK::Real iclCriteriaValue();
     /** This function will provide the current status of ICoClustModel::stopAlgo_ parameter.*/
     bool stopAlgo();
+    /** @return the number of free parmaters of the distribution of a block.*/
+    virtual int nbFreeParameters() const = 0;
     /** Interface for finalizing the output. This function will allow the model to finalize
      * all the output parameters after the algorithm terminates.
      */
@@ -204,13 +211,18 @@ class ICoClustModel
     std::vector<std::pair<int,int> > knownLabelsRows_, knownLabelsCols_;
     VectorInteger v_nbRowClusterMembers_,v_nbColClusterMembers_;
 
-    bool empty_cluster_;
     ModelParameters Mparam_;
     STK::Real likelihood_,Lmax_;
-    MatrixReal m_Tik_,m_Rjl_,m_Rjlstart_,m_Tikstart_,m_Rjlmax_,m_Tikmax_;
+    bool empty_cluster_;
+    MatrixReal m_Tik_, m_Rjl_
+             , m_Tikstart_, m_Rjlstart_
+             , m_Tikmax_, m_Rjlmax_;
     // sum by column and by row of the posterior probabilities
     VectorReal v_Tk_,v_Rl_;
-    VectorReal v_Piek_,v_logPiek_,v_logPiekstart_,v_logPiekmax_,v_logRhol_,v_Rhol_,v_logRholstart_,v_logRholmax_;
+    // proportions and log proportions
+    VectorReal v_Piek_, v_Rhol_, v_logPiek_, v_logRhol_
+             , v_logPiekstart_, v_logRholstart_
+             , v_logPiekmax_, v_logRholmax_;
     /** Row and column classification matrices respectively*/
     MatrixInteger m_Zik_,m_Wjl_;
     /**Row and column classification vector*/
@@ -234,6 +246,13 @@ class ICoClustModel
     bool finalizeStepCols();
     /** Parameter finalization common for all models*/
     void commonFinalizeOutput();
+    /** generate random m_Tik_
+     *  @return the minimal number of individuals in class */
+    int randomFuzzyTik();
+    /** generate random m_Rjl_
+     *  @return the minimal number of individuals in class */
+    int randomFuzzyRjl();
+
     VectorInteger partRnd(int n,VectorReal proba);
     VectorReal cumSum(VectorReal proba);
     PointReal unifRnd(STK::Real a, STK::Real b, int col);
@@ -241,7 +260,6 @@ class ICoClustModel
   private:
     //make assignment operator private
     ICoClustModel& operator=(const ICoClustModel&);
-
 };
 
 inline ModelParameters const& ICoClustModel::modelParameters() const

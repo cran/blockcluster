@@ -60,7 +60,7 @@ bool XStrategyAlgo::run()
   std::cout<<"Entering XStrategy::run()"<<"\n";
 #endif
   STK::Real Lmax = -RealMax, L1 = -RealMax, Lcurrent;
-  int ntry_empty=0;
+//int ntry_empty=0;  Unused
   bool non_empty = false;
   bool isinitialized = false;
   for ( int itry = 0; itry < Stratparam_.nbtry_; ++itry)
@@ -69,11 +69,10 @@ bool XStrategyAlgo::run()
     L1 = -RealMax;
     //set espilon to eps_xem
     p_Model_->setEpsilon(p_Model_->modelParameters().eps_xem_);
-    for ( int ixem = 0; ixem < Stratparam_.nbxem_; ++ixem)
+    for (int ixem = 0; ixem < Stratparam_.nbxem_; ++ixem)
     {
-      ntry_empty = 0;
       p_Model_->setEmptyCluster(true);
-      while(ntry_empty<100)
+      for (int ntry_empty = 0; ntry_empty<100; ntry_empty++)
       {
         if (p_Init_->run())
         {
@@ -89,7 +88,6 @@ bool XStrategyAlgo::run()
           }
         }
         if (!p_Model_->isEmptyCluster()) break;
-        ntry_empty++;
       }
       // all initialization failed
       if(!isinitialized) return false;

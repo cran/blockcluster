@@ -24,32 +24,29 @@
 
  */
 
-/** @file IAlgo.h
- *  @brief Declares interface class for various algorithms.
+/** @file GibbsAlgo.cpp
+ *  @brief Implements GibbsAlgo class.
  **/
 
-#ifndef IALGO_H_
-#define IALGO_H_
-#include "../Models/ICoClustModel.h"
+#include "GibbsAlgo.h"
 
-/** @brief This is an interface class for various algorithms available in the package.
- *
- */
-class IAlgo
+GibbsAlgo::GibbsAlgo()
 {
-  public:
-    IAlgo(){};
-    virtual bool run() = 0;
-    void setModel(ICoClustModel*);
-    virtual ~IAlgo(){};
+  // TODO Auto-generated constructor stub
 
-  protected:
-    ICoClustModel * p_Model_;
-};
-
-inline void IAlgo::setModel(ICoClustModel* p_model)
-{
-  p_Model_ = p_model;
 }
 
-#endif /* IALGO_H_ */
+GibbsAlgo::~GibbsAlgo()
+{
+  // TODO Auto-generated destructor stub
+}
+
+bool GibbsAlgo::run()
+{
+  if (p_Model_->GibbsRows()) {
+    if (p_Model_->GibbsCols()) {
+      return true;
+    }
+  }
+  return false;
+}

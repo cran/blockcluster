@@ -5,7 +5,7 @@
 \title{Co-Clustering function for categorical data-sets.}
 \usage{
 coclusterCategorical(data, semisupervised = FALSE, rowlabels = numeric(0),
-  collabels = numeric(0), model = character(0), nbcocluster,
+  collabels = numeric(0), model = NULL, nbcocluster,
   strategy = coclusterStrategy(), a = 1, b = 1)
 }
 \arguments{

@@ -10,21 +10,22 @@ bc.date <- packageDescription("blockcluster")$Date
 
 
 ###################################################
-### code chunk number 2: blockcluster_tutorial.Rnw:408-410
+### code chunk number 2: blockcluster_tutorial.Rnw:411-413
 ###################################################
 defaultstrategy <- coclusterStrategy()
 summary(defaultstrategy)
 
 
 ###################################################
-### code chunk number 3: blockcluster_tutorial.Rnw:418-419
+### code chunk number 3: blockcluster_tutorial.Rnw:421-422
 ###################################################
 newstrategy <- coclusterStrategy(nbtry=5, nbxem=10, algo='BCEM')
 
 
 ###################################################
-### code chunk number 4: blockcluster_tutorial.Rnw:587-590
+### code chunk number 4: blockcluster_tutorial.Rnw:586-590
 ###################################################
+library(blockcluster)
 data("binarydata")
 out<-coclusterBinary(binarydata, nbcocluster=c(2,3))
 summary(out)

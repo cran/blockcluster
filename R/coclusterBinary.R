@@ -54,8 +54,8 @@ NULL
 #' 
 #' 
 coclusterBinary<-function( data, semisupervised = FALSE, rowlabels = numeric(0), collabels = numeric(0),
-                           model = character(0), nbcocluster, strategy = coclusterStrategy(), a=1, b=1
-                           ) 
+                           model = NULL, nbcocluster, strategy = coclusterStrategy(), a=1, b=1
+                         ) 
 {
 	#Check for data
 	if(missing(data)){ stop("Data is missing.")}
@@ -111,32 +111,44 @@ coclusterBinary<-function( data, semisupervised = FALSE, rowlabels = numeric(0),
     warning("The algorithm 'XCEMStrategy' is renamed as BCEM!")
     strategy@algo = "BCEM"
   }
-  else if(strategy@algo!="BEM" && strategy@algo!="BCEM" && strategy@algo!="BSEM" )
+  else if(strategy@algo!="BEM" && strategy@algo!="BCEM" && strategy@algo!="BSEM" && strategy@algo!="BGibbs")
   {
-    stop("Incorrect Algorithm, Valide algorithms are: BEM, BCEM, BSEM") 
+    stop("Incorrect Algorithm, Valide algorithms are: BEM, BCEM, BSEM, BGibbs") 
   }
 	#check for stopping criteria
 	if(strategy@stopcriteria!="Parameter" && strategy@stopcriteria!="Likelihood")
 		stop("Incorrect stopping criteria, Valid stopping criterians are: Parameter, Likelihood")
   # check for model
-	if(missing(model)){ model = "pik_rhol_epsilonkl"}
+	if(is.null(model)){ model = "pik_rhol_epsilonkl"}
 	else 
 	{
-		if(model!="pik_rhol_epsilonkl" && model!="pik_rhol_epsilon" && 
- 			 model!="pi_rho_epsilonkl" && model!="pi_rho_epsilon")
+		if(  model!="pik_rhol_epsilonkl"
+			&& model!="pik_rhol_epsilon"
+			&& model!="pi_rho_epsilonkl"
+			&& model!="pi_rho_epsilon")
 		{
 			stop("Incorrect Model, Valid Binary models are:pik_rhol_epsilonkl, pik_rhol_epsilon
 								pi_rho_epsilonkl, pi_rho_epsilon")
 		}
 	}
   # checking for strategy
-	if(length(strategy@initmethod)==0) { strategy@initmethod = "cemInitStep"}
-  # checking for hyperparameters
+	if(length(strategy@initmethod)==0)
+	{strategy@initmethod = "emInitStep"}
+	else
+	{
+    if(strategy@initmethod!="cemInitStep" && strategy@initmethod!="emInitStep")
+			stop("In coclusterBinary. Incorrect initialization method, valid method(s) are: cemInitStep, emInitStep")
+	}
+	# checking for hyperparameters
   if ((a <=0)||(b<=0)) { stop("hyper-parameters must be positive")}
-  strategy@hyperparam = c(a,b);
+  #strategy@hyperparam = c(a,b);
   # create object
-  inpobj<-new("BinaryOptions",data = data, rowlabels = rowlabels, collabels = collabels, semisupervised = semisupervised,
-		           datatype = "binary", model = model,nbcocluster = nbcocluster, strategy = strategy)
+  inpobj<-new( "BinaryOptions",data = data
+	           , rowlabels = rowlabels, collabels = collabels
+	           , semisupervised = semisupervised,
+		           datatype = "binary", model = model,nbcocluster = nbcocluster
+					   , strategy = strategy
+				     , hyperparam = c(a,b))
 
   .Call("CoClustmain",inpobj,PACKAGE = "blockcluster")
   cat(inpobj@message,"\n")

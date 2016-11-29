@@ -82,6 +82,7 @@ void ContingencyDataExchange::dataOutput(Rcpp::S4& obj,ICoClustModel* model,bool
     obj.slot("rowposteriorprob") = STK::wrap(model->rowPosteriorProb());
     obj.slot("colposteriorprob") = STK::wrap(model->colPosteriorProb());
     obj.slot("likelihood") = model->likelihood();
+    obj.slot("ICLvalue") = model->iclCriteriaValue();
   }
 }
 

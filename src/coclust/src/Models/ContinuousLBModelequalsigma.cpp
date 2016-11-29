@@ -158,6 +158,24 @@ bool ContinuousLBModelequalsigma::cemCols()
   return true;
 }
 
+bool ContinuousLBModelequalsigma::GibbsRows()
+{
+  Error_msg_ = "Gibbs is not implemented for this model.";
+#ifdef COVERBOSE
+  std::cout<<Error_msg_<<"\n";
+#endif
+  return false;
+}
+
+bool ContinuousLBModelequalsigma::GibbsCols()
+{
+  Error_msg_ = "Gibbs is not implemented for this model.";
+#ifdef COVERBOSE
+  std::cout<<Error_msg_<<"\n";
+#endif
+  return false;
+}
+
 void ContinuousLBModelequalsigma::parameterStopCriteria()
 {
   if((((m_Mukl_-m_Muklold1_)/m_Mukl_).abs().sum())<Mparam_.epsilon_)
@@ -178,6 +196,12 @@ STK::Real ContinuousLBModelequalsigma::estimateLikelihood()
               - (m_Rjl_.prod( (RealMin + m_Rjl_).log()) ).sum();
 
   return likelihood_;
+}
+
+/* @return the number of free parameters of the distribution of a block.*/
+int ContinuousLBModelequalsigma::nbFreeParameters() const
+{
+  return Mparam_.nbcolclust_*Mparam_.nbrowclust_ + 1;
 }
 
 // Initialization using CEM algo
@@ -201,8 +225,40 @@ bool ContinuousLBModelequalsigma::cemInitStep()
     m_Muklold1_ = m_Mukl_;
     m_Muklold2_.resize(Mparam_.nbrowclust_,Mparam_.nbcolclust_) = 0;
 #ifdef COVERBOSE
-    std::cout<<"Initialization over."<<"\n";
+      std::cout<<"ContinuousLBModelequalsigma::cemInitStep. Initialization done with success."<<std::endl;
+      consoleOut();
 #endif
+
+    return true;
+  }
+  return false;
+}
+
+// Initialization using EM algo
+bool ContinuousLBModelequalsigma::emInitStep()
+{
+#ifdef COVERBOSE
+  std::cout<<"Running Initialization.."<<"\n";
+#endif
+  if (initEMCols())
+  {
+    v_logPiek_ = std::log(1.0/Mparam_.nbrowclust_)*(STK::Const::Vector<STK::Real>(Mparam_.nbrowclust_));
+    v_logRhol_ = std::log(1.0/Mparam_.nbcolclust_)*(STK::Const::Vector<STK::Real>(Mparam_.nbcolclust_));
+    m_Dataij2_ = m_Dataij_.square();
+    m_Uil1_.resize(nbSample_,Mparam_.nbcolclust_) = 0;
+    m_Uil2_.resize(nbSample_,Mparam_.nbcolclust_) = 0;
+    m_Vjk1_.resize(nbVar_,Mparam_.nbrowclust_) = 0;
+    m_Vjk2_.resize(nbVar_,Mparam_.nbrowclust_) = 0;
+    v_Tk_.resize(Mparam_.nbrowclust_) = 0;
+    m_Tik_.resize(nbSample_,Mparam_.nbrowclust_) = 0;
+    //m_Mukl2_ = m_Mukl_.square();
+    m_Muklold1_ = m_Mukl_;
+    m_Muklold2_.resize(Mparam_.nbrowclust_,Mparam_.nbcolclust_) = 0;
+#ifdef COVERBOSE
+      std::cout<<"ContinuousLBModelequalsigma::emInitStep. Initialization done with success."<<std::endl;
+      consoleOut();
+#endif
+
     return true;
   }
   return false;
@@ -241,6 +297,68 @@ bool ContinuousLBModelequalsigma::initCEMCols()
     p_Mul2 = ( STK::sumByRow(m_Mulk.square()) ).transpose();
     m_Djl = v_Vj2*STK::Const::Point<STK::Real>(Mparam_.nbcolclust_)
           + STK::Const::Vector<STK::Real>(nbVar_) * p_Mul2 - 2*(m_Vjk*m_Mulk.transpose());
+    for ( int j=0;j< (int)UnknownLabelsCols_.size();j++)
+    {
+      m_Djl.row(UnknownLabelsCols_[j]).minElt(minIndex);
+      m_Rjl_.row(UnknownLabelsCols_[j]).setZeros();
+      m_Rjl_(UnknownLabelsCols_[j],minIndex)=1;
+    }
+    // check empty class
+    if( (empty_cluster_ = finalizeStepCols()) )
+    {
+      Error_msg_  = "In ContinuousLBModelequalsigma::initCEMCols(). Class size too small while estimating model.\n";
+#ifdef COVERBOSE
+      std::cout << Error_msg_;
+#endif
+      return false;
+    }
+    // M step
+    m_Mulk = (m_Rjl_.transpose()*m_Vjk)/(v_Rl_*STK::Const::Point<STK::Real>(Mparam_.nbrowclust_));
+    //Check for termination
+    W1_old = W1;
+    W1 = (m_Rjl_.prod(m_Djl)).sum();
+    //Initialization of model parameters
+    m_Mukl_ = m_Mulk.transpose();
+    if (std::abs((W1-W1_old)/W1)<Mparam_.initepsilon_)
+    { break;}
+  }
+  return true;
+
+}
+
+bool ContinuousLBModelequalsigma::initEMCols()
+{
+  //Temporary variables
+  MatrixReal m_Vjk(nbVar_,Mparam_.nbrowclust_);
+  MatrixReal m_Vkj(Mparam_.nbrowclust_,nbVar_);
+  MatrixReal m_Djl(nbVar_,Mparam_.nbcolclust_);
+  MatrixReal m_Mulk(Mparam_.nbcolclust_,Mparam_.nbrowclust_);
+  PointReal  p_Mul2(Mparam_.nbcolclust_);
+  MatrixReal m_Rlk(Mparam_.nbcolclust_,Mparam_.nbrowclust_);
+  int minIndex;
+  STK::Real W1 = RealMax , W1_old;
+
+  //Private members initialization
+  m_Rjl_.resize(nbVar_,Mparam_.nbcolclust_) = 0;
+  std::pair<int,int> Label_pair;
+  for ( int j=0;j< (int)knownLabelsCols_.size();j++ )
+  {
+    Label_pair = knownLabelsCols_[j];
+    m_Rjl_(Label_pair.first,Label_pair.second)=1;
+  }
+  Sigma2_ = 1.0;
+  //Initializations
+  selectRandomRowsFromData(m_Vkj);
+  m_Vjk = m_Vkj.transpose();
+  VectorReal v_Vj2 = STK::sumByRow(m_Vjk.square());
+  generateRandomMean(m_Vjk,m_Mulk);
+  for ( int itr = 0; itr < Mparam_.nbiterations_int_; ++itr)
+  {
+    p_Mul2 = ( STK::sumByRow(m_Mulk.square()) ).transpose();
+    m_Djl = v_Vj2*STK::Const::Point<STK::Real>(Mparam_.nbcolclust_)
+          + STK::Const::Vector<STK::Real>(nbVar_) * p_Mul2 - 2*(m_Vjk*m_Mulk.transpose());
+    m_Rjl_ = (m_Djl-STK::maxByRow(m_Djl)*STK::Const::PointX(Mparam_.nbcolclust_)).exp();
+    m_Rjl_ /= (STK::sumByRow(m_Rjl_)*STK::Const::PointX(Mparam_.nbcolclust_));
     for ( int j=0;j< (int)UnknownLabelsCols_.size();j++)
     {
       m_Djl.row(UnknownLabelsCols_[j]).minElt(minIndex);

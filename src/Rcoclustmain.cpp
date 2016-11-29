@@ -50,7 +50,7 @@
 
 
 
-#ifdef SUPPORT_OPENMP
+#ifdef _OPENMP
 #include <omp.h>
 
 RcppExport SEXP CoClustmain(SEXP robj)
@@ -60,7 +60,8 @@ RcppExport SEXP CoClustmain(SEXP robj)
   Rcpp::S4 CoClustobj(robj);
 
   //set number of threads equal to number of processors
-  omp_set_num_threads(omp_get_num_procs());
+//omp_set_num_threads(omp_get_num_procs()); // Can be problematic with set.seed in R. And it might be better to give choice to the user, juste have to export OMP_NUM_THREADS = x 
+  
 
   std::map<std::string,DataType> S_DataType;
   S_DataType["binary"] = Binary;
@@ -97,7 +98,7 @@ RcppExport SEXP CoClustmain(SEXP robj)
   }
 
   //Get input parameters
-  p_DataExchange_->SetInput(CoClustobj);
+  p_DataExchange_->setInput(CoClustobj);
   //Get data
   p_DataExchange_->dataInput(CoClustobj);
   //instantiate model
@@ -124,10 +125,10 @@ RcppExport SEXP CoClustmain(SEXP robj)
 
     //set cocluster
     p_CoCluster_ = new CoCluster();
-    p_CoCluster_->SetStrategy(p_Strategy_);
-    p_CoCluster_->SetAlgo(p_Algo_);
-    p_CoCluster_->SetModel(p_Model_);
-    p_CoCluster_->SetInit(p_Init_);
+    p_CoCluster_->setStrategy(p_Strategy_);
+    p_CoCluster_->setAlgo(p_Algo_);
+    p_CoCluster_->setModel(p_Model_);
+    p_CoCluster_->setInit(p_Init_);
 
 #pragma omp for schedule(dynamic,1)
       for (int i = 0; i < nbtry; ++i)
@@ -135,7 +136,7 @@ RcppExport SEXP CoClustmain(SEXP robj)
         bool success = p_CoCluster_->run();
 #pragma omp critical
         {
-          if (Lmax<p_Model_->likelihood()&& success)
+          if (Lmax<p_Model_->likelihood() && success)
           {
             Lmax = p_Model_->likelihood();
             globalsuccess = true;
@@ -178,11 +179,11 @@ RcppExport SEXP CoClustmain(SEXP robj)
   DataType datatype = S_DataType[Rcpp::as<std::string>(CoClustobj.slot("datatype"))];
 
   //Various pointers declarations
-  IStrategy * p_Strategy_ = NULL;
-  IAlgo * p_Algo_ = NULL;
+  IStrategy * p_Strategy_  = NULL;
+  IAlgo * p_Algo_          = NULL;
   ICoClustModel * p_Model_ = NULL;
-  IInit * p_Init_ = NULL;
-  CoCluster* p_CoCluster_ = NULL;
+  IInit * p_Init_          = NULL;
+  CoCluster* p_CoCluster_  = NULL;
   IDataExchange * p_DataExchange_ = NULL;
 
   //set p_DataExchange_ to required case
@@ -206,7 +207,7 @@ RcppExport SEXP CoClustmain(SEXP robj)
   }
 
   //Get input parameters
-  p_DataExchange_->SetInput(CoClustobj);
+  p_DataExchange_->setInput(CoClustobj);
   //Get data
   p_DataExchange_->dataInput(CoClustobj);
   //instantiate algorithm and strategy
@@ -218,10 +219,10 @@ RcppExport SEXP CoClustmain(SEXP robj)
 
   //create cocluster object and run coclustering
   p_CoCluster_ = new CoCluster();
-  p_CoCluster_->SetStrategy(p_Strategy_);
-  p_CoCluster_->SetAlgo(p_Algo_);
-  p_CoCluster_->SetModel(p_Model_);
-  p_CoCluster_->SetInit(p_Init_);
+  p_CoCluster_->setStrategy(p_Strategy_);
+  p_CoCluster_->setAlgo(p_Algo_);
+  p_CoCluster_->setModel(p_Model_);
+  p_CoCluster_->setInit(p_Init_);
   bool success = p_CoCluster_->run();
   p_DataExchange_->dataOutput(CoClustobj,p_Model_,success);
 

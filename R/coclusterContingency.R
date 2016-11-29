@@ -52,7 +52,7 @@ NULL
 #' 
 coclusterContingency<-function( data, semisupervised = FALSE
                               , rowlabels = numeric(0), collabels = numeric(0)
-                              , model = character(0), nbcocluster, strategy = coclusterStrategy()) 
+                              , model = NULL, nbcocluster, strategy = coclusterStrategy()) 
 {
 	#Check for data
 	if(missing(data)){ stop("Data is missing.")}
@@ -123,9 +123,8 @@ coclusterContingency<-function( data, semisupervised = FALSE
 		stop("Incorrect stopping criteria, Valid stopping criterians are: Parameter, Likelihood")
   
 	#check for datatype and models and create input object to be passed in .Call function.
-	if(missing(model)&& !is.list(data)){ model = "pik_rhol_unknown"}
-	else if(missing(model) && is.list(data))
-	{	model = "pik_rhol_known"}
+	if(is.null(model) && !is.list(data)){ model = "pik_rhol_unknown"}
+	else if(is.null(model) && is.list(data)) {	model = "pik_rhol_known"}
 	else
   {
     if(model!="pik_rhol_unknown" && model!="pik_rhol_known" && 
@@ -148,8 +147,8 @@ coclusterContingency<-function( data, semisupervised = FALSE
 	{
      if(strategy@initmethod!="randomInit"&&(model=="pi_rho_known"||model=="pik_rhol_known"))
      { stop("Incorrect initialization method, valid method(s) are: randomInit")}
-     else if(strategy@initmethod!="cemInitStep"&&(model=="pi_rho_unknown"||model=="pik_rhol_unknown"))
-       stop("Incorrect initialization method, valid method(s) are: cemInitStep")
+     else if((strategy@initmethod!="cemInitStep" && strategy@initmethod!="emInitStep")&&(model=="pi_rho_unknown"||model=="pik_rhol_unknown"))
+       stop("Incorrect initialization method, valid method(s) are: cemInitStep, emInitStep")
 	}
   if(!is.list(data))
         inpobj<-new("ContingencyOptions",data = data,semisupervised = semisupervised,rowlabels = rowlabels, collabels = collabels,

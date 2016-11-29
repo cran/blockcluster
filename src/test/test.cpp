@@ -16,7 +16,7 @@
 */
 
 /*
- *  Project:    MixtComp
+ *  Project:    blockcluster
  *  Created on: Mar 20, 2014
  *  Author:     Vincent KUBICKI <vincent.kubicki@inria.fr>
  **/

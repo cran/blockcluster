@@ -61,7 +61,7 @@ class IDataExchange
 
     void instantiateAlgo(IAlgo*& algo,IStrategy*& strat);
     void instantiateInit(IInit*& init);
-    void SetInput(Rcpp::S4 & obj);
+    void setInput(Rcpp::S4 & obj);
 
     StrategyParameters& GetStrategyParameters(){return Stratparam_;}
     void setStrategyParameters(StrategyParameters& strat){Stratparam_ = strat;}

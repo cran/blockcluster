@@ -41,9 +41,10 @@
 #include "coclust/src/Algorithms/EMAlgo.h"
 #include "coclust/src/Algorithms/CEMAlgo.h"
 #include "coclust/src/Algorithms/SEMAlgo.h"
+#include "coclust/src/Algorithms/GibbsAlgo.h"
 //CoClust::Initialization
 #include "coclust/src/Initialization/CEMInit.h"
-#include "coclust/src/Initialization/FuzzyCEMInit.h"
+#include "coclust/src/Initialization/EMInit.h"
 #include "coclust/src/Initialization/RandomInit.h"
 //CoClust::strategy
 #include "coclust/src/Strategy/XStrategyAlgo.h"
@@ -52,7 +53,7 @@
 IDataExchange::~IDataExchange()
 {}
 
-void IDataExchange::SetInput(Rcpp::S4 & obj)
+void IDataExchange::setInput(Rcpp::S4 & obj)
 {
   //Get Strategy
   Rcpp::S4 strategy(obj.slot("strategy"));
@@ -100,6 +101,9 @@ void IDataExchange::SetInput(Rcpp::S4 & obj)
   Mparam_.initepsilon_ = Rcpp::as<double>(strategy.slot("initepsilon"));
   Mparam_.epsilon_int_ = Rcpp::as<double>(strategy.slot("epsilon_int"));
 
+ // initialize epsilon_
+  Mparam_.epsilon_ = Mparam_.eps_xem_;
+
   //get row and column clusters
   Rcpp::IntegerVector nbcocluster(SEXP(obj.slot("nbcocluster")));
   Mparam_.nbrowclust_ = nbcocluster[0];
@@ -118,6 +122,7 @@ void IDataExchange::initializeParamEnum()
   S_Algorithm["BEM"] = BEM;
   S_Algorithm["BCEM"] = BCEM;
   S_Algorithm["BSEM"] = BSEM;
+  S_Algorithm["BGibbs"] = BGibbs;
 
   //StopCriteria
   S_StopCriteria["Parameter"] = Parameter;
@@ -125,7 +130,7 @@ void IDataExchange::initializeParamEnum()
 
   //Initialization
   S_Init["cemInitStep"] = e_CEMInit;
-  S_Init["fuzzyCemInitStep"] = e_FuzzyCEMInit;
+  S_Init["emInitStep"] = e_EMInit;
   S_Init["randomInit"] = e_RandomInit;
 
   //Models
@@ -161,6 +166,10 @@ void IDataExchange::instantiateAlgo(IAlgo*& algo,IStrategy*& strategy)
       algo = new SEMAlgo();
       strategy = new XStrategyforSEMAlgo(Stratparam_);
       break;
+    case BGibbs:
+      algo = new GibbsAlgo();
+      strategy = new XStrategyforSEMAlgo(Stratparam_);
+      break;
     default:
       algo = new EMAlgo();
       strategy = new XStrategyAlgo(Stratparam_);
@@ -175,8 +184,8 @@ void IDataExchange::instantiateInit(IInit*& init)
     case e_CEMInit:
       init = new CEMInit();
       break;
-    case e_FuzzyCEMInit:
-      init = new FuzzyCemInit();
+    case e_EMInit:
+      init = new emInit();
       break;
     case e_RandomInit:
       init = new RandomInit();

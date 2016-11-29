@@ -43,44 +43,42 @@ class CoCluster
 {
   public:
     /**Default Constructor*/
-    inline CoCluster(){};
+    inline CoCluster(): p_Strategy_(0), p_Model_(0), p_Init_(0), p_Algo_(0) {};
+    /**Default Destructor*/
+    inline ~CoCluster(){};
+
     /** This function perform Co-Clustering.*/
     bool run();
     /**It sets the algorithm to be run.*/
-    void SetStrategy(IStrategy * );
+    void setStrategy(IStrategy * );
     /**It  sets the model to be run.*/
-    void SetModel(ICoClustModel * );
+    void setModel(ICoClustModel * );
     /** It sets the Initialization method */
-    void SetInit(IInit * );
+    void setInit(IInit * );
     /** It sets the algorithm to be run */
-    void SetAlgo(IAlgo * );
-    /**Default Destructor*/
-    ~CoCluster(){};
+    void setAlgo(IAlgo * );
 
   private:
-    IStrategy * p_Strategy_; /**Pointer to algorithm*/
-    ICoClustModel * p_Model_; /**Pointer to Model*/
-    IInit * p_Init_; /**Pointer to Initialization*/
-    IAlgo * p_Algo_; /**Pointer to Algorithm*/
+    /**Pointer to Strategy */
+    IStrategy * p_Strategy_;
+    /**Pointer to Model*/
+    ICoClustModel * p_Model_;
+    /**Pointer to Initialization*/
+    IInit * p_Init_;
+    /**Pointer to algorithm*/
+    IAlgo * p_Algo_;
 };
 
-inline void CoCluster::SetStrategy(IStrategy * strategy)
-{
-  p_Strategy_ = strategy;
-}
+inline void CoCluster::setStrategy(IStrategy * strategy)
+{ p_Strategy_ = strategy;}
 
-inline void CoCluster::SetModel(ICoClustModel * Model)
-{
-  p_Model_ = Model;
-}
+inline void CoCluster::setModel(ICoClustModel * Model)
+{ p_Model_ = Model;}
 
-inline void CoCluster::SetInit(IInit * Init)
-{
-  p_Init_ = Init;
-}
+inline void CoCluster::setInit(IInit * Init)
+{ p_Init_ = Init;}
 
-inline void CoCluster::SetAlgo(IAlgo * algo)
-{
-  p_Algo_ = algo;
-}
+inline void CoCluster::setAlgo(IAlgo * algo)
+{ p_Algo_ = algo;}
+
 #endif /* COCLUSTER_H_ */

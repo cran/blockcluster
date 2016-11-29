@@ -37,7 +37,7 @@ setClass(
 				datatype = "character",
 				model = "character",
 				nbcocluster = "numeric",
-        semisupervised = "logical",
+		        semisupervised = "logical",
 				strategy = "strategy",
 				message = "character",
 				successful = "logical",
@@ -48,16 +48,17 @@ setClass(
 				rowposteriorprob = "numeric",
 				colposteriorprob = "numeric",
 				likelihood = "numeric",
-				coclusterdata = "matrix"
+				coclusterdata = "matrix",
+				ICLvalue = "numeric"
 		),
 		prototype = prototype(
 				data = matrix(nrow=0,ncol=0),
-        rowlabels = numeric(0),
-        collabels = numeric(0),
+        		rowlabels = numeric(0),
+        		collabels = numeric(0),
 				datatype = character(0),
 				model = character(0),
 				nbcocluster = numeric(0),
-        semisupervised = logical(0),
+        		semisupervised = logical(0),
 				message = character(0),
 				successful = logical(0),
 				rowproportions = numeric(0),
@@ -67,7 +68,8 @@ setClass(
 				rowposteriorprob = numeric(0),
 				colposteriorprob = numeric(0),
 				likelihood = numeric(0),
-				coclusterdata = matrix(nrow=0,ncol=0)
+				coclusterdata = matrix(nrow=0,ncol=0),
+				ICLvalue = numeric(0)
 		)
 )
 
@@ -92,13 +94,13 @@ setClass(
 		representation = representation(
 				classmean = "matrix",
 				classdispersion = "matrix",
-        ICLvalue = "numeric"
+				hyperparam = "numeric"
 		),
 		
 		prototype = prototype(
 				classmean = matrix(nrow=0,ncol=0),
 				classdispersion = matrix(nrow=0,ncol=0),
-        ICLvalue = numeric(0)
+        hyperparam = c(1,1)
 		)
 )
 
@@ -177,12 +179,12 @@ setClass(
   contains = "CommonOptions",
   representation = representation(
     classmean = "list",
-    ICLvalue = "numeric"
+		hyperparam = "numeric"
     ),
   
   prototype = prototype(
     classmean = list(0),
-    ICLvalue = numeric(0)
+		hyperparam = c(1,1)
   )
 )
 
@@ -214,7 +216,7 @@ setMethod(
 		definition = function(x,i,j,drop) {
 			switch(EXPR=i,
 					"data"={return (x@data)},
-          "coclusterdata"={return (x@coclusterdata)},
+          			"coclusterdata"={return (x@coclusterdata)},
 					"datatype"={return (x@datatype)},
           "semisupervised"={return (x@semisupervised)},
 					"model"={return (x@model)}, 
@@ -230,7 +232,8 @@ setMethod(
 					"classmean"={return (x@classmean)},
 					"classdispersion"={return (x@classdispersion)},
 			    "ICLvalue"={return (x@ICLvalue)},
-					stop("Invalid slot name.")
+					"hyperparam"={return (x@hyperparam)},
+						stop("Invalid slot name.")
 			)
 		}
 )
@@ -244,9 +247,9 @@ setMethod(
 		definition = function(x,i,j,drop) {
 			switch(EXPR=i,
 					"data"={return (x@data)},
-			    "coclusterdata"={return (x@coclusterdata)},
-          "datatype"={return (x@datatype)},
-			    "semisupervised"={return (x@semisupervised)},
+			    	"coclusterdata"={return (x@coclusterdata)},
+          			"datatype"={return (x@datatype)},
+			    	"semisupervised"={return (x@semisupervised)},
 					"model"={return (x@model)}, 
 					"strategy"={return (x@strategy)},
 					"message"={return (x@message)}, 
@@ -258,6 +261,7 @@ setMethod(
 					"rowposteriorprob"={return (x@rowposteriorprob)},
 					"colposteriorprob"={return (x@colposteriorprob)},
 					"classgamma"={return (x@classgamma)},
+					"ICLvalue"={return (x@ICLvalue)},					
 					stop("Invalid slot name.")
 			)
 			
@@ -273,9 +277,9 @@ setMethod(
 		definition = function(x,i,j,drop) {
 			switch(EXPR=i,
 					"data"={return (x@data)},
-			    "coclusterdata"={return (x@coclusterdata)},
+			   	    "coclusterdata"={return (x@coclusterdata)},
 					"datatype"={return (x@datatype)},
-			    "semisupervised"={return (x@semisupervised)},
+			        "semisupervised"={return (x@semisupervised)},
 					"model"={return (x@model)}, 
 					"strategy"={return (x@strategy)},
 					"message"={return (x@message)}, 
@@ -288,7 +292,8 @@ setMethod(
 					"colposteriorprob"={return (x@colposteriorprob)},
 					"classmean"={return (x@classmean)},
 					"classvariance"={return (x@classvariance)},
-					stop("Invalid slot name.")
+					"ICLvalue"={return (x@ICLvalue)},
+					stop("Invalid slot name.")	
 			)
 			
 		}
@@ -318,7 +323,8 @@ setMethod(
            "colposteriorprob"={return (x@colposteriorprob)},
            "classmean"={return (x@classmean)},
            "ICLvalue"={return (x@ICLvalue)},
-           stop("Invalid slot name.")
+					 "hyperparam"={return (x@hyperparam)},
+					 stop("Invalid slot name.")
     )
   }
 )
@@ -336,7 +342,6 @@ setMethod(
           cat("\nCo-Clustering Type : Semi-Supervised")
         else
           cat("\nCo-Clustering Type : Unsupervised")
-        
         cat("\nICL value: ",object@ICLvalue)
         cat("\n\nModel Parameters..")
         cat("\n\nClass Mean:\n")
@@ -346,6 +351,7 @@ setMethod(
         cat("\nRow proportions: ",object@rowproportions)
         cat("\nColumn proportions: ",object@columnproportions)
         cat("\nPseudo-likelihood: ",object@likelihood)
+				cat("\nhyperparam: ",object@hyperparam)
         cat("\n******************************************************************\n")
       } else {
         cat("Co-Clustering was not successful.\n")
@@ -366,7 +372,8 @@ setMethod(
           cat("\nCo-Clustering Type : Semi-Supervised")
         else
           cat("\nCo-Clustering Type : Unsupervised")
-        cat("\n\nModel Parameters..")
+		cat("\nICL value: ",object@ICLvalue)
+		cat("\n\nModel Parameters..")
         cat("\n\nClass Gamma:\n")
         print(object@classgamma)
         cat("\nRow proportions: ",object@rowproportions)
@@ -395,7 +402,8 @@ setMethod(
           cat("\nCo-Clustering Type : Semi-Supervised")
         else
           cat("\nCo-Clustering Type : Unsupervised")
-        cat("\n\nModel Parameters..")
+	    cat("\nICL value: ",object@ICLvalue)
+	    cat("\n\nModel Parameters..")
         cat("\n\nClass Mean:\n")
         print(object@classmean)
         cat("\nClass Variance:\n")
@@ -443,7 +451,8 @@ setMethod(
         cat("\nRow proportions: ",object@rowproportions)
         cat("\nColumn proportions: ",object@columnproportions)
         cat("\nPseudo-likelihood: ",object@likelihood)
-        cat("\n******************************************************************\n")
+				cat("\nhyperparam: ",object@hyperparam)
+				cat("\n******************************************************************\n")
       } else {
         cat("Co-Clustering was not successful.\n")
       }	

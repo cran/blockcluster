@@ -6,14 +6,14 @@
 #' \code{\link{coclusterCategorical}}, \code{\link{coclusterContingency}},
 #' \code{\link{coclusterContinuous}} function. 
 #' 
-#' @param algo  The valid values for this parameter are "BEM" (Default), "BCEM"
-#' and "BSEM".
+#' @param algo  The valid values for this parameter are "BEM" (Default), "BCEM",
+#' "BSEM" and "BGibbs" (only for Binary model).
 #' @param stopcriteria It specifies the stopping criteria. It can be based on
 #' either relative change in parameters (preffered due to computation reasons)
 #' value or relative change in pseudo log-likelihood. Valid criterion values are
 #' "Parameter" and "Likelihood". Default criteria is "Parameter".
 #' @param initmethod Method to initialize model parameters. The valid values are
-#' "cemInitStep", "fuzzyCemInitStep" and "randomInit". For now only one kind of
+#' "cemInitStep", "emInitStep" and "randomInit". For now only one kind of
 #' initialization exists for every model currently available in the package.
 #' Hence default value for initialization is set according to the model.
 #' @param nbinititerations Number of Global iterations used in initialization
@@ -31,8 +31,6 @@
 #' Default value is 500.
 #' @param epsilonxem Tolerance value used during xem step. Default value is 1e-4.
 #' @param epsilonXEM Tolerance value used during XEM step. Default value is 1e-10
-#' @param hyperparam Hyper-parameters ("a" and "b") in case of Bayesian settings (only valid
-#' for binary and categorical models). Default values are c(1,1) (no prior).
 #' 
 #' @return Object of class \code{\linkS4class{strategy}}
 #' @export
@@ -45,14 +43,14 @@
 #' 
 coclusterStrategy<-function(algo = "BEM",initmethod=character(),stopcriteria = "Parameter",  
 		nbiterationsxem = 50, nbiterationsXEM = 500,nbinititerations = 10, initepsilon = 1e-2, nbiterations_int = 5,
-		epsilon_int = 1e-2, epsilonxem = 1e-4,epsilonXEM =1e-10, nbtry = 2, nbxem = 5, hyperparam = c(1,1))
+		epsilon_int = 1e-2, epsilonxem = 1e-4,epsilonXEM =1e-10, nbtry = 2, nbxem = 5)
 { 
 	#create and return object of class strategy
 	new("strategy",algo = algo,initmethod = initmethod,stopcriteria = stopcriteria, 
 			nbinititerations = nbinititerations,initepsilon = initepsilon, nbiterations_int = nbiterations_int, 
 			epsilonxem = epsilonxem,epsilonXEM = epsilonXEM, epsilon_int = epsilon_int, 
-			nbtry = nbtry,nbxem = nbxem,nbiterationsxem = nbiterationsxem, nbiterationsXEM = nbiterationsXEM,
-      hyperparam=hyperparam)
+			nbtry = nbtry,nbxem = nbxem,nbiterationsxem = nbiterationsxem, nbiterationsXEM = nbiterationsXEM
+     )
 }
 
 #' strategy class
@@ -73,7 +71,6 @@ coclusterStrategy<-function(algo = "BEM",initmethod=character(),stopcriteria = "
 #' \item{nbiterationsXEM: }{Number of EM iterations used during XEM.}
 #' \item{epsilonxem: }{Tolerance value used during xem.}
 #' \item{epsilonXEM: }{Tolerance value used during XEM.}
-#' \item{hyperparam: }{Hyper-parameters ("a" and "b") in case of Bayesian settings.}
 #' }
 #' 
 #' @rdname coclusterStrategy
@@ -96,8 +93,7 @@ setClass(
 				nbiterationsxem = "numeric",
 				nbiterationsXEM = "numeric",
 				epsilonxem = "numeric",
-				epsilonXEM = "numeric",
-				hyperparam = "numeric"
+				epsilonXEM = "numeric"
 		),
 		prototype = prototype(
 				algo = character(0),
@@ -112,8 +108,7 @@ setClass(
 				nbiterationsxem = integer(0),
 				nbiterationsXEM = integer(0),
 				epsilonxem = numeric(0),
-				epsilonXEM = numeric(0),
-				hyperparam = numeric(0)
+				epsilonXEM = numeric(0)
 		)
 )
 			
@@ -138,7 +133,6 @@ setMethod(
 					"nbiterationsXEM"={return (x@nbiterationsXEM)},
 					"epsilonxem"={return (x@epsilonxem)},
 					"epsilonXEM"={return (x@epsilonXEM)},
-          "hyperparam"={return (x@hyperparam)},
 					stop("Invalid slot name.")
 			)			
 		}
@@ -168,7 +162,6 @@ setMethod(
       cat("\nTolerance value for internal E-step: ",object@epsilon_int)
       cat("\nTolerance value used during xem: ",object@epsilonxem)
       cat("\nTolerance value used during XEM: ",object@epsilonXEM)
-      cat("\nHyper-parameters: ",object@hyperparam)
       cat("\n******************************************************************\n")
     }
 )

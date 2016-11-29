@@ -40,7 +40,7 @@
 #include "../Models/ICoClustModel.h"
 
 #ifndef RPACKAGE
-#include "../../../CImg/CImg.h"
+#include "../../CImg/CImg.h"
 #endif
 
 class BinaryLBModel : public ICoClustModel
@@ -78,8 +78,11 @@ class BinaryLBModel : public ICoClustModel
     virtual bool cemCols();
     virtual bool semRows();
     virtual bool semCols();
+    virtual bool GibbsRows();
+    virtual bool GibbsCols();
     virtual void parameterStopCriteria();
     virtual bool cemInitStep();
+    virtual bool emInitStep();
     virtual void finalizeOutput();
     virtual STK::Real iclCriteriaValue();
     virtual void consoleOut();
@@ -88,6 +91,9 @@ class BinaryLBModel : public ICoClustModel
     virtual void copyThetaMax();
     virtual void modifyThetaMax();
     virtual STK::Real estimateLikelihood();
+    /** @return the number of free parameters of the distribution of a block.*/
+    virtual int nbFreeParameters() const;
+
     MatrixBinary const&  arrangedDataClusters();
     /**Return class mean BinaryLBModel::m_akl_ for all the blocks (co-clusters)*/
     MatrixBinary const&  mean() const;
@@ -104,9 +110,9 @@ class BinaryLBModel : public ICoClustModel
   protected:
     //Variables involved in Bernouilli model
     int a_,b_;//hyper-parameters
+    STK::Real dimprod_;
     MatrixBinary const&  m_Dataij_;
     MatrixBinary m_ClusterDataij_;
-    STK::Real dimprod_;
     MatrixReal m_Vjk_;
     MatrixReal m_Uil_;
     MatrixReal m_Alphakl_, m_Alphaklold_, m_Alphakl1_, m_Alphakl1old_,m_Alphaklmax_,m_Alphaklstart_;
@@ -116,9 +122,14 @@ class BinaryLBModel : public ICoClustModel
     void mStepRows();
     void mStepCols();
 
+    void mGibbsStepRows();
+    void mGibbsStepCols();
+
     // Functions used to operate on data in intermediate steps when running the Initialization
     bool initCEMRows();
     bool initCEMCols();
+    bool initEMRows();
+    bool initEMCols();
     void initBernoulliLogSumRows(MatrixReal & m_sum);
     void initBernoulliLogSumCols(MatrixReal & m_sum);
     void selectRandomColsFromData(MatrixReal& m,int col);

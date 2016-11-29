@@ -45,7 +45,11 @@ class CategoricalLBModel:public ICoClustModel
     virtual bool cemCols();
     virtual bool semRows();
     virtual bool semCols();
+    virtual bool GibbsRows();
+    virtual bool GibbsCols();
     virtual void parameterStopCriteria();
+    virtual bool cemInitStep();
+    virtual bool emInitStep();
     virtual bool randomInit();
     virtual STK::Real iclCriteriaValue();
     virtual void finalizeOutput();
@@ -57,12 +61,18 @@ class CategoricalLBModel:public ICoClustModel
     virtual STK::Real estimateLikelihood();
     const MatrixInteger& arrangedDataClusters();
     inline const std::vector<MatrixReal>& mean(){return m3_Alphahkl_;}
+    /** @return the number of free parameters of the distribution of a block.*/
+    virtual int nbFreeParameters() const;
+
     virtual ~CategoricalLBModel();
 
   protected:
     int a_,b_;//hyper-parameters
     const MatrixInteger& m_Dataij_;
     MatrixInteger m_ClusterDataij_;
+    MatrixReal m_Uil_;
+    MatrixReal m_Vjk_;
+    VectorReal v_Ui_,v_Vj_;
     int r_; //number of categories
     std::vector<MatrixReal> m3_Alphahkl_,m3_Alphahklold_,m3_Alphahkl1_,
     m3_Alphahkl1old_,m3_Alphahklstart_,m3_Alphahklmax_,m3_logAlhphahkl_;
@@ -70,6 +80,20 @@ class CategoricalLBModel:public ICoClustModel
 
     virtual void mStepRows();
     virtual void mStepCols();
+    virtual void mGibbsStepRows();
+    virtual void mGibbsStepCols();
+
+    // Functions used to operate on data in intermediate steps when running the Initialization
+    bool initCEMRows();
+    bool initCEMCols();
+    bool initEMRows();
+    bool initEMCols();
+    void initBernoulliLogSumRows(MatrixReal & m_sum);
+    void initBernoulliLogSumCols(MatrixReal & m_sum);
+    void selectRandomColsFromData(MatrixReal& m,int col);
+    void randomParameterRows(MatrixReal& m,int col);
+    void randomParameterCols(MatrixReal& m);
+
 };
 
 

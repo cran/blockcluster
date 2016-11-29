@@ -50,7 +50,7 @@ NULL
 #' plot(out)
 #' 
 coclusterCategorical<-function(data, semisupervised = FALSE, rowlabels = numeric(0), collabels = numeric(0),
-                               model = character(0), nbcocluster, strategy = coclusterStrategy(), a=1, b=1)
+                               model = NULL, nbcocluster, strategy = coclusterStrategy(), a=1, b=1)
 {
 	#Check for data
 	if(missing(data)){ stop("Data is missing.")}
@@ -99,8 +99,8 @@ coclusterCategorical<-function(data, semisupervised = FALSE, rowlabels = numeric
  	if(!is.list(data)) dimData = dim(data)
 	else               dimData = dim(data[[1]])
 		
-	if(dimData[1]<nbcocluster[1]) stop("Number of Row cluters exceeds numbers of rows.")
-	if(dimData[2]<nbcocluster[2])	stop("Number of Column cluters exceeds numbers of columns.")
+	if(dimData[1]<nbcocluster[1]) stop("Number of Row clusters exceeds numbers of rows.")
+	if(dimData[2]<nbcocluster[2])	stop("Number of Column clusters exceeds numbers of columns.")
 	#check for Algorithm name (and make it compatible with version 1)
 	if(strategy@algo=="XEMStrategy")
   {
@@ -112,13 +112,13 @@ coclusterCategorical<-function(data, semisupervised = FALSE, rowlabels = numeric
     warning("The algorithm 'XCEMStrategy' is renamed as BCEM!")
     strategy@algo = "BCEM"
   }
-  else if(strategy@algo!="BEM" && strategy@algo!="BCEM" && strategy@algo!="BSEM" )
-  { stop("Incorrect Algorithm, Valide algorithms are: BEM, BCEM, BSEM") }
+  else if(strategy@algo!="BEM" && strategy@algo!="BCEM" && strategy@algo!="BSEM")# && strategy@algo!="BGibbs")
+  { stop("Incorrect Algorithm, Valide algorithms are: BEM, BCEM, BSEM") }#, BGibbs") }
 	#check for stopping criteria
 	if(strategy@stopcriteria!="Parameter" && strategy@stopcriteria!="Likelihood")
 		stop("Incorrect stopping criteria, Valid stopping criterians are: Parameter, Likelihood")
   # check model
-  if(missing(model)){ model = "pik_rhol_multi"}
+  if(is.null(model)){ model = "pik_rhol_multi"}
   else 
   {
     if(model!="pi_rho_multi" && model!="pik_rhol_multi")
@@ -126,11 +126,16 @@ coclusterCategorical<-function(data, semisupervised = FALSE, rowlabels = numeric
       stop("Incorrect Model, Valid categorical models are:pik_rhol_multi, pi_rho_multi")
 		}
   }
-  #check init method
-  if(length(strategy@initmethod)==0){ strategy@initmethod = "randomInit"}
-  # checking for hyperparameters
+	# checking for strategy
+	if(length(strategy@initmethod)==0) {strategy@initmethod = "randomInit"}
+	else
+	{
+		if(strategy@initmethod!="randomInit")
+			stop("In coclusterCategorical. Incorrect initialization method, valid method(s) are: randomInit")
+	}
+	# checking for hyperparameters
   if ((a <=0)||(b<=0)) { stop("hyper-parameters must be positive")}
-  strategy@hyperparam = c(a,b);
+  #strategy@hyperparam = c(a,b);
   # create object
   inpobj<-new("CategoricalOptions",data = data
              , rowlabels = rowlabels, collabels = collabels
@@ -138,7 +143,8 @@ coclusterCategorical<-function(data, semisupervised = FALSE, rowlabels = numeric
              , datatype = "categorical"
              , model = model
              , nbcocluster = nbcocluster
-             , strategy = strategy)
+             , strategy = strategy
+				     , hyperparam = c(a,b))
 
   .Call("CoClustmain",inpobj,PACKAGE = "blockcluster")
   cat(inpobj@message,"\n")

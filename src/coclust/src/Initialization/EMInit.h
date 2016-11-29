@@ -22,48 +22,29 @@
  Contact : parmeet.bhatia@inria.fr , bhatia.parmeet@gmail.com
  */
 
-
-/** @file CoCluster.cpp
- *  @brief Implements CoCluster class.
+/** @file emInit.h
+ *  @brief Declares EM initialization class emInit derived from IInit.
  **/
 
-#include "CoCluster.h"
+#ifndef EMINIT_H_
+#define EMINIT_H_
 
-bool CoCluster::run()
+/** @brief This class provides functionalities for EM initialization. It is  derived from IInit
+ * abstract class.
+ *
+ */
+#include "IInit.h"
+
+class emInit: public IInit
 {
-#ifdef COVERBOSE
-  std::cout<<"CoCluster::run. Starting Co-Clustering."<<std::endl;
-#endif
+  public:
+    inline emInit(){};
+    virtual bool run();
+    inline virtual ~emInit(){};
+};
 
-  if (!p_Strategy_||!p_Algo_||!p_Model_||!p_Init_)
-  {
-#ifdef COVERBOSE
-  std::cout<<"Invalid pointer(s).."<<std::endl;
-#endif
-    return false;
-  }
-
-  p_Algo_->setModel(p_Model_);
-  p_Init_->setModel(p_Model_);
-  p_Strategy_->setInit(p_Init_);
-  p_Strategy_->setAlgo(p_Algo_);
-  p_Strategy_->setModel(p_Model_);
-  try
-  {
-    if(p_Strategy_->run())
-    {
-      p_Model_->SetErrormsg("Co-Clustering successfully terminated!");
-      return true;
-    }
-  }
-  catch (std::exception & e)
-  {
-    p_Model_->SetErrormsg(e.what());
-#ifdef COVERBOSE
-    std::cout << "CoCluster::run() failed." <<e.what();
-#endif
-  }
-  return false;
+inline bool emInit::run()
+{
+  return p_Model_->emInitStep();
 }
-
-
+#endif /* EMINIT_H_ */

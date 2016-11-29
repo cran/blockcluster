@@ -10,14 +10,14 @@ coclusterStrategy(algo = "BEM", initmethod = character(),
   stopcriteria = "Parameter", nbiterationsxem = 50, nbiterationsXEM = 500,
   nbinititerations = 10, initepsilon = 0.01, nbiterations_int = 5,
   epsilon_int = 0.01, epsilonxem = 1e-04, epsilonXEM = 1e-10, nbtry = 2,
-  nbxem = 5, hyperparam = c(1, 1))
+  nbxem = 5)
 }
 \arguments{
-\item{algo}{The valid values for this parameter are "BEM" (Default), "BCEM"
-and "BSEM".}
+\item{algo}{The valid values for this parameter are "BEM" (Default), "BCEM",
+"BSEM" and "BGibbs" (only for Binary model).}
 
 \item{initmethod}{Method to initialize model parameters. The valid values are
-"cemInitStep", "fuzzyCemInitStep" and "randomInit". For now only one kind of
+"cemInitStep", "emInitStep" and "randomInit". For now only one kind of
 initialization exists for every model currently available in the package.
 Hence default value for initialization is set according to the model.}
 
@@ -50,9 +50,6 @@ for internal E-step. Default value is 1e-2.}
 \item{nbtry}{Number of tries (XEM steps). Default value is 2.}
 
 \item{nbxem}{Number of xem steps. Default value is 5.}
-
-\item{hyperparam}{Hyper-parameters ("a" and "b") in case of Bayesian settings (only valid
-for binary and categorical models). Default values are c(1,1) (no prior).}
 }
 \value{
 Object of class \code{\linkS4class{strategy}}
@@ -81,7 +78,6 @@ This class contains all the input parameters to run coclustering.
 \item{nbiterationsXEM: }{Number of EM iterations used during XEM.}
 \item{epsilonxem: }{Tolerance value used during xem.}
 \item{epsilonXEM: }{Tolerance value used during XEM.}
-\item{hyperparam: }{Hyper-parameters ("a" and "b") in case of Bayesian settings.}
 }
 }
 \examples{

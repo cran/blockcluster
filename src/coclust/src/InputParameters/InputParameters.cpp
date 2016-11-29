@@ -29,6 +29,40 @@
 
 #include "../Models/ICoClustModel.h"
 #include "InputParameters.h"
+
+std::ostream& operator<< (std::ostream& os, ModelParameters const& param)
+{
+  //iterations and epsilon inside model
+  os << "****************************************" << std::endl;
+  os << "* epsilon_init_     = " << param.epsilon_int_ << std::endl;
+  os << "* nbiterations_int_ = " << param.nbiterations_int_ << std::endl;
+  os << "* eps_xem_          = " << param.eps_xem_ << std::endl;
+  os << "* eps_XEM_          = " << param.eps_XEM_ << std::endl;
+  os << "****************************************" << std::endl;
+
+  //iterations and epsilon inside initialization
+  os << "* nbinititerations_ = " << param.nbinititerations_ << std::endl;
+  os << "* initepsilon_      = " << param.initepsilon_ << std::endl;
+  os << "****************************************" << std::endl;
+
+  //epsilon set either to eps_xem_ or esp_XEM_ depending on where we are in XEMstrategy
+  os << "* epsilon_          = " << param.epsilon_ << std::endl;
+  os << "****************************************" << std::endl;
+
+  //other input options, self explanatory
+  os << "* nbrowclust_       = " << param.nbrowclust_ << std::endl;
+  os << "* nbcolclust_       = " << param.nbcolclust_ << std::endl;
+  os << "* nbrowdata_        = " << param.nbrowdata_  << std::endl;
+  os << "* nbcoldata_        = " << param.nbcoldata_  << std::endl;
+  os << "****************************************" << std::endl;
+
+  //proportion
+  os << "* fixedproportions_ = " << param.fixedproportions_ << std::endl;
+  os << "****************************************" << std::endl;
+  return os;
+};
+
+
 #ifdef STK_DMANAGER
 InputParameters::InputParameters( STK::Integer const& level = 1) :
   STK::IPage("InputOptions", level, true)
@@ -211,6 +245,7 @@ void InputParameters::initializeParamEnum()
   S_Algorithm["BEM"] = BEM;
   S_Algorithm["BCEM"] = BCEM;
   S_Algorithm["BSEM"] = BSEM;
+  S_Algorithm["BGibbs"] = BGibbs;
 
   //StopCriteria
   S_StopCriteria["Parameter"] = Parameter;
@@ -218,7 +253,7 @@ void InputParameters::initializeParamEnum()
 
   //Initialization
   S_Init["cemInitStep"] = e_CEMInit;
-  S_Init["fuzzyCemInitStep"] = e_FuzzyCEMInit;
+  S_Init["emInitStep"] = e_EMInit;
   S_Init["randomInit"] = e_RandomInit;
 
   //Models

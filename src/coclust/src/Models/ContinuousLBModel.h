@@ -41,6 +41,7 @@ class ContinuousLBModel: public ICoClustModel
     ContinuousLBModel( MatrixReal const& m_Dataij,ModelParameters const& Mparam);
     ContinuousLBModel(MatrixReal const& m_Dataij,VectorInteger const & rowlabels,
                        VectorInteger const & collabels,ModelParameters const& Mparam);
+    virtual ~ContinuousLBModel(){};
     virtual ContinuousLBModel* clone(){return new ContinuousLBModel(*this);}
     virtual void logSumRows(MatrixReal & _m_sum);
     virtual void logSumCols(MatrixReal & _m_sum);
@@ -51,9 +52,12 @@ class ContinuousLBModel: public ICoClustModel
     virtual bool cemCols();
     virtual bool semRows();
     virtual bool semCols();
+    virtual bool GibbsRows();
+    virtual bool GibbsCols();
     virtual void parameterStopCriteria();
     virtual STK::Real estimateLikelihood();
     virtual bool cemInitStep();
+    virtual bool emInitStep();
     virtual void finalizeOutput();
     virtual void consoleOut();
     virtual void modifyThetaStart();
@@ -61,7 +65,8 @@ class ContinuousLBModel: public ICoClustModel
     virtual void copyThetaMax();
     virtual void modifyThetaMax();
     MatrixReal const& arrangedDataClusters();
-    virtual ~ContinuousLBModel(){};
+    /** @return the number of free parameters of the distribution of a block.*/
+    virtual int nbFreeParameters() const;
 
     /**Return various co-clusters mean ContinuousLBModel::m_Mukl_*/
     MatrixReal const& mean() const;
@@ -73,7 +78,7 @@ class ContinuousLBModel: public ICoClustModel
     MatrixReal m_ClusterDataij_;
     STK::Real dimprod_;
     MatrixReal m_Dataij2_;
-    MatrixReal m_Mukl_ /*,m_Mukl2_ */,m_Sigma2kl_,m_Muklstart_,m_Muklmax_,m_Sigma2klstart_,m_Sigma2klmax_;
+    MatrixReal m_Mukl_, m_Sigma2kl_, m_Muklstart_, m_Muklmax_,m_Sigma2klstart_,m_Sigma2klmax_;
     MatrixReal m_Muklold1_,m_Muklold2_;
     MatrixReal m_Vjk1_,m_Vjk2_;
     MatrixReal m_Uil1_,m_Uil2_;
@@ -83,6 +88,7 @@ class ContinuousLBModel: public ICoClustModel
     void mStepCols();
     //Internal steps during initialization
     bool initCEMCols();
+    bool initEMCols();
     void selectRandomRowsFromData(MatrixReal &);
     void generateRandomMean(const MatrixReal & , MatrixReal &);
 };
@@ -99,7 +105,6 @@ inline void ContinuousLBModel::mStepRows()
 
   MatrixReal m_trkl = v_Tk_*v_Rl_.transpose();
   m_Mukl_           = (m_Tik_.transpose()*m_Uil1_)/m_trkl;
-  //m_Mukl2_          = m_Mukl_.square();
   m_Sigma2kl_       = (m_Tik_.transpose()*m_Uil2_)/m_trkl - m_Mukl_.square();
 }
 
@@ -109,7 +114,6 @@ inline void ContinuousLBModel::mStepCols()
 
   MatrixReal m_trkl = v_Tk_*v_Rl_.transpose();
   m_Mukl_           = (m_Vjk1_.transpose()*m_Rjl_)/m_trkl;
-  //m_Mukl2_          = m_Mukl_.square();
   m_Sigma2kl_       = ((m_Vjk2_.transpose()*m_Rjl_)/m_trkl) - m_Mukl_.square();
 }
 

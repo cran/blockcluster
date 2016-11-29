@@ -52,15 +52,21 @@ class ContinuousLBModelequalsigma: public ICoClustModel
     virtual bool cemCols();
     virtual bool semRows();
     virtual bool semCols();
+    virtual bool GibbsRows();
+    virtual bool GibbsCols();
     virtual void parameterStopCriteria();
     virtual STK::Real estimateLikelihood();
     virtual bool cemInitStep();
+    virtual bool emInitStep();
     virtual void finalizeOutput();
     virtual void consoleOut();
     virtual void modifyThetaStart();
     virtual void copyThetaStart();
     virtual void copyThetaMax();
     virtual void modifyThetaMax();
+    /** @return the number of free parameters of the distribution of a block.*/
+    virtual int nbFreeParameters() const;
+
     MatrixReal const& arrangedDataClusters();
     virtual ~ContinuousLBModelequalsigma(){};
 
@@ -85,6 +91,7 @@ class ContinuousLBModelequalsigma: public ICoClustModel
 
     // Functions used to operate on data in intermediate steps when running the Initialization
     bool initCEMCols();
+    bool initEMCols();
     void selectRandomRowsFromData(MatrixReal &);
     void generateRandomMean(const MatrixReal & , MatrixReal &);
 };
