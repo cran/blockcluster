@@ -1,4 +1,4 @@
-0fad2062628e1a5bba74ba105b81ac3b *DESCRIPTION
+b1ce6045e15b5d9dc418a9b8ca39d245 *DESCRIPTION
 989789dcbfcb12bf0db6226354bec5d1 *NAMESPACE
 0b4b25b0c75dad6e5a401e03383a27a5 *R/RCocluster.R
 48ba9007bf09ce58caf036c803ebed36 *R/cocluster.R
@@ -18,7 +18,7 @@ e18f3f4026ae2a1c42897f5ef688d4c3 *data/categoricaldata.rda
 ebbb45f4e0123062e0d9c6ba70cd7a6d *data/gaussiandata.rda
 8561a842115af4a964ffd757c8fdff10 *inst/doc/blockcluster_tutorial.R
 0ab65e8f482e54a3cedebd9f7a835e27 *inst/doc/blockcluster_tutorial.Rnw
-4100991ec6b1cad91c0c729ef4888a3f *inst/doc/blockcluster_tutorial.pdf
+7e4ed2eaf8df8d111037a7676c7f31ae *inst/doc/blockcluster_tutorial.pdf
 c23bff008f2680ea6465f324aedd593e *man/BinaryOptions-class.Rd
 14f377f5861d9864ab68c9ed51df0b81 *man/CategoricalOptions-class.Rd
 ee1af4bc039e0cd225ba56f266765e18 *man/CommonOptions-class.Rd
@@ -51,7 +51,7 @@ f72e89bfba91bf0459f14e517355ff86 *src/ContinuousDataExchange.h
 8abb949513320b81719d5c5c6fd1e710 *src/IDataExchange.cpp
 22d462814a1a64c1e0ebf1deb9ecf982 *src/IDataExchange.h
 27c4638f5281d7666bf0ef52a73e74ad *src/Makevars
-1dbf7ccd0a45474705bd6d1bc66592a2 *src/Makevars.win
+14b81303cd3cef8bf6c642a0851e645f *src/Makevars.win
 03e5ac9981480646d6c76067d1af5179 *src/Rcoclustmain.cpp
 f161f934d0a45976dff8227cd5f96efe *src/coclust/get_symbolic_link.sh
 8b49f24a140ea0fd82ec5f637249b9e5 *src/coclust/get_symbolic_link_without_trunk.sh
