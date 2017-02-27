@@ -146,6 +146,7 @@ RcppExport SEXP CoClustmain(SEXP robj)
         }
       }
 
+      delete p_Strategy_;
       delete p_Model_;
       delete p_Algo_;
       delete p_Init_;
@@ -229,6 +230,7 @@ RcppExport SEXP CoClustmain(SEXP robj)
   //release memory
   delete p_DataExchange_;
   delete p_Init_;
+  delete p_Strategy_;
   delete p_Algo_;
   delete p_Model_;
   delete p_CoCluster_;

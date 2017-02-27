@@ -1,4 +1,4 @@
-b1ce6045e15b5d9dc418a9b8ca39d245 *DESCRIPTION
+500ad426afcdfba758664c7b0a813383 *DESCRIPTION
 989789dcbfcb12bf0db6226354bec5d1 *NAMESPACE
 0b4b25b0c75dad6e5a401e03383a27a5 *R/RCocluster.R
 48ba9007bf09ce58caf036c803ebed36 *R/cocluster.R
@@ -16,9 +16,10 @@ e18f3f4026ae2a1c42897f5ef688d4c3 *data/categoricaldata.rda
 062988cda777f45c4c7f2a4c3033c740 *data/contingencydatalist.rda
 6a5adedaadcdd3eed1a195cc3918488e *data/contingencydataunknown.rda
 ebbb45f4e0123062e0d9c6ba70cd7a6d *data/gaussiandata.rda
+4fc21b7203eb21c4d4ba33e9164f03d3 *inst/CITATION
 8561a842115af4a964ffd757c8fdff10 *inst/doc/blockcluster_tutorial.R
 0ab65e8f482e54a3cedebd9f7a835e27 *inst/doc/blockcluster_tutorial.Rnw
-7e4ed2eaf8df8d111037a7676c7f31ae *inst/doc/blockcluster_tutorial.pdf
+d38c2183803d99d7b53c88beddcbba6c *inst/doc/blockcluster_tutorial.pdf
 c23bff008f2680ea6465f324aedd593e *man/BinaryOptions-class.Rd
 14f377f5861d9864ab68c9ed51df0b81 *man/CategoricalOptions-class.Rd
 ee1af4bc039e0cd225ba56f266765e18 *man/CommonOptions-class.Rd
@@ -52,7 +53,8 @@ f72e89bfba91bf0459f14e517355ff86 *src/ContinuousDataExchange.h
 22d462814a1a64c1e0ebf1deb9ecf982 *src/IDataExchange.h
 27c4638f5281d7666bf0ef52a73e74ad *src/Makevars
 14b81303cd3cef8bf6c642a0851e645f *src/Makevars.win
-03e5ac9981480646d6c76067d1af5179 *src/Rcoclustmain.cpp
+a96e5583f56b9e98fb7c4b04cb4e8d44 *src/Rcoclustmain.cpp
+59b4da7dc46a5a5ce96b81801dc759a5 *src/Rcoclustmain.h
 f161f934d0a45976dff8227cd5f96efe *src/coclust/get_symbolic_link.sh
 8b49f24a140ea0fd82ec5f637249b9e5 *src/coclust/get_symbolic_link_without_trunk.sh
 2047c39fd7dcffd18341649402866db2 *src/coclust/makefile
@@ -97,6 +99,7 @@ db0a79365b573b046d07055c722afbf1 *src/coclust/src/Strategy/IStrategy.h
 17ae49b56281583e2467f8d08a8ae403 *src/coclust/src/enumerations/enumerations.h
 a522185b7bf1abc2f003b6f0735d76ef *src/coclust/src/typedefs/typedef.h
 e771392162537c6cf5ad1dd9e157e7c4 *src/conversion.h
+2bc2d44a16dd86a965af4040b87f4622 *src/init_blockcluster.c
 2313dd461078a25f60b524ad6afecd34 *src/test/test.cpp
 d6e3456514b97f58c30300a7797e2675 *tests/Binary/binary.R
 99e9c2b79a05c37b6b25e4a215c8428a *tests/Categorical/categorical.R

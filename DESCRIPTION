@@ -2,7 +2,7 @@ Package: blockcluster
 Type: Package
 Title: Coclustering Package for Binary, Categorical, Contingency and
         Continuous Data-Sets
-Version: 4.2.1
+Version: 4.2.3
 Encoding: UTF-8
 Date: 2016-11-23
 Authors@R: c( person("Serge", "Iovleff", role = c("aut","cre"), email = "Serge.Iovleff@stkpp.org")
@@ -27,8 +27,7 @@ Description: Simultaneous clustering of rows and columns, usually designated by
     the link mentioned in URL.
 License: GPL (>= 3)
 URL: https://gforge.inria.fr/projects/cocluster/
-BugReports:
-        https://gforge.inria.fr/forum/forum.php?forum_id=11190&group_id=3679
+BugReports: https://gforge.inria.fr/forum/forum.php?forum_id=11190&group_id=3679
 LazyLoad: yes
 Depends: R (>= 3.0.2), rtkore (>= 1.0.0)
 Imports: methods
@@ -39,7 +38,7 @@ Collate: 'coclusterStrategy.R' 'optionclasses.R' 'onattach.R'
         'coclusterCategorical.R' 'coclusterContingency.R'
         'coclusterContinuous.R'
 NeedsCompilation: yes
-Packaged: 2016-11-30 07:47:31 UTC; iovleff
+Packaged: 2017-02-27 19:54:25 UTC; iovleff
 RoxygenNote: 5.0.1
 Author: Serge Iovleff [aut, cre],
   Parmeet Singh Bhatia [aut],
@@ -50,4 +49,4 @@ Author: Serge Iovleff [aut, cre],
   Gilles Celeux [ctb]
 Maintainer: Serge Iovleff <Serge.Iovleff@stkpp.org>
 Repository: CRAN
-Date/Publication: 2016-11-30 14:55:16
+Date/Publication: 2017-02-27 21:39:25
