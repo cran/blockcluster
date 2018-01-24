@@ -118,7 +118,7 @@ NULL
 #' @format A data matrix with 1000 rows and 100 columns.
 #'
 #' @examples
-#'   data(gaussianData)
+#'   data(gaussiandata)
 NULL
 
 #' Simulated Binary Data-set
@@ -132,7 +132,7 @@ NULL
 #' @format A data matrix with 1000 rows and 100 columns.
 #'
 #' @examples
-#'   data(binaryData)
+#'   data(binarydata)
 NULL
 
 #' Simulated categorical Data-set
@@ -146,7 +146,7 @@ NULL
 #' @format A data matrix with 1000 rows and 100 columns.
 #'
 #' @examples
-#'   data(categoricalData)
+#'   data(categoricaldata)
 NULL
 
 #' Simulated Contingency Data-set 

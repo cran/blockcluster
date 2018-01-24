@@ -268,6 +268,8 @@ clusters respectively.
 \item {\bf strategy:} This input can be used to control various input parameters. It
 can be created using the function {\bf coclusterStrategy} as explained in
 Section~\ref{sec:coclusterStrategy}.
+\item {\bf nbCore:} This input can be used to control the number of threads to
+use. Put 0 for all availables cores. Default is 1.
 
 \end{itemize}
 The only mandatory inputs to the function {\bf cocluster} are {\bf data},

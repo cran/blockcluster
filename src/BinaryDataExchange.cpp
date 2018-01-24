@@ -103,7 +103,6 @@ void BinaryDataExchange::dataInput(Rcpp::S4 & obj)
   m_Dataij_ = data.cast<bool>();
   Mparam_.nbrowdata_ = m_Dataij_.sizeRows();
   Mparam_.nbcoldata_ = m_Dataij_.sizeCols();
-
   //Get Strategy
   //Rcpp::S4 strategy(obj.slot("strategy"));
   //get hyper-parameters

@@ -10,7 +10,6 @@ It is a Continuous data-set simulated using Gaussian distribution. It consist of
 in rows and three clusters in columns.
 }
 \examples{
-  data(gaussianData)
+  data(gaussiandata)
 }
 \keyword{datasets}
-

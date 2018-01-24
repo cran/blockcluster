@@ -15,4 +15,3 @@ with the parameters in base class.
 \item{ICLvalue: }{Integrated complete likelihood}
 }
 }
-

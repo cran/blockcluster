@@ -1,6 +1,5 @@
 #' @include coclusterStrategy.R
 #' @include optionclasses.R
-#' @include Rcoclust.R
 #' 
 NULL
 
@@ -27,6 +26,8 @@ NULL
 #' 
 #' @param nbcocluster Integer vector specifying the number of row and column clusters respectively.
 #' @param strategy Object of class \code{\linkS4class{strategy}}.
+#' @param nbCore number of thread to use (OpenMP must be available), 0 for all cores. Default value is 1.
+#' 
 #' @return Return an object of \code{\linkS4class{BinaryOptions}} or \code{\linkS4class{ContingencyOptions}}
 #' or \code{\linkS4class{ContinuousOptions}} depending on whether the data-type is Binary, Contingency or Continuous
 #' respectively.
@@ -52,7 +53,8 @@ NULL
 #' 
 coclusterContingency<-function( data, semisupervised = FALSE
                               , rowlabels = numeric(0), collabels = numeric(0)
-                              , model = NULL, nbcocluster, strategy = coclusterStrategy()) 
+                              , model = NULL, nbcocluster, strategy = coclusterStrategy()
+													    , nbCore = 1) 
 {
 	#Check for data
 	if(missing(data)){ stop("Data is missing.")}
@@ -150,14 +152,17 @@ coclusterContingency<-function( data, semisupervised = FALSE
      else if((strategy@initmethod!="cemInitStep" && strategy@initmethod!="emInitStep")&&(model=="pi_rho_unknown"||model=="pik_rhol_unknown"))
        stop("Incorrect initialization method, valid method(s) are: cemInitStep, emInitStep")
 	}
-  if(!is.list(data))
+	#  check nbCore
+	if(!is.numeric(nbCore) && length(nbCore) != 1) stop("nbCore must be an integer")
+	# check options
+	if(!is.list(data))
         inpobj<-new("ContingencyOptions",data = data,semisupervised = semisupervised,rowlabels = rowlabels, collabels = collabels,
                     datatype = "contingency", model = model, nbcocluster = nbcocluster, strategy = strategy)
   else
         inpobj<-new("ContingencyOptions",data = data[[1]], semisupervised = semisupervised,rowlabels = rowlabels, collabels = collabels,
                     datatype = "contingency", model = model, nbcocluster = nbcocluster, strategy = strategy,datamui=data[[2]],datanuj=data[[3]])
 
-  .Call("CoClustmain",inpobj,PACKAGE = "blockcluster")
+  .Call("CoClustmain",inpobj, nbCore,PACKAGE = "blockcluster")
   cat(inpobj@message,"\n")
   return(inpobj)
 }

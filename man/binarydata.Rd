@@ -10,7 +10,6 @@ It is a binary data-set simulated using Bernoulli distribution. It consist of tw
 clusters in columns.
 }
 \examples{
-  data(binaryData)
+  data(binarydata)
 }
 \keyword{datasets}
-

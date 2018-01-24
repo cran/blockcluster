@@ -59,11 +59,11 @@ class BinaryLBModel : public ICoClustModel
      * @param rowlabels various labels for rows (-1  for unknown row label)
      * @param collabels various labels for columns (-1 for unknown column label)
      * @param Mparam A constant reference to various ModelParameters.
-     * @param a,b bayesian hyperparameters
+     * @param a,b Bayesian hyperparameters
      * */
     BinaryLBModel( MatrixBinary const&  m_Dataij
-                 , VectorInteger const & rowlabels
-                 , VectorInteger const & collabels
+                 , VectorInteger const& rowlabels
+                 , VectorInteger const& collabels
                  , ModelParameters const& Mparam
                  , int a=1,int b=1);
 
@@ -110,7 +110,6 @@ class BinaryLBModel : public ICoClustModel
   protected:
     //Variables involved in Bernouilli model
     int a_,b_;//hyper-parameters
-    STK::Real dimprod_;
     MatrixBinary const&  m_Dataij_;
     MatrixBinary m_ClusterDataij_;
     MatrixReal m_Vjk_;
@@ -133,7 +132,7 @@ class BinaryLBModel : public ICoClustModel
     void initBernoulliLogSumRows(MatrixReal & m_sum);
     void initBernoulliLogSumCols(MatrixReal & m_sum);
     void selectRandomColsFromData(MatrixReal& m,int col);
-    void generateRandomBernoulliParameterRows(MatrixReal& m,int col);
+    void generateRandomBernoulliParameterRows(MatrixReal& m, int cols);
     void generateRandomBernoulliParameterCols(MatrixReal& m);
 };
 

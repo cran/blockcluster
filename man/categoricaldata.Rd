@@ -10,7 +10,6 @@ It is a categorical data-set simulated using Categorical distribution with 5 mod
 clusters in columns.
 }
 \examples{
-  data(categoricalData)
+  data(categoricaldata)
 }
 \keyword{datasets}
-

@@ -76,7 +76,6 @@ class ContinuousLBModel: public ICoClustModel
   protected:
     MatrixReal const& m_Dataij_;
     MatrixReal m_ClusterDataij_;
-    STK::Real dimprod_;
     MatrixReal m_Dataij2_;
     MatrixReal m_Mukl_, m_Sigma2kl_, m_Muklstart_, m_Muklmax_,m_Sigma2klstart_,m_Sigma2klmax_;
     MatrixReal m_Muklold1_,m_Muklold2_;

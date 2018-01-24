@@ -29,20 +29,18 @@
 
 #include "ContinuousLBModel.h"
 #include <exception>
-ContinuousLBModel::ContinuousLBModel( MatrixReal const& m_Dataij,ModelParameters const& Mparam)
-                           : ICoClustModel(Mparam)
-                           , m_Dataij_(m_Dataij)
-{
-  dimprod_ = nbSample_*nbVar_;
-};
+ContinuousLBModel::ContinuousLBModel( MatrixReal const& m_Dataij, ModelParameters const& Mparam)
+								    : ICoClustModel(Mparam)
+								    , m_Dataij_(m_Dataij)
+{}
 
-ContinuousLBModel::ContinuousLBModel(MatrixReal const& m_Dataij,VectorInteger const & rowlabels,
-                                     VectorInteger const & collabels,ModelParameters const& Mparam)
-               : ICoClustModel(Mparam,rowlabels,collabels)
-               , m_Dataij_(m_Dataij)
-{
-  dimprod_ = nbSample_*nbVar_;
-};
+ContinuousLBModel::ContinuousLBModel( MatrixReal const& m_Dataij
+		                            , VectorInteger const & rowlabels
+									, VectorInteger const & collabels
+									, ModelParameters const& Mparam)
+								    : ICoClustModel(Mparam,rowlabels,collabels)
+								    , m_Dataij_(m_Dataij)
+{}
 
 void ContinuousLBModel::logSumRows(MatrixReal& m_sumik)
 {
@@ -208,11 +206,12 @@ void ContinuousLBModel::parameterStopCriteria()
 
 STK::Real ContinuousLBModel::estimateLikelihood()
 {
-  likelihood_ = (-0.5*(dimprod_+v_Tk_.dot(m_Sigma2kl_.log()*v_Rl_+v_logPiek_))
-//              + v_Tk_.dot(v_logPiek_)
-              + v_Rl_.dot(v_logRhol_)
-              - (m_Tik_.prod( (RealMin + m_Tik_).log()) ).sum()
-              - (m_Rjl_.prod( (RealMin + m_Rjl_).log()) ).sum())/dimprod_;
+  likelihood_ = (-0.5*(dimprod_+v_Tk_.dot(m_Sigma2kl_.log()*v_Rl_))
+                 + v_Tk_.dot(v_logPiek_)
+                 + v_Rl_.dot(v_logRhol_)
+                 - (m_Tik_.prod( (RealMin + m_Tik_).log()) ).sum()
+                 - (m_Rjl_.prod( (RealMin + m_Rjl_).log()) ).sum()
+			     );
   return likelihood_;
 }
 
@@ -297,7 +296,7 @@ bool ContinuousLBModel::initCEMCols()
   m_Rjl_.resize(nbVar_,Mparam_.nbcolclust_);
   m_Rjl_ = 0;
   std::pair<int,int> Label_pair;
-  for (unsigned int j=0;j<knownLabelsCols_.size();j++)
+  for (int j=0;j<knownLabelsCols_.size();j++)
   {
     Label_pair = knownLabelsCols_[j];
     m_Rjl_(Label_pair.first,Label_pair.second)=1;
@@ -314,7 +313,7 @@ bool ContinuousLBModel::initCEMCols()
     m_Djl  = v_Vj2*STK::Const::Point<STK::Real>(Mparam_.nbcolclust_)
            + STK::Const::Vector<STK::Real>(nbVar_)*STK::sumByRow(m_Mulk.square()).transpose()
            - 2*(m_Vjk*m_Mulk.transpose());
-    for (unsigned int j =0;j< UnknownLabelsCols_.size();j++)
+    for (int j =0;j< UnknownLabelsCols_.size();j++)
     {
       m_Djl.row(UnknownLabelsCols_[j]).minElt(minIndex);
       m_Rjl_.row(UnknownLabelsCols_[j]).setZeros();
@@ -359,7 +358,7 @@ bool ContinuousLBModel::initEMCols()
   m_Rjl_.resize(nbVar_,Mparam_.nbcolclust_);
   m_Rjl_ = 0;
   std::pair<int,int> Label_pair;
-  for (unsigned int j=0;j<knownLabelsCols_.size();j++)
+  for (int j=0;j<knownLabelsCols_.size();j++)
   {
     Label_pair = knownLabelsCols_[j];
     m_Rjl_(Label_pair.first,Label_pair.second)=1;
@@ -378,7 +377,7 @@ bool ContinuousLBModel::initEMCols()
            - 2*(m_Vjk*m_Mulk.transpose());
     m_Rjl_ = (m_Djl-STK::maxByRow(m_Djl)*STK::Const::PointX(Mparam_.nbcolclust_)).exp();
     m_Rjl_ /= (STK::sumByRow(m_Rjl_)*STK::Const::PointX(Mparam_.nbcolclust_));
-    for (unsigned int j =0;j< UnknownLabelsCols_.size();j++)
+    for (int j =0;j< UnknownLabelsCols_.size();j++)
     {
       m_Djl.row(UnknownLabelsCols_[j]).minElt(minIndex);
       m_Rjl_.row(UnknownLabelsCols_[j]).setZeros();

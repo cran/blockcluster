@@ -532,19 +532,25 @@ bool CategoricalLBModel::GibbsCols()
 
 STK::Real CategoricalLBModel::estimateLikelihood()
 {
-  Array2DReal m_TbyRkl = v_Tk_*v_Rl_.transpose();
-  STK::Real tempsum = -(m_TbyRkl.prod(m_TbyRkl+RealMin).log()).sum();
+  Array2DReal m_Ukl = v_Tk_*v_Rl_.transpose();
+  STK::Real tempsum = -(m_Ukl.prod(m_Ukl+RealMin).log()).sum();
+  // Compute \sum_h \sum_{i,j,k,l} t_{ik} Y_{ij}^h r_{jl} \log(\alpha_{k,l}^h
   for (int h = 0; h < r_; ++h)
   {
-    Array2DReal m_Ukl = m_Tik_.transpose()*m3_Yhij_[h].cast<STK::Real>()*m_Rjl_;
-    tempsum+= ( m_Ukl.prod( (m_Ukl+RealMin).log() )).sum()+(b_-1)*((m3_Alphahkl_[h]+RealMin).log()).sum();
+    m_Ukl    = m_Tik_.transpose()*m3_Yhij_[h].cast<STK::Real>()*m_Rjl_;
+    // BUGFIXE (Serge Iovleff) Seems log is wrong
+    //    tempsum += ( m_Ukl.prod( (m_Ukl+RealMin).log() )).sum()
+    //    		 + (b_-1)*((m3_Alphahkl_[h]+RealMin).log()).sum();
+    tempsum += ( m_Ukl.prod( (m3_Alphahkl_[h]+RealMin).log() )).sum();
+//    		 + (b_-1)*((m3_Alphahkl_[h]+RealMin).log()).sum();
   }
   likelihood_ = tempsum
-              + v_Tk_.dot(v_logPiek_) - Mparam_.nbrowdata_*log(STK::Real(Mparam_.nbrowdata_))
-              + v_Rl_.dot(v_logRhol_) - Mparam_.nbcoldata_*log(STK::Real(Mparam_.nbcoldata_))
-              - (m_Tik_.prod((RealMin + m_Tik_).log()) ).sum()
-              - (m_Rjl_.prod((RealMin + m_Rjl_).log()) ).sum()
-              + (a_-1)*(v_logPiek_.sum()+v_logRhol_.sum());
+              + v_Tk_.dot(v_logPiek_) // - nbSample_*log(STK::Real(nbSample_))
+              + v_Rl_.dot(v_logRhol_) // - nbVar_   *log(STK::Real(nbVar_))
+              - ( m_Tik_.prod((RealMin + m_Tik_).log()) ).sum()
+              - ( m_Rjl_.prod((RealMin + m_Rjl_).log()) ).sum()
+			  //              + (a_-1)*(v_logPiek_.sum()+v_logRhol_.sum())
+              ;
   return likelihood_;
 }
 
@@ -639,9 +645,8 @@ bool CategoricalLBModel::initCEMRows()
   }
   //Determine row partition using CEM algorithm with equal proportions
   MatrixReal m_sumik(nbSample_,Mparam_.nbrowclust_);
-  int maxIndex;
   std::pair<int,int> Label_pair;
-  for(unsigned int i=0;i<knownLabelsRows_.size();i++)
+  for(int i=0;i<knownLabelsRows_.size();i++)
   {
     Label_pair = knownLabelsRows_[i];
     m_Tik_(Label_pair.first,Label_pair.second) = 1;
@@ -649,8 +654,9 @@ bool CategoricalLBModel::initCEMRows()
   for ( int itr = 0; itr < Mparam_.nbinititerations_; ++itr)
   {
     initBernoulliLogSumRows(m_sumik);
-    for (unsigned int i=0; i<UnknownLabelsRows_.size();i++)
+    for (int i=0; i<UnknownLabelsRows_.size();i++)
     {
+   	  int maxIndex;
       m_sumik.row(UnknownLabelsRows_[i]).maxElt(maxIndex);
       m_Tik_.row(UnknownLabelsRows_[i]).setZeros();
       m_Tik_(UnknownLabelsRows_[i],maxIndex)=1;
@@ -685,7 +691,6 @@ bool CategoricalLBModel::initCEMCols()
 {
   //Determine row partition using CEM algorithm with equal proportions
   MatrixReal m_sumjl(nbVar_, Mparam_.nbcolclust_);
-  int maxIndex;
   m3_Alphahkl_.resize(r_);
   m3_logAlhphahkl_.resize(r_);
   m_Vjk_=m_Dataij_.cast<STK::Real>().transpose()*m_Tik_;
@@ -700,7 +705,7 @@ bool CategoricalLBModel::initCEMCols()
     m3_logAlhphahkl_[h] = (m3_Alphahkl_[h]+RealMin).log();
   }
   std::pair<int,int> Label_pair;
-  for (unsigned int j=0;j<knownLabelsCols_.size();j++)
+  for (int j=0;j<knownLabelsCols_.size();j++)
   {
     Label_pair = knownLabelsCols_[j];
     m_Rjl_(Label_pair.first,Label_pair.second)=1;
@@ -709,8 +714,9 @@ bool CategoricalLBModel::initCEMCols()
   {
     // CE-step
     initBernoulliLogSumCols(m_sumjl); 
-    for (unsigned int j=0;j< UnknownLabelsCols_.size();j++)
+    for (int j=0;j< UnknownLabelsCols_.size();j++)
     {
+      int maxIndex;
       m_sumjl.row(UnknownLabelsCols_[j]).maxElt(maxIndex);
       m_Rjl_.row(UnknownLabelsCols_[j]).setZeros();
       m_Rjl_(UnknownLabelsCols_[j],maxIndex)=1;
@@ -770,9 +776,8 @@ bool CategoricalLBModel::initEMRows()
   }
   //Determine row partition using EM algorithm with equal proportions
   MatrixReal m_sumik(nbSample_,Mparam_.nbrowclust_);
-  int maxIndex;
   std::pair<int,int> Label_pair;
-  for(unsigned int i=0;i<knownLabelsRows_.size();i++)
+  for(int i=0;i<knownLabelsRows_.size();i++)
   {
     Label_pair = knownLabelsRows_[i];
     m_Tik_(Label_pair.first,Label_pair.second) = 1;
@@ -800,7 +805,9 @@ bool CategoricalLBModel::initEMRows()
   std::vector<STK::Real> randnumbers(nbSample_);
   for ( int i = 0; i < nbSample_; ++i)
   {
+#ifdef _OPENMP
 #pragma omp critical
+#endif
     randnumbers[i] = STK::Law::Uniform::rand(0,1);
   }
 
@@ -852,7 +859,6 @@ bool CategoricalLBModel::initEMCols()
 {
   //Determine row partition using EM algorithm with equal proportions
   MatrixReal m_sumjl(nbVar_, Mparam_.nbcolclust_);
-  int maxIndex;
   m3_Alphahkl_.resize(r_);
   m3_logAlhphahkl_.resize(r_);
   m_Vjk_=m_Dataij_.cast<STK::Real>().transpose()*m_Tik_;
@@ -867,7 +873,7 @@ bool CategoricalLBModel::initEMCols()
   }
   consoleOut();
   std::pair<int,int> Label_pair;
-  for (unsigned int j=0;j<knownLabelsCols_.size();j++)
+  for (int j=0;j<knownLabelsCols_.size();j++)
   {
     Label_pair = knownLabelsCols_[j];
     m_Rjl_(Label_pair.first,Label_pair.second)=1;
@@ -898,7 +904,9 @@ bool CategoricalLBModel::initEMCols()
   {
     //std::srand(j);
 //  randnumbers[j] = STK::Real(std::rand())/STK::Real(RAND_MAX);
+#ifdef _OPENMP
 #pragma omp critical
+#endif
     randnumbers[j] = STK::Law::Uniform::rand(0,1);
   }
   m_Wjl_.setZeros();

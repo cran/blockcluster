@@ -42,7 +42,10 @@
 class ICoClustModel
 {
     /** Default constructor */
-    inline ICoClustModel(){};
+    inline ICoClustModel(): nbSample_(0), nbVar_(0)
+                          , likelihood_(0), Lmax_(0)
+                          , empty_cluster_(true), stopAlgo_(true), dimprod_(0)
+    {};
 
   public:
     /** Constructor
@@ -205,10 +208,11 @@ class ICoClustModel
 
   protected:
     std::string  Error_msg_;
+    /// number of sample (number of rows) and of variables (number of columns)
     int nbSample_,nbVar_;
     //variables use in case of semi-supervised co-clustering
-    std::vector<int> UnknownLabelsRows_, UnknownLabelsCols_ ;
-    std::vector<std::pair<int,int> > knownLabelsRows_, knownLabelsCols_;
+    STK::Array1D<int> UnknownLabelsRows_, UnknownLabelsCols_ ;
+    STK::Array1D<std::pair<int,int> > knownLabelsRows_, knownLabelsCols_;
     VectorInteger v_nbRowClusterMembers_,v_nbColClusterMembers_;
 
     ModelParameters Mparam_;
@@ -230,6 +234,8 @@ class ICoClustModel
     /** Boolean Variable used to identify whether the stopping condition
      *  is reached or not*/
     bool stopAlgo_;
+    STK::Real dimprod_;
+
     // Utility Functions
     /** Generate k Random integers in the range 0 to n-1
      *  @param n Max integer value

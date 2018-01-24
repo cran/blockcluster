@@ -25,7 +25,7 @@
 */
 
 /*
- * Project:  Rcoclust::
+ * Project:  blockcluster::
  * created on: Apr 11, 2012
  * Purpose:  .
  * Author:   modal-laptop, parmeet.bhatia@inria.fr

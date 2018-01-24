@@ -1,6 +1,5 @@
 #' @include coclusterStrategy.R
 #' @include optionclasses.R
-#' @include Rcoclust.R
 #' 
 NULL
 
@@ -37,6 +36,8 @@ NULL
 #' 
 #' @param nbcocluster Integer vector specifying the number of row and column clusters respectively.
 #' @param strategy Object of class \code{\linkS4class{strategy}}.
+#' @param nbCore number of thread to use (OpenMP must be available), 0 for all cores. Default value is 1.
+#' 
 #' @return Return an object of \code{\linkS4class{BinaryOptions}} or \code{\linkS4class{ContingencyOptions}}
 #' or \code{\linkS4class{ContinuousOptions}} depending on whether the data-type is Binary, Contingency or Continuous
 #' respectively.
@@ -64,6 +65,7 @@ NULL
 cocluster<-function( data, datatype
                    , semisupervised = FALSE, rowlabels = numeric(0), collabels = numeric(0)
                    , model = NULL, nbcocluster, strategy = coclusterStrategy()
+							     , nbCore =1
 							     ) 
 {
 	#check for datatype and models and create input object to be passed in .Call function.
@@ -74,22 +76,22 @@ cocluster<-function( data, datatype
     if(datatype == "binary")
 	  {
       inpobj<-coclusterBinary( data, semisupervised, rowlabels, collabels
-												     , model, nbcocluster, strategy)
+												     , model, nbcocluster, strategy, nbCore)
 	  }
     else if(datatype == "continuous")
 	  {
       inpobj<-coclusterContinuous( data, semisupervised, rowlabels, collabels
-								                 , model, nbcocluster, strategy) 
+								                 , model, nbcocluster, strategy, nbCore) 
 	  }	
     else if(datatype == "contingency")
 	  {
 		  inpobj<-coclusterContingency( data, semisupervised, rowlabels, collabels
-									                , model, nbcocluster, strategy)
+									                , model, nbcocluster, strategy, nbCore)
 	  }
     else if(datatype == "categorical")
 	  {
 		  inpobj<-coclusterCategorical( data, semisupervised, rowlabels, collabels
-                                  , model, nbcocluster, strategy)
+                                  , model, nbcocluster, strategy, nbCore)
 	  }
   }
   return(inpobj)

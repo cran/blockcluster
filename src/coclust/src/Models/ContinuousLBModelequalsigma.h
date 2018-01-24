@@ -77,7 +77,6 @@ class ContinuousLBModelequalsigma: public ICoClustModel
   protected:
     MatrixReal const& m_Dataij_;
     MatrixReal m_ClusterDataij_;
-    STK::Real dimprod_;
     MatrixReal m_Dataij2_;
     MatrixReal m_Mukl_; //,m_Mukl2_;
     STK::Real Sigma2_,Sigma2start_,Sigma2max_;

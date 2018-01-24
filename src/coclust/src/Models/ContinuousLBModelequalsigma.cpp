@@ -31,17 +31,13 @@
 ContinuousLBModelequalsigma::ContinuousLBModelequalsigma( MatrixReal const& m_Dataij,ModelParameters const& Mparam)
                            : ICoClustModel(Mparam)
                            , m_Dataij_(m_Dataij)
-{
-  dimprod_ = nbSample_*nbVar_;
-};
+{}
 
 ContinuousLBModelequalsigma::ContinuousLBModelequalsigma(MatrixReal const& m_Dataij,VectorInteger const & rowlabels,
                                                          VectorInteger const & collabels,ModelParameters const& Mparam)
                            : ICoClustModel(Mparam,rowlabels,collabels)
                            , m_Dataij_(m_Dataij)
-{
-  dimprod_ = nbSample_*nbVar_;
-};
+{}
 
 void ContinuousLBModelequalsigma::logSumRows(MatrixReal & m_sumik)
 {

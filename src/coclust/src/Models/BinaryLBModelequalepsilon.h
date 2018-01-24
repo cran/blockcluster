@@ -110,7 +110,6 @@ class BinaryLBModelequalepsilon : public ICoClustModel
     MatrixBinary const&  m_Dataij_;
     MatrixBinary m_ClusterDataij_;
     MatrixReal m_Xjl_,m_Xik_,m_Tk_Rl_;
-    STK::Real dimprod_;
     MatrixReal m_Vjk_;
     MatrixReal m_Uil_,m_Ukl_;
     VectorReal v_Ui_;

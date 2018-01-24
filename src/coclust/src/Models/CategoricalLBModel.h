@@ -67,15 +67,20 @@ class CategoricalLBModel:public ICoClustModel
     virtual ~CategoricalLBModel();
 
   protected:
-    int a_,b_;//hyper-parameters
-    const MatrixInteger& m_Dataij_;
+    /// hyper-parameters
+    int a_,b_;
+    MatrixInteger const& m_Dataij_;
     MatrixInteger m_ClusterDataij_;
-    MatrixReal m_Uil_;
-    MatrixReal m_Vjk_;
+    /// matrices of the posterior probabilities of the rows/columns
+    MatrixReal m_Uil_, m_Vjk_;
+    /// Vector of the summed matrices
     VectorReal v_Ui_,v_Vj_;
     int r_; //number of categories
+    /// parameters sets
     std::vector<MatrixReal> m3_Alphahkl_,m3_Alphahklold_,m3_Alphahkl1_,
     m3_Alphahkl1old_,m3_Alphahklstart_,m3_Alphahklmax_,m3_logAlhphahkl_;
+    // TODO replace binary matrices by sparse matrices
+    /// binary matrices
     std::vector<MatrixBinary> m3_Yhij_,m3_Yijh_,m3_Yjih_;//different ways to store data
 
     virtual void mStepRows();

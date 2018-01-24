@@ -10,7 +10,7 @@
 //
 static const R_CallMethodDef callMethods[]  =
 {
-  {"CoClustmain", (DL_FUNC) &CoClustmain, 1},
+  {"CoClustmain", (DL_FUNC) &CoClustmain, 2},
   {NULL}
 };
 

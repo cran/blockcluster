@@ -6,7 +6,7 @@
 \usage{
 coclusterBinary(data, semisupervised = FALSE, rowlabels = numeric(0),
   collabels = numeric(0), model = NULL, nbcocluster,
-  strategy = coclusterStrategy(), a = 1, b = 1)
+  strategy = coclusterStrategy(), a = 1, b = 1, nbCore = 1)
 }
 \arguments{
 \item{data}{Input data as matrix (or list containing data matrix)}
@@ -38,6 +38,8 @@ Binary data:
 \item{a}{First hyper-parameter in case of Bayesian settings. Default is 1 (no prior).}
 
 \item{b}{Second hyper-parameter in case of Bayesian settings. Default is 1 (no prior).}
+
+\item{nbCore}{number of thread to use (OpenMP must be available), 0 for all cores. Default value is 1.}
 }
 \value{
 Return an object of \code{\linkS4class{BinaryOptions}}.
@@ -61,4 +63,3 @@ plot(out)
 
 
 }
-

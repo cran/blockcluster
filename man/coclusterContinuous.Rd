@@ -6,7 +6,7 @@
 \usage{
 coclusterContinuous(data, semisupervised = FALSE, rowlabels = numeric(0),
   collabels = numeric(0), model = NULL, nbcocluster,
-  strategy = coclusterStrategy())
+  strategy = coclusterStrategy(), nbCore = 1)
 }
 \arguments{
 \item{data}{Input data as matrix (or list containing data matrix.)}
@@ -30,6 +30,8 @@ column labels if specified value is true. The default value is false.}
 \item{nbcocluster}{Integer vector specifying the number of row and column clusters respectively.}
 
 \item{strategy}{Object of class \code{\linkS4class{strategy}}.}
+
+\item{nbCore}{number of thread to use (OpenMP must be available), 0 for all cores. Default value is 1.}
 }
 \value{
 Return an object of \code{\linkS4class{BinaryOptions}} or \code{\linkS4class{ContingencyOptions}}
@@ -55,4 +57,3 @@ plot(out)
 
 
 }
-

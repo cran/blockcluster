@@ -22,4 +22,3 @@ The number of repetitions can be modified via parameter "nbtry" of
 \code{\link{coclusterStrategy}} function. Default value is 2. } 
 }
 }
-

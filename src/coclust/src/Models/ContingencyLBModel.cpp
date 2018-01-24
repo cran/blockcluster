@@ -137,7 +137,6 @@ bool ContingencyLBModel::initCEMRows()
 
   MatrixReal m_Akl(Mparam_.nbrowclust_,cols), m_Aklold(Mparam_.nbrowclust_,cols);
   MatrixReal m_sumik(Mparam_.nbrowdata_,Mparam_.nbrowclust_);
-  int maxIndex;
 
   //Model parameters
   m_Tik_.resize(nbSample_,Mparam_.nbrowclust_) = 0;
@@ -167,6 +166,7 @@ bool ContingencyLBModel::initCEMRows()
     m_sumik = m_Uil_*m_Akl.transpose();
     for ( int i =0;i< UnknownLabelsRows_.size();i++)
     {
+      int maxIndex;
       m_sumik.row(UnknownLabelsRows_[i]).maxElt(maxIndex);
       m_Tik_.row(UnknownLabelsRows_[i]).setZeros();
       m_Tik_(UnknownLabelsRows_[i], maxIndex)=1;
@@ -213,7 +213,6 @@ bool ContingencyLBModel::initCEMCols()
     MatrixReal m_Alk(Mparam_.nbcolclust_,Mparam_.nbrowclust_)
              , m_Alkold(Mparam_.nbcolclust_,Mparam_.nbrowclust_);
     MatrixReal m_sumjl(nbVar_, Mparam_.nbcolclust_);
-    int maxIndex;
   
     //Initializations
     m_Vjk_ = m_Dataij_.transpose()*m_Tik_;
@@ -231,6 +230,7 @@ bool ContingencyLBModel::initCEMCols()
       m_sumjl = m_Vjk_*(m_Alk.transpose());
       for ( int j =0;j< UnknownLabelsCols_.size();j++)
       {
+        int maxIndex;
         m_sumjl.row(UnknownLabelsCols_[j]).maxElt(maxIndex);
         m_Rjl_.row(UnknownLabelsCols_[j]).setZeros();
         m_Rjl_(UnknownLabelsCols_[j],maxIndex)=1;
@@ -343,7 +343,6 @@ bool ContingencyLBModel::initEMRows()
 
   MatrixReal m_Akl(Mparam_.nbrowclust_,cols), m_Aklold(Mparam_.nbrowclust_,cols);
   MatrixReal m_sumik(Mparam_.nbrowdata_,Mparam_.nbrowclust_);
-  int maxIndex;
 
   //Model parameters
   m_Tik_.resize(nbSample_,Mparam_.nbrowclust_) = 0;
@@ -424,7 +423,6 @@ bool ContingencyLBModel::initEMCols()
     MatrixReal m_Alk(Mparam_.nbcolclust_,Mparam_.nbrowclust_)
              , m_Alkold(Mparam_.nbcolclust_,Mparam_.nbrowclust_);
     MatrixReal m_sumjl(nbVar_, Mparam_.nbcolclust_);
-    int maxIndex;
   
     //Initializations
     m_Vjk_ = m_Dataij_.transpose()*m_Tik_;
@@ -617,9 +615,11 @@ void ContingencyLBModel::selectRandomColsFromData(MatrixReal& _m_il,int cols)
     {
 //    int random=std::rand()%(Mparam_.nbcoldata_-l);
       int random;
+#ifdef _OPENMP
 #pragma omp critical
+#endif
       random = STK::Law::UniformDiscrete::rand(0, Mparam_.nbcoldata_-l - 1);
-      int index=_v_temp[random];
+      int index  =_v_temp[random];
       _m_il.col(l)=m_Dataij_.col(index);
       //swap elements
       std::swap(_v_temp[Mparam_.nbcoldata_-l-1], _v_temp[random]);

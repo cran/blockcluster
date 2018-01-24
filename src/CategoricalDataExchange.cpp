@@ -19,7 +19,7 @@ void CategoricalDataExchange::dataOutput(Rcpp::S4& obj,ICoClustModel* model,bool
     const std::vector<MatrixReal> mean = ptrLBM->mean();
     std::vector<std::vector<std::vector<double> > > tempmean(mean.size(),std::vector<std::vector<double> >(Mparam_.nbrowclust_,(std::vector<double>(Mparam_.nbcolclust_))));
     //std::vector<STK::RMatrix<STK::Real>> tempmean(mean.size());
-    for (int h = 0; h < mean.size(); ++h)
+    for (int h = 0; h < int(mean.size()); ++h)
     {
       for (int k = 0; k < Mparam_.nbrowclust_; ++k)
       {

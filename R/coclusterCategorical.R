@@ -1,6 +1,5 @@
 #' @include coclusterStrategy.R
 #' @include optionclasses.R
-#' @include Rcoclust.R
 #' 
 NULL
 
@@ -27,6 +26,7 @@ NULL
 #' @param strategy Object of class \code{\linkS4class{strategy}}.
 #' @param a First hyper-parameter in case of Bayesian settings. Default is 1 (no prior).
 #' @param b Second hyper-parameter in case of Bayesian settings. Default is 1 (no prior).
+#' @param nbCore number of thread to use (OpenMP must be available), 0 for all cores. Default value is 1.
 #' 
 #' @return Return an object of \code{\linkS4class{BinaryOptions}} or \code{\linkS4class{ContingencyOptions}}
 #' or \code{\linkS4class{ContinuousOptions}} depending on whether the data-type is Binary, Contingency or Continuous
@@ -50,7 +50,8 @@ NULL
 #' plot(out)
 #' 
 coclusterCategorical<-function(data, semisupervised = FALSE, rowlabels = numeric(0), collabels = numeric(0),
-                               model = NULL, nbcocluster, strategy = coclusterStrategy(), a=1, b=1)
+                               model = NULL, nbcocluster, strategy = coclusterStrategy(), a=1, b=1
+													    , nbCore = 1)
 {
 	#Check for data
 	if(missing(data)){ stop("Data is missing.")}
@@ -136,7 +137,9 @@ coclusterCategorical<-function(data, semisupervised = FALSE, rowlabels = numeric
 	# checking for hyperparameters
   if ((a <=0)||(b<=0)) { stop("hyper-parameters must be positive")}
   #strategy@hyperparam = c(a,b);
-  # create object
+	#  check nbCore
+	if(!is.numeric(nbCore) && length(nbCore) != 1) stop("nbCore must be an integer")
+	# create object
   inpobj<-new("CategoricalOptions",data = data
              , rowlabels = rowlabels, collabels = collabels
              , semisupervised = semisupervised
@@ -146,7 +149,7 @@ coclusterCategorical<-function(data, semisupervised = FALSE, rowlabels = numeric
              , strategy = strategy
 				     , hyperparam = c(a,b))
 
-  .Call("CoClustmain",inpobj,PACKAGE = "blockcluster")
+  .Call("CoClustmain",inpobj, nbCore,PACKAGE = "blockcluster")
   cat(inpobj@message,"\n")
   return(inpobj)
 }

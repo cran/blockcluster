@@ -38,4 +38,3 @@ summary(out)
 plot(out)
 
 }
-

@@ -29,8 +29,8 @@
  *
  **/
 
-/** @file Rcoclustermain.cpp
- *  @brief 
+/** @file Rcoclustmain.cpp
+ *  @brief Implementation of the main function
  **/
 
 #include <RTKpp.h>
@@ -53,15 +53,16 @@
 #ifdef _OPENMP
 #include <omp.h>
 
-RcppExport SEXP CoClustmain(SEXP robj)
+RcppExport SEXP CoClustmain(SEXP robj, SEXP nbCore)
 {
   BEGIN_RCPP
   //Initialize Rcpp object
   Rcpp::S4 CoClustobj(robj);
-
+  int nc = Rcpp::as<int>(nbCore), nbAvail = omp_get_num_procs();
+  if (nc<=0 || nc > nbAvail ) nc = nbAvail;
+//omp_set_num_threads(omp_get_num_procs()); // Can be problematic with set.seed in R. And it might be better to give choice to the user, juste have to export OMP_NUM_THREADS = x
   //set number of threads equal to number of processors
-//omp_set_num_threads(omp_get_num_procs()); // Can be problematic with set.seed in R. And it might be better to give choice to the user, juste have to export OMP_NUM_THREADS = x 
-  
+  omp_set_num_threads(nc);
 
   std::map<std::string,DataType> S_DataType;
   S_DataType["binary"] = Binary;
@@ -165,12 +166,12 @@ RcppExport SEXP CoClustmain(SEXP robj)
   END_RCPP
 }
 #else
-RcppExport SEXP CoClustmain(SEXP robj)
+// nbCore will not be used
+RcppExport SEXP CoClustmain(SEXP robj, SEXP nbCore)
 {
   BEGIN_RCPP
   //Initialize Rcpp object
   Rcpp::S4 CoClustobj(robj);
-
   std::map<std::string,DataType> S_DataType;
   S_DataType["binary"] = Binary;
   S_DataType["contingency"] = Contingency;

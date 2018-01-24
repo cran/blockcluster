@@ -33,20 +33,74 @@
 #ifndef RPACKAGE
 using namespace cimg_library;
 #endif
-BinaryLBModel::BinaryLBModel( MatrixBinary const&  m_Dataij,ModelParameters const& Mparam,int a,int b)
-                           : ICoClustModel(Mparam) , m_Dataij_(m_Dataij)
-{
-  a_ = a;
-  b_ = b;
-  dimprod_ = nbSample_*nbVar_;
-};
-
-BinaryLBModel::BinaryLBModel(MatrixBinary const&  m_Dataij,VectorInteger const & rowlabels,
-                             VectorInteger const & collabels,ModelParameters const& Mparam,int a,int b)
-                            : ICoClustModel(Mparam,rowlabels,collabels)
-                            , a_(a), b_(b), dimprod_(nbSample_*nbVar_)
+BinaryLBModel::BinaryLBModel( MatrixBinary const&  m_Dataij
+                            , ModelParameters const& Mparam
+                            , int a,int b)
+                            : ICoClustModel(Mparam)
+                            , a_(a), b_(b)
                             , m_Dataij_(m_Dataij)
-{}
+{
+  m_Uil_.resize(nbSample_,Mparam_.nbcolclust_) = 0;
+  m_Vjk_.resize(nbVar_,Mparam_.nbrowclust_) = 0.;
+
+  m_Rjl_.resize(nbVar_   ,Mparam_.nbcolclust_) = 1.0/(Mparam_.nbcolclust_);
+  v_Rl_.resize(Mparam_.nbcolclust_) = STK::Real(nbVar_)/(Mparam_.nbcolclust_);
+
+
+  m_Tik_.resize(nbSample_,Mparam_.nbrowclust_) = 1.0/(Mparam_.nbrowclust_);
+  v_Tk_.resize(Mparam_.nbrowclust_) = STK::Real(nbSample_)/(Mparam_.nbrowclust_);
+
+  m_Alphakl_.resize(Mparam_.nbrowclust_,Mparam_.nbcolclust_) = 0;
+  m_Alphakl1old_.resize(Mparam_.nbrowclust_,Mparam_.nbcolclust_) = 0;
+  m_Alphaklold_.resize(Mparam_.nbrowclust_,Mparam_.nbcolclust_) = 0;
+
+  m_akl_.resize(Mparam_.nbrowclust_,Mparam_.nbcolclust_) = 0;
+
+  v_logPiek_ = std::log(1.0/Mparam_.nbrowclust_)*(STK::Const::Vector<STK::Real>(Mparam_.nbrowclust_));
+  v_logRhol_ = std::log(1.0/Mparam_.nbcolclust_)*(STK::Const::Vector<STK::Real>(Mparam_.nbcolclust_));
+
+#ifdef COVERBOSE
+  std::cout << "BinaryLBModel::BinaryLBModel done"<<std::endl;
+  std::cout << "nbSample_="<< nbSample_ << std::endl;
+  std::cout << "nbVar_="<< nbVar_ << std::endl;
+  consoleOut();
+#endif
+}
+
+BinaryLBModel::BinaryLBModel( MatrixBinary const&  m_Dataij
+                            , VectorInteger const& rowlabels
+                            , VectorInteger const& collabels
+                            , ModelParameters const& Mparam
+                            , int a,int b)
+                            : ICoClustModel(Mparam,rowlabels,collabels)
+                            , a_(a), b_(b)
+                            , m_Dataij_(m_Dataij)
+{
+  m_Uil_.resize(nbSample_,nbVar_) = 0;
+
+  m_Vjk_.resize(nbVar_,Mparam_.nbrowclust_) = 0;
+  v_Rl_  = STK::Const::Vector<double>(nbVar_);
+
+  m_Tik_.resize(nbSample_,Mparam_.nbrowclust_) = 0;
+  m_Rjl_.resize(nbVar_,Mparam_.nbcolclust_) = 0;
+
+  m_Alphakl_.resize(Mparam_.nbrowclust_,nbVar_) = 0;
+
+  m_Alphakl1old_.resize(Mparam_.nbrowclust_,Mparam_.nbcolclust_) = 0;
+  m_Alphaklold_.resize(Mparam_.nbrowclust_,Mparam_.nbcolclust_) = 0;
+
+  m_akl_.resize(Mparam_.nbrowclust_,Mparam_.nbcolclust_) = 0;
+
+  v_logPiek_ = std::log(1.0/Mparam_.nbrowclust_)*(STK::Const::Vector<STK::Real>(Mparam_.nbrowclust_));
+  v_logRhol_ = std::log(1.0/Mparam_.nbcolclust_)*(STK::Const::Vector<STK::Real>(Mparam_.nbcolclust_));
+
+#ifdef COVERBOSE
+  std::cout << "BinaryLBModel::BinaryLBModel done"<<std::endl;
+  std::cout << "nbSample_="<< nbSample_ << std::endl;
+  std::cout << "nbVar_="<< nbVar_ << std::endl;
+  consoleOut();
+#endif
+}
 
 bool BinaryLBModel::cemInitStep()
 {
@@ -66,6 +120,7 @@ bool BinaryLBModel::cemInitStep()
       m_Vjk_.resize(nbVar_,Mparam_.nbrowclust_) = 0;
       v_logPiek_ = std::log(1.0/Mparam_.nbrowclust_)*(STK::Const::Vector<STK::Real>(Mparam_.nbrowclust_));
       v_logRhol_ = std::log(1.0/Mparam_.nbcolclust_)*(STK::Const::Vector<STK::Real>(Mparam_.nbcolclust_));
+
 #ifdef COVERBOSE
       std::cout<<"BinaryLBModel::cemInitStep. Initialization done with success."<<std::endl;
       consoleOut();
@@ -94,13 +149,13 @@ bool BinaryLBModel::emInitStep()
       m_akl_.resize(Mparam_.nbrowclust_,Mparam_.nbcolclust_) = 0;
       m_Uil_.resize(nbSample_,Mparam_.nbcolclust_) = 0;
       m_Vjk_.resize(nbVar_,Mparam_.nbrowclust_) = 0;
+
       v_logPiek_ = std::log(1.0/Mparam_.nbrowclust_)*(STK::Const::Vector<STK::Real>(Mparam_.nbrowclust_));
       v_logRhol_ = std::log(1.0/Mparam_.nbcolclust_)*(STK::Const::Vector<STK::Real>(Mparam_.nbcolclust_));
 #ifdef COVERBOSE
       std::cout<<"BinaryLBModel::emInitStep. Initialization done with success."<<std::endl;
       consoleOut();
 #endif
-
       return true;
     }
   }
@@ -119,18 +174,19 @@ void BinaryLBModel::finalizeOutput()
     }
   }
   // Calculate probability for Summary Matrix
-  m_epsilonkl_ = m_akl_.cast<STK::Real>().prod(1-m_Alphakl_) + (1-m_akl_.cast<STK::Real>()).prod(m_Alphakl_);
-
+  m_epsilonkl_ = m_akl_.cast<STK::Real>().prod((-m_Alphakl_+1))
+               + (-m_akl_.cast<STK::Real>()+1).prod(m_Alphakl_);
 }
 
 void BinaryLBModel::consoleOut()
 {
 #ifdef COVERBOSE
-  std::cout <<"Output Model parameter:"<<"\nakl:\n"<<m_akl_
-            <<"\nepsilonkl:\n"<<m_epsilonkl_
-            <<"\npiek: "<< v_Piek_.transpose()
-            <<"\nRhol: "<<v_Rhol_.transpose()<<"\n";
-  std::cout<<"ICL: "<<iclCriteriaValue()<<"\n";
+  std::cout <<"Model parameters:\n"
+            <<"Alphakl:\n" << m_Alphakl_
+            <<"\nlog(piek): "<< v_logPiek_.transpose()
+            <<"\nlog(Rhol): "<< v_logRhol_.transpose() <<"\n";
+  std::cout<<"likelihood: "<<likelihood() <<"\n";
+  std::cout<<"ICL: "<<iclCriteriaValue() <<std::endl;
 #endif
 }
 
@@ -138,16 +194,16 @@ void BinaryLBModel::consoleOut()
 //Compute Bernoulli log-sum for all rows
 void BinaryLBModel::logSumRows(MatrixReal & m_sum)
 {
-  m_sum = m_Uil_*(((((m_Alphakl_+RealMin)/((1-m_Alphakl_)+RealMin)).log())).transpose())
-        + STK::Const::Vector<STK::Real>(nbSample_)*((v_logPiek_+((1-m_Alphakl_+RealMin).log())*v_Rl_).transpose());
+  m_sum = m_Uil_*(((((m_Alphakl_+RealMin)/(((-m_Alphakl_+1))+RealMin)).log())).transpose())
+        + STK::Const::VectorX(nbSample_)*((v_logPiek_+(( ((-m_Alphakl_+1))+RealMin).log())*v_Rl_).transpose());
 }
 
 //Compute Bernoulli log-sum for all columns
 void BinaryLBModel::logSumCols(MatrixReal & m_sum)
 {
-  m_sum = m_Vjk_*( ((m_Alphakl_+RealMin)/(1-m_Alphakl_+RealMin)).log())
+  m_sum = m_Vjk_*( ((m_Alphakl_+RealMin)/((-m_Alphakl_+1)+RealMin)).log())
         + STK::Const::VectorX(nbVar_)
-          *( (v_logRhol_+(( (1-m_Alphakl_)+RealMin).log()).transpose()*v_Tk_).transpose());
+          *( (v_logRhol_+(( ((-m_Alphakl_+1))+RealMin).log()).transpose()*v_Tk_).transpose());
 }
 
 //Run EM algorithm on data Matrix m_Uil_
@@ -286,15 +342,15 @@ int BinaryLBModel::nbFreeParameters() const
 
 STK::Real BinaryLBModel::estimateLikelihood()
 {
-	likelihood_ = ( v_Tk_.transpose()*
-	                ( m_Alphakl_.prod((m_Alphakl_+RealMin).log())
-	                + (1-m_Alphakl_).prod( (1-m_Alphakl_+RealMin).log() )
-	                )*v_Rl_
-	                + v_Tk_.dot(v_logPiek_) + v_Rl_.dot(v_logRhol_)
-	                - (m_Tik_.prod( (RealMin + m_Tik_).log()) ).sum()
-	                - (m_Rjl_.prod( (RealMin + m_Rjl_).log()) ).sum()
-	              )/dimprod_;
-	return likelihood_;
+  likelihood_ = (v_Tk_.transpose()* 
+  							( m_Alphakl_.prod((m_Alphakl_+RealMin).log())
+								+ ((-m_Alphakl_+1)).prod( ((-m_Alphakl_+1)+RealMin).log() )
+								)*v_Rl_
+			  				+ v_Tk_.dot(v_logPiek_) + v_Rl_.dot(v_logRhol_)
+			          - (m_Tik_.prod( (RealMin + m_Tik_).log()) ).sum()
+			          - (m_Rjl_.prod( (RealMin + m_Rjl_).log()) ).sum()
+			          ); // /(nbSample_*nbVar_);
+  return likelihood_;
 }
 
 //Compute change in Alpha and set the terminate variable accordingly
@@ -318,7 +374,7 @@ void BinaryLBModel::displayCluster()
 {
   CImg<unsigned char>  cluster(nbVar_,nbSample_,1,1,0);
   CImg<unsigned char>  data(nbVar_,nbSample_,1,1,0);
-  MatrixBinary m_ClusterDataij_ = arrangedDataClusters();
+  m_ClusterDataij_ = arrangedDataClusters();
 
   // Assign value to images
   for ( int i = 0; i < nbSample_; ++i)
@@ -348,16 +404,18 @@ void BinaryLBModel::displayCluster()
 void BinaryLBModel::initBernoulliLogSumRows(MatrixReal & _m_sum)
 {
   //Array2DReal m_Alphakltmp = m_Alphakl_+RealMin;
-  _m_sum = m_Uil_* ( (m_Alphakl_+RealMin) / (1-m_Alphakl_+RealMin) ).log().transpose()
-         + STK::Const::Vector<STK::Real>(Mparam_.nbrowdata_)
-           * ( (1-m_Alphakl_+RealMin).log() * v_Rl_).transpose();
+//  _m_sum = m_Uil_* ( (m_Alphakl_+RealMin) / ((-m_Alphakl_+1)+RealMin) ).log().transpose()
+//         + STK::Const::Vector<STK::Real>(Mparam_.nbrowdata_)
+//           * ( ((-m_Alphakl_+1)+RealMin).log() * v_Rl_).transpose();
+  STK::Law::Uniform u(0,1);
+  _m_sum.rand(u);
 }
 
 //Compute Bernoulli log-sum for all columns
 void BinaryLBModel::initBernoulliLogSumCols(MatrixReal & _m_sum)
 {
-  _m_sum = m_Vjk_*(((((m_Alphakl_+RealMin)/(1-m_Alphakl_+RealMin)).log())))+
-      STK::Const::Vector<STK::Real>(Mparam_.nbcoldata_)*(v_Tk_.transpose()*(((1-m_Alphakl_+RealMin).log())));
+  _m_sum = m_Vjk_*(((((m_Alphakl_+RealMin)/((-m_Alphakl_+1)+RealMin)).log())))+
+      STK::Const::Vector<STK::Real>(Mparam_.nbcoldata_)*(v_Tk_.transpose()*((((-m_Alphakl_+1)+RealMin).log())));
 }
 
 bool BinaryLBModel::initCEMRows()
@@ -378,18 +436,18 @@ bool BinaryLBModel::initCEMRows()
   generateRandomBernoulliParameterRows(m_Alphakl_,cols);
   //Determine row partition using CEM algorithm with equal proportions
   MatrixReal m_sumik(nbSample_,Mparam_.nbrowclust_);
-  int maxIndex;
-  std::pair<int,int> Label_pair;
-  for(unsigned int i=0;i<knownLabelsRows_.size();i++)
+  for(int i=0;i<knownLabelsRows_.size();i++)
   {
-    Label_pair = knownLabelsRows_[i];
+    std::pair<int,int> Label_pair = knownLabelsRows_[i];
     m_Tik_(Label_pair.first,Label_pair.second) = 1;
   }
+  // start iterations
   for ( int itr = 0; itr < Mparam_.nbinititerations_; ++itr)
   {
     initBernoulliLogSumRows(m_sumik);
-    for (unsigned int i=0; i<UnknownLabelsRows_.size();i++)
+    for (int i=0; i<UnknownLabelsRows_.size();i++)
     {
+      int maxIndex;
       m_sumik.row(UnknownLabelsRows_[i]).maxElt(maxIndex);
       m_Tik_.row(UnknownLabelsRows_[i]).setZeros();
       m_Tik_(UnknownLabelsRows_[i],maxIndex)=1;
@@ -417,22 +475,22 @@ bool BinaryLBModel::initCEMCols()
 {
   //Determine row partition using CEM algorithm with equal proportions
   MatrixReal m_sumjl(nbVar_, Mparam_.nbcolclust_);
-  int maxIndex;
   m_Vjk_=m_Dataij_.cast<STK::Real>().transpose()*m_Tik_;
   m_Alphakl_.resize(Mparam_.nbrowclust_,Mparam_.nbcolclust_);
+
   generateRandomBernoulliParameterCols(m_Alphakl_);
-  std::pair<int,int> Label_pair;
-  for (unsigned int j=0;j<knownLabelsCols_.size();j++)
+  for (int j=0;j<knownLabelsCols_.size();j++)
   {
-    Label_pair = knownLabelsCols_[j];
+    std::pair<int,int> Label_pair = knownLabelsCols_[j];
     m_Rjl_(Label_pair.first,Label_pair.second)=1;
   }
   for ( int itr = 0; itr < Mparam_.nbinititerations_; ++itr)
   {
     // CE-step
     initBernoulliLogSumCols(m_sumjl);
-    for (unsigned int j=0;j< UnknownLabelsCols_.size();j++)
+    for (int j=0;j< UnknownLabelsCols_.size();j++)
     {
+   	  int maxIndex;
       m_sumjl.row(UnknownLabelsCols_[j]).maxElt(maxIndex);
       m_Rjl_.row(UnknownLabelsCols_[j]).setZeros();
       m_Rjl_(UnknownLabelsCols_[j],maxIndex)=1;
@@ -473,13 +531,12 @@ bool BinaryLBModel::initEMRows()
   generateRandomBernoulliParameterRows(m_Alphakl_,cols);
   //Determine row partition using CEM algorithm with equal proportions
   MatrixReal m_sumik(nbSample_,Mparam_.nbrowclust_);
-  int maxIndex;
-  std::pair<int,int> Label_pair;
-  for(unsigned int i=0;i<knownLabelsRows_.size();i++)
+  for(int i=0;i<knownLabelsRows_.size();i++)
   {
-    Label_pair = knownLabelsRows_[i];
+    std::pair<int,int> Label_pair = knownLabelsRows_[i];
     m_Tik_(Label_pair.first,Label_pair.second) = 1;
   }
+  // start iteration
   for ( int itr = 0; itr < Mparam_.nbinititerations_; ++itr)
   {
     //E Step
@@ -503,11 +560,20 @@ bool BinaryLBModel::initEMRows()
 #endif
       return false;
     }
-
     // M-step
     m_Alphaklold_ = m_Alphakl_;
     m_Alphakl_ = (m_Tik_.transpose()*m_Uil_)/(v_Tk_*(v_Rl_.transpose()));
 
+#ifdef COVERBOSE
+    std::cout << "BinaryLBModel::initEMRows mStepRows() done"<<std::endl;
+    std::cout << "m_Alphakl_=\n "<< m_Alphakl_  << std::endl;
+    std::cout << "v_Tk_= " << v_Tk_.transpose() << std::endl;
+    std::cout << "v_Rl_= " << v_Rl_.transpose() << std::endl;
+    std::cout << "log(piek): "<< v_logPiek_.transpose() << std::endl;
+    std::cout << "log(Rhol): "<< v_logRhol_.transpose() << std::endl;
+    std::cout << "m_Tik_.nbAvailableValues()= " << m_Tik_.nbAvailableValues() << std::endl;
+#endif
+//    m_Alphakl_ = (m_Tik_.transpose()*m_Uil_)/(v_Tk_*(v_Rl_.transpose()));
     if((((m_Alphakl_-m_Alphaklold_).abs()/(m_Alphakl_+RealMin)).sum())<Mparam_.initepsilon_)
     { break;}
   }
@@ -518,12 +584,12 @@ bool BinaryLBModel::initEMCols()
 {
   //Determine row partition using CEM algorithm with equal proportions
   MatrixReal m_sumjl(nbVar_, Mparam_.nbcolclust_);
-  int maxIndex;
   m_Vjk_=m_Dataij_.cast<STK::Real>().transpose()*m_Tik_;
   m_Alphakl_.resize(Mparam_.nbrowclust_,Mparam_.nbcolclust_);
+
   generateRandomBernoulliParameterCols(m_Alphakl_);
   std::pair<int,int> Label_pair;
-  for (unsigned int j=0;j<knownLabelsCols_.size();j++)
+  for (int j=0;j<knownLabelsCols_.size();j++)
   {
     Label_pair = knownLabelsCols_[j];
     m_Rjl_(Label_pair.first,Label_pair.second)=1;
@@ -533,10 +599,11 @@ bool BinaryLBModel::initEMCols()
     //E-step
     initBernoulliLogSumCols(m_sumjl);
     m_Rjl_ = (m_sumjl-STK::maxByRow(m_sumjl)*STK::Const::PointX(Mparam_.nbcolclust_)).exp();
-    m_Rjl_ /= (STK::sumByRow(m_Rjl_)*STK::Const::PointX(Mparam_.nbcolclust_));
+    m_Rjl_ /= (STK::sumByRow(m_Rjl_).safe(1)*STK::Const::PointX(Mparam_.nbcolclust_));
     //
     for ( int j=0;j< (int)knownLabelsCols_.size();j++)
     {
+   	  int maxIndex;
       m_sumjl.row(UnknownLabelsCols_[j]).maxElt(maxIndex); //??
       m_Rjl_.row(knownLabelsCols_[j].first).setZeros();
       m_Rjl_(knownLabelsCols_[j].first,knownLabelsCols_[j].second)=1;
@@ -660,6 +727,13 @@ void BinaryLBModel::mStepFull()
 
 void BinaryLBModel::mStepRows()
 {
+#ifdef COVERBOSE
+  std::cout << "Entering BinaryLBModel::mStepRows" << std::endl;
+  std::cout << Error_msg_;
+  std::cout << "v_Tk_= " << v_Tk_.transpose();
+  std::cout << "v_Rl_= " << v_Rl_.transpose();
+#endif
+
   if(!Mparam_.fixedproportions_)
   { v_logPiek_=((v_Tk_+a_-1)/(nbSample_+Mparam_.nbrowclust_*(a_-1))).log();}
 

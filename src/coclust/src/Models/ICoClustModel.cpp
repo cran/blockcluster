@@ -39,8 +39,8 @@ ICoClustModel::ICoClustModel( ModelParameters const& Mparam)
                             , Lmax_(-STK::Arithmetic<STK::Real>::infinity())
                             , empty_cluster_(false)
                             , stopAlgo_(false)
+							, dimprod_(nbSample_*nbVar_)
 {
-
   v_nbRowClusterMembers_.resize(Mparam.nbrowclust_) = 0;
   v_nbColClusterMembers_.resize(Mparam.nbcolclust_) = 0;
   v_Zi_.resize(nbSample_) = 0;
@@ -63,9 +63,8 @@ ICoClustModel::ICoClustModel( ModelParameters const& Mparam
                             , likelihood_(-STK::Arithmetic<STK::Real>::infinity())
                             , empty_cluster_(false)
                             , stopAlgo_(false)
+							, dimprod_(nbSample_*nbVar_)
 {
-  nbSample_ = Mparam.nbrowdata_;
-  nbVar_    = Mparam.nbcoldata_;
   v_nbRowClusterMembers_.resize(Mparam.nbrowclust_) = 0;
   v_nbColClusterMembers_.resize(Mparam.nbcolclust_) = 0;
   v_Zi_.resize(nbSample_) = 0;
@@ -85,9 +84,10 @@ VectorInteger ICoClustModel::randSample(int n,int k)
   {
     // get ramdom index
     int irand;
+#ifdef _OPENMP
 #pragma omp critical
+#endif
     irand = STK::Law::UniformDiscrete::rand(0,lend - 1);
-//  int irand=std::rand()%(lend);
     v_randint[lfirst] = v_temp[irand];
     //swap elements
     --lend;
@@ -304,7 +304,9 @@ void ICoClustModel::rowClassMatrixDraw()
   {
     //std::srand(i);
 //  randnumbers[i] = STK::Real(std::rand())/STK::Real(RAND_MAX);
+#ifdef _OPENMP
 #pragma omp critical
+#endif
     randnumbers[i] = STK::Law::Uniform::rand(0,1);
   }
 
@@ -336,7 +338,9 @@ void ICoClustModel::colClassMatrixDraw()
   {
     //std::srand(j);
 //  randnumbers[j] = STK::Real(std::rand())/STK::Real(RAND_MAX);
+#ifdef _OPENMP
 #pragma omp critical
+#endif
     randnumbers[j] = STK::Law::Uniform::rand(0,1);
   }
   m_Wjl_.setZeros();
@@ -454,7 +458,9 @@ PointReal ICoClustModel::unifRnd(STK::Real a,STK::Real b, int col)
   for ( int c = 0; c < col; ++c)
   {
 //   m_temp[c] = (b-a)*(std::rand()/STK::Real(RAND_MAX)) + a;
+#ifdef _OPENMP
 #pragma omp critical
+#endif
      m_temp[c] = (b-a)*STK::Law::Uniform::rand(0,1) + a;
   }
   return m_temp;

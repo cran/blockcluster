@@ -34,7 +34,7 @@
  **/
 #ifndef COCLUSTMAIN_H
 
-SEXP CoClustmain(SEXP robj);
+SEXP CoClustmain(SEXP robj, SEXP nbCore);
 
 #endif /* COCLUSTMAIN_H*/
 

@@ -87,4 +87,3 @@ strategy<-coclusterStrategy()
 summary(strategy)
 
 }
-

@@ -15,4 +15,3 @@ with the parameters in base class.
 \item{classvariance:}{The variance of each co-cluster.} 
 }
 }
-

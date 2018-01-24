@@ -127,7 +127,6 @@ bool ContingencyLBModel_mu_i_nu_j::initCEMRows()
 
   MatrixReal m_Akl(Mparam_.nbrowclust_,cols), m_Aklold(Mparam_.nbrowclust_,cols);
   MatrixReal m_sumik(Mparam_.nbrowdata_,Mparam_.nbrowclust_);
-  int maxIndex;
 
   //Model parameters
   m_Tik_.resize(nbSample_,Mparam_.nbrowclust_) = 0;
@@ -157,6 +156,7 @@ bool ContingencyLBModel_mu_i_nu_j::initCEMRows()
     m_sumik = m_Uil_*m_Akl.transpose();
     for ( int i =0;i< UnknownLabelsRows_.size();i++)
     {
+      int maxIndex;
       m_sumik.row(UnknownLabelsRows_[i]).maxElt(maxIndex);
       m_Tik_.row(UnknownLabelsRows_[i]).setZeros();
       m_Tik_(UnknownLabelsRows_[i], maxIndex)=1;
@@ -173,7 +173,7 @@ bool ContingencyLBModel_mu_i_nu_j::initCEMRows()
     // M-step
     m_Aklold = m_Akl;
     m_Akl = ( (m_Tik_.transpose()*m_Uil_)
-        /( (m_Tik_.transpose()*v_Ui_)*STK::Const::PointX(cols))+RealMin).log();
+        /( (m_Tik_.transpose()*v_Ui_)*STK::Const::PointX(cols))+RealMin).log(); // @suppress("No return")
     // check convergence
     if((((m_Akl-m_Aklold).abs()/m_Akl).sum())<Mparam_.initepsilon_) { break;}
   }
@@ -203,7 +203,6 @@ bool ContingencyLBModel_mu_i_nu_j::initCEMCols()
     MatrixReal m_Alk(Mparam_.nbcolclust_,Mparam_.nbrowclust_)
              , m_Alkold(Mparam_.nbcolclust_,Mparam_.nbrowclust_);
     MatrixReal m_sumjl(nbVar_, Mparam_.nbcolclust_);
-    int maxIndex;
   
     //Initializations
     m_Vjk_ = m_Dataij_.transpose()*m_Tik_;
@@ -221,6 +220,7 @@ bool ContingencyLBModel_mu_i_nu_j::initCEMCols()
       m_sumjl = m_Vjk_*(m_Alk.transpose());
       for ( int j =0;j< UnknownLabelsCols_.size();j++)
       {
+        int maxIndex;
         m_sumjl.row(UnknownLabelsCols_[j]).maxElt(maxIndex);
         m_Rjl_.row(UnknownLabelsCols_[j]).setZeros();
         m_Rjl_(UnknownLabelsCols_[j],maxIndex)=1;
@@ -333,7 +333,6 @@ bool ContingencyLBModel_mu_i_nu_j::initEMRows()
 
   MatrixReal m_Akl(Mparam_.nbrowclust_,cols), m_Aklold(Mparam_.nbrowclust_,cols);
   MatrixReal m_sumik(Mparam_.nbrowdata_,Mparam_.nbrowclust_);
-  int maxIndex;
 
   //Model parameters
   m_Tik_.resize(nbSample_,Mparam_.nbrowclust_) = 0;
@@ -350,10 +349,9 @@ bool ContingencyLBModel_mu_i_nu_j::initEMRows()
   //
   randomPoissonParameterRows(m_Akl,cols);
 
-  std::pair<int,int> Label_pair;
   for(int i=0;i<knownLabelsRows_.size();i++)
   {
-    Label_pair = knownLabelsRows_[i];
+    std::pair<int,int> Label_pair = knownLabelsRows_[i];
     m_Tik_(Label_pair.first,Label_pair.second) = 1;
   }
 
@@ -414,16 +412,14 @@ bool ContingencyLBModel_mu_i_nu_j::initEMCols()
     MatrixReal m_Alk(Mparam_.nbcolclust_,Mparam_.nbrowclust_)
              , m_Alkold(Mparam_.nbcolclust_,Mparam_.nbrowclust_);
     MatrixReal m_sumjl(nbVar_, Mparam_.nbcolclust_);
-    int maxIndex;
   
     //Initializations
     m_Vjk_ = m_Dataij_.transpose()*m_Tik_;
     v_Vj_  = STK::sumByRow(m_Vjk_);
     randomPoissonParameterCols(m_Alk);
-    std::pair<int,int> Label_pair;
-    for ( int j=0;j<knownLabelsCols_.size();j++)
+    for ( int j = 0; j < knownLabelsCols_.size(); ++j)
     {
-      Label_pair = knownLabelsCols_[j];
+      std::pair<int,int> Label_pair = knownLabelsCols_[j];
       m_Rjl_(Label_pair.first,Label_pair.second)=1;
     }
     for ( int itr = 0; itr < Mparam_.nbinititerations_; ++itr)
@@ -599,11 +595,13 @@ void ContingencyLBModel_mu_i_nu_j::selectRandomColsFromData(MatrixReal& _m_il,in
     for ( int j = 0; j < Mparam_.nbcoldata_; ++j) { _v_temp[j]=j;}
     for ( int l = 0; l < cols; ++l)
     {
-//    int random=std::rand()%(Mparam_.nbcoldata_-l);
-      int random;
+//    int random=std::rand()%(Mparam_.nbcoldata_-l);	
+		int random;
+#ifdef _OPENMP
 #pragma omp critical
+#endif
       random = STK::Law::UniformDiscrete::rand(0, Mparam_.nbcoldata_-l - 1);
-      int index=_v_temp[random];
+      int index  =_v_temp[random];
       _m_il.col(l)=m_Dataij_.col(index);
       //swap elements
       std::swap(_v_temp[Mparam_.nbcoldata_-l-1], _v_temp[random]);
@@ -655,9 +653,11 @@ void ContingencyLBModel_mu_i_nu_j::logSumCols(MatrixReal & m_jl)
 
 STK::Real ContingencyLBModel_mu_i_nu_j::estimateLikelihood()
 {
-  likelihood_ = (m_Ykl_.prod(m_Gammakl_.log()) ).sum() - DataSum_ + v_Tk_.transpose()*v_logPiek_ + v_Rl_.transpose()*v_logRhol_
-            -(m_Tik_.prod((RealMin + m_Tik_).log()) ).sum()
-            -(m_Rjl_.prod((RealMin + m_Rjl_).log()) ).sum();
+  likelihood_ = (m_Ykl_.prod(m_Gammakl_.log()) ).sum() - DataSum_
+		      + v_Tk_.transpose()*v_logPiek_
+			  + v_Rl_.transpose()*v_logRhol_
+	          - (m_Tik_.prod((RealMin + m_Tik_).log()) ).sum()
+  		      - (m_Rjl_.prod((RealMin + m_Rjl_).log()) ).sum();
 
   return likelihood_;
 }

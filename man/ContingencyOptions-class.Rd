@@ -16,4 +16,3 @@ with the parameters in base class.
 \item{datanuj:}{Columns effect (if known).}
 }
 }
-

@@ -2,13 +2,13 @@
 % Please edit documentation in R/coclusterStrategy.R, R/optionclasses.R
 \docType{methods}
 \name{[,strategy-method}
+\alias{[,strategy-method}
 \alias{[}
 \alias{[,BinaryOptions-method}
-\alias{[,CategoricalOptions-method}
 \alias{[,ContingencyOptions-method}
 \alias{[,ContinuousOptions-method}
-\alias{[,strategy-method}
-\title{Getter method for Rcoclust output}
+\alias{[,CategoricalOptions-method}
+\title{Getter method for blockcluster output}
 \usage{
 \S4method{[}{strategy}(x, i, j, drop)
 
@@ -35,4 +35,3 @@ the output from \code{\link{coclusterBinary}},
 \code{\link{coclusterCategorical}}, \code{\link{coclusterContingency}},
 \code{\link{coclusterContinuous}}.
 }
-

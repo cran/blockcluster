@@ -18,4 +18,3 @@ this data-set. It consist of two clusters in rows and three clusters in columns.
   data(contingencydatalist)
 }
 \keyword{datasets}
-
