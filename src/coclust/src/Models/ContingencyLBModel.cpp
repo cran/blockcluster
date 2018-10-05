@@ -41,8 +41,8 @@ ContingencyLBModel::ContingencyLBModel( MatrixReal const& m_Dataij
 };
 
 ContingencyLBModel::ContingencyLBModel( MatrixReal const& m_Dataij
-                                      , VectorInteger const& rowlabels
-                                      , VectorInteger const& collabels
+                                      , VectorInt const& rowlabels
+                                      , VectorInt const& collabels
                                       , ModelParameters const& Mparam)
                                       : ICoClustModel(Mparam,rowlabels,collabels)
                                       , m_Dataij_(m_Dataij)
@@ -144,7 +144,7 @@ bool ContingencyLBModel::initCEMRows()
   v_Tk_.resize(Mparam_.nbrowclust_) = 0;
 
   m_Rjl_.resize(nbVar_,Mparam_.nbcolclust_) = 0;
-  v_Rl_ = STK::Const::Vector<STK::Real>(cols);
+  v_Rl_ = STK::Const::VectorX(cols);
 
   // Initializations. m_Uil_ will contain cols columns of the original data set
   m_Uil_.resize(nbSample_, cols) = 0;
@@ -350,7 +350,7 @@ bool ContingencyLBModel::initEMRows()
   v_Tk_.resize(Mparam_.nbrowclust_) = 0;
 
   m_Rjl_.resize(nbVar_,Mparam_.nbcolclust_) = 0;
-  v_Rl_ = STK::Const::Vector<STK::Real>(cols);
+  v_Rl_ = STK::Const::VectorX(cols);
 
   // Initializations. m_Uil_ will contain cols columns of the original data set
   m_Uil_.resize(nbSample_, cols) = 0;
@@ -609,7 +609,7 @@ void ContingencyLBModel::selectRandomColsFromData(MatrixReal& _m_il,int cols)
   else
   {
     //random shuffle Algorithm
-    VectorInteger _v_temp(Mparam_.nbcoldata_);
+    VectorInt _v_temp(Mparam_.nbcoldata_);
     for ( int j = 0; j < Mparam_.nbcoldata_; ++j) { _v_temp[j]=j;}
     for ( int l = 0; l < cols; ++l)
     {
@@ -642,7 +642,7 @@ void ContingencyLBModel::logSumCols(MatrixReal & m_jl)
 void ContingencyLBModel::randomPoissonParameterRows(MatrixReal& m_kl,int cols)
 {
   // sample nbrowclust_ integer form [1..nbSample]
-  VectorInteger _v_temp = randSample(nbSample_, Mparam_.nbrowclust_);
+  VectorInt _v_temp = randSample(nbSample_, Mparam_.nbrowclust_);
   for ( int k = 0; k < Mparam_.nbrowclust_; ++k)
   {
     int index=_v_temp[k];
@@ -655,7 +655,7 @@ void ContingencyLBModel::randomPoissonParameterRows(MatrixReal& m_kl,int cols)
 
 void ContingencyLBModel::randomPoissonParameterCols(MatrixReal& m_lk)
 {
-  VectorInteger _v_temp = randSample(nbVar_,Mparam_.nbcolclust_);
+  VectorInt _v_temp = randSample(nbVar_,Mparam_.nbcolclust_);
   for ( int l = 0; l < Mparam_.nbcolclust_; ++l)
   {
     int index=_v_temp[l];

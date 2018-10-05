@@ -46,8 +46,8 @@ BinaryLBModelequalepsilon::BinaryLBModelequalepsilon( MatrixBinary const&  m_Dat
 };
 
 BinaryLBModelequalepsilon::BinaryLBModelequalepsilon( MatrixBinary const&  m_Dataij
-                                                    , VectorInteger const& rowlabels
-                                                    , VectorInteger const& collabels
+                                                    , VectorInt const& rowlabels
+                                                    , VectorInt const& collabels
                                                     , ModelParameters const& Mparam
                                                     , int a,int b)
                                                     : ICoClustModel(Mparam,rowlabels,collabels)
@@ -82,8 +82,8 @@ bool BinaryLBModelequalepsilon::cemInitStep()
       v_Wj_.resize(nbVar_) = 0;
       m_Zik_.resize(nbSample_,Mparam_.nbrowclust_) = 0;
       m_Wjl_.resize(nbVar_,Mparam_.nbcolclust_) = 0;
-      v_logPiek_ = std::log(1.0/Mparam_.nbrowclust_)*(STK::Const::Vector<STK::Real>(Mparam_.nbrowclust_));
-      v_logRhol_ = std::log(1.0/Mparam_.nbcolclust_)*(STK::Const::Vector<STK::Real>(Mparam_.nbcolclust_));
+      v_logPiek_ = std::log(1.0/Mparam_.nbrowclust_)*(STK::Const::VectorX(Mparam_.nbrowclust_));
+      v_logRhol_ = std::log(1.0/Mparam_.nbcolclust_)*(STK::Const::VectorX(Mparam_.nbcolclust_));
 #ifdef COVERBOSE
       std::cout<<"BinaryLBModelequalepsilon::cemInitStep. Initialization done with success."<<std::endl;
       consoleOut();
@@ -117,8 +117,8 @@ bool BinaryLBModelequalepsilon::emInitStep()
       v_Wj_.resize(nbVar_) = 0;
       m_Zik_.resize(nbSample_,Mparam_.nbrowclust_) = 0;
       m_Wjl_.resize(nbVar_,Mparam_.nbcolclust_) = 0;
-      v_logPiek_ = std::log(1.0/Mparam_.nbrowclust_)*(STK::Const::Vector<STK::Real>(Mparam_.nbrowclust_));
-      v_logRhol_ = std::log(1.0/Mparam_.nbcolclust_)*(STK::Const::Vector<STK::Real>(Mparam_.nbcolclust_));
+      v_logPiek_ = std::log(1.0/Mparam_.nbrowclust_)*(STK::Const::VectorX(Mparam_.nbrowclust_));
+      v_logRhol_ = std::log(1.0/Mparam_.nbcolclust_)*(STK::Const::VectorX(Mparam_.nbcolclust_));
 #ifdef COVERBOSE
       std::cout<<"BinaryLBModelequalepsilon::emInitStep. Initialization done with success."<<std::endl;
       consoleOut();
@@ -149,7 +149,7 @@ void BinaryLBModelequalepsilon::consoleOut()
 void BinaryLBModelequalepsilon::logSumRows(MatrixReal & m_sum)
 {
   STK::Real logepsilon = log(Epsilon_/(-Epsilon_+1));
-  m_sum = STK::Const::Vector<STK::Real>(nbSample_)*(v_logPiek_+logepsilon*m_Akl_.cast<STK::Real>()*v_Rl_).transpose()
+  m_sum = STK::Const::VectorX(nbSample_)*(v_logPiek_+logepsilon*m_Akl_.cast<STK::Real>()*v_Rl_).transpose()
           -logepsilon*(2*m_Uil_*m_Akl_.cast<STK::Real>().transpose() + m_Xik_.cast<STK::Real>());
 }
 
@@ -157,7 +157,7 @@ void BinaryLBModelequalepsilon::logSumRows(MatrixReal & m_sum)
 void BinaryLBModelequalepsilon::logSumCols(MatrixReal & m_sum)
 {
   STK::Real logepsilon = log(Epsilon_/(-Epsilon_+1));
-  m_sum = STK::Const::Vector<STK::Real>(nbVar_)*(v_logRhol_.transpose()+logepsilon*v_Tk_.transpose()*m_Akl_.cast<STK::Real>())
+  m_sum = STK::Const::VectorX(nbVar_)*(v_logRhol_.transpose()+logepsilon*v_Tk_.transpose()*m_Akl_.cast<STK::Real>())
           -logepsilon*(2*m_Vjk_*m_Akl_.cast<STK::Real>() + m_Xjl_.cast<STK::Real>());
 }
 
@@ -171,7 +171,7 @@ void BinaryLBModelequalepsilon::initBernoulliLogSumRows(MatrixReal & m_sum)
 
 void BinaryLBModelequalepsilon::initBernoulliLogSumCols(MatrixReal & m_sum)
 {
-  m_sum = STK::Const::Vector<STK::Real>(nbVar_)* (v_Tk_.transpose()*m_Akl_.cast<STK::Real>())
+  m_sum = STK::Const::VectorX(nbVar_)* (v_Tk_.transpose()*m_Akl_.cast<STK::Real>())
         - 2*m_Vjk_*m_Akl_.cast<STK::Real>()
         + m_Xjl_;
 }
@@ -637,7 +637,7 @@ void BinaryLBModelequalepsilon::selectRandomColsFromData(MatrixReal& _m_il,int c
     _m_il=m_Dataij_.cast<STK::Real>();
   else{
     //random shuffle Algorithm
-    VectorInteger _v_temp = randSample(nbVar_,cols);
+    VectorInt _v_temp = randSample(nbVar_,cols);
 
     for ( int l = 0; l < cols; ++l)
     {
@@ -649,7 +649,7 @@ void BinaryLBModelequalepsilon::selectRandomColsFromData(MatrixReal& _m_il,int c
 
 void BinaryLBModelequalepsilon::SelectRandomRows(MatrixReal& m_lk)
 {
-  VectorInteger v_temp = randSample(nbVar_,Mparam_.nbcolclust_);
+  VectorInt v_temp = randSample(nbVar_,Mparam_.nbcolclust_);
   for ( int l = 0; l < Mparam_.nbcolclust_; ++l)
   {
     m_lk.row(l) = m_Vjk_.row(v_temp[l]);
@@ -659,7 +659,7 @@ void BinaryLBModelequalepsilon::SelectRandomRows(MatrixReal& m_lk)
 
 void BinaryLBModelequalepsilon::generateRandomMean(MatrixBinary& m_kl)
 {
-  VectorInteger _v_temp = randSample(nbSample_,Mparam_.nbrowclust_);
+  VectorInt _v_temp = randSample(nbSample_,Mparam_.nbrowclust_);
   for ( int k = 0; k < Mparam_.nbrowclust_; ++k)
   {
     m_kl.row(k) = m_Uil_.cast<bool>().row(_v_temp[k]);

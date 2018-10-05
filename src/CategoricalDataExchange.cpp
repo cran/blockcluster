@@ -6,19 +6,18 @@ void CategoricalDataExchange::dataOutput(Rcpp::S4& obj,ICoClustModel* model,bool
   if(!successful)
   {
     obj.slot("successful") = false;
-    obj.slot("message") = std::string("Co-Clustering Failed! ") + model->errorMsg();
+    obj.slot("message")    = std::string("Co-Clustering Failed! ") + model->errorMsg();
   }
   else
   {
     obj.slot("successful") = true;
-    obj.slot("message") = "Co-Clustering successfully terminated!";
+    obj.slot("message")    = "Co-Clustering successfully terminated!";
     CategoricalLBModel* ptrLBM;
     MatrixReal dispersion;
 
     ptrLBM = dynamic_cast<CategoricalLBModel*>(model);
     const std::vector<MatrixReal> mean = ptrLBM->mean();
     std::vector<std::vector<std::vector<double> > > tempmean(mean.size(),std::vector<std::vector<double> >(Mparam_.nbrowclust_,(std::vector<double>(Mparam_.nbcolclust_))));
-    //std::vector<STK::RMatrix<STK::Real>> tempmean(mean.size());
     for (int h = 0; h < int(mean.size()); ++h)
     {
       for (int k = 0; k < Mparam_.nbrowclust_; ++k)
@@ -63,11 +62,11 @@ void CategoricalDataExchange::instantiateModel(ICoClustModel*& model)
   {
     switch (strategy_.Model_)
     {
-      case pi_rho_multi:
+      case pi_rho_multi_:
         Mparam_.fixedproportions_ = true;
         model = new CategoricalLBModel(m_Dataij_,Mparam_,a_,b_);
         break;
-      case pik_rhol_multi:
+      case pik_rhol_multi_:
         Mparam_.fixedproportions_ = false;
         model = new CategoricalLBModel(m_Dataij_,Mparam_,a_,b_);
         break;
@@ -80,11 +79,11 @@ void CategoricalDataExchange::instantiateModel(ICoClustModel*& model)
   {
     switch (strategy_.Model_)
     {
-      case pi_rho_multi:
+      case pi_rho_multi_:
         Mparam_.fixedproportions_ = true;
         model = new CategoricalLBModel(m_Dataij_,v_rowlabels_,v_collabels_,Mparam_,a_,b_);
         break;
-      case pik_rhol_multi:
+      case pik_rhol_multi_:
         Mparam_.fixedproportions_ = false;
         model = new CategoricalLBModel(m_Dataij_,v_rowlabels_,v_collabels_,Mparam_,a_,b_);
         break;

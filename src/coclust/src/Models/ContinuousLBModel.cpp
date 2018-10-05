@@ -30,23 +30,23 @@
 #include "ContinuousLBModel.h"
 #include <exception>
 ContinuousLBModel::ContinuousLBModel( MatrixReal const& m_Dataij, ModelParameters const& Mparam)
-								    : ICoClustModel(Mparam)
-								    , m_Dataij_(m_Dataij)
+                                    : ICoClustModel(Mparam)
+                                    , m_Dataij_(m_Dataij)
 {}
 
 ContinuousLBModel::ContinuousLBModel( MatrixReal const& m_Dataij
-		                            , VectorInteger const & rowlabels
-									, VectorInteger const & collabels
-									, ModelParameters const& Mparam)
-								    : ICoClustModel(Mparam,rowlabels,collabels)
-								    , m_Dataij_(m_Dataij)
+		                                , VectorInt const & rowlabels
+                                    , VectorInt const & collabels
+                                    , ModelParameters const& Mparam)
+                                    : ICoClustModel(Mparam,rowlabels,collabels)
+                                    , m_Dataij_(m_Dataij)
 {}
 
 void ContinuousLBModel::logSumRows(MatrixReal& m_sumik)
 {
 //  VectorReal tmp1(Mparam_.nbrowclust_);
 //  tmp1 = ((0.5*((m_Sigma2kl_.log()+m_Mukl_.square()/m_Sigma2kl_)*v_Rl_)) - v_logPiek_);
-  m_sumik = STK::Const::Vector<STK::Real>(nbSample_)
+  m_sumik = STK::Const::VectorX(nbSample_)
             * ( ( v_logPiek_ - 0.5*( (m_Sigma2kl_.log()+m_Mukl_.square()/m_Sigma2kl_)*v_Rl_))).transpose()
             - 0.5     * (m_Uil2_ * m_Sigma2kl_.inverse().transpose())
             + m_Uil1_ * (m_Mukl_/m_Sigma2kl_).transpose();
@@ -56,7 +56,7 @@ void ContinuousLBModel::logSumCols(MatrixReal & m_sumjl)
 {
 //  VectorReal tmp1(Mparam_.nbcolclust_);
 //  tmp1 = ((0.5*(v_Tk_.transpose()*(m_Sigma2kl_.log()+m_Mukl_.square()/m_Sigma2kl_))) - v_logRhol_);
-  m_sumjl = STK::Const::Vector<STK::Real>(nbVar_)
+  m_sumjl = STK::Const::VectorX(nbVar_)
             * ( v_logRhol_.transpose() - 0.5 * v_Tk_.transpose() * (m_Sigma2kl_.log() + m_Mukl_.square()/m_Sigma2kl_))
           - 0.5    * (m_Vjk2_ * m_Sigma2kl_.inverse())
           + m_Vjk1_* (m_Mukl_/m_Sigma2kl_);
@@ -227,8 +227,8 @@ bool ContinuousLBModel::cemInitStep()
 #endif
   if (initCEMCols())
   {
-    v_logPiek_ = std::log(1.0/Mparam_.nbrowclust_)*(STK::Const::Vector<STK::Real>(Mparam_.nbrowclust_));
-    v_logRhol_ = std::log(1.0/Mparam_.nbcolclust_)*(STK::Const::Vector<STK::Real>(Mparam_.nbcolclust_));
+    v_logPiek_ = std::log(1.0/Mparam_.nbrowclust_)*(STK::Const::VectorX(Mparam_.nbrowclust_));
+    v_logRhol_ = std::log(1.0/Mparam_.nbcolclust_)*(STK::Const::VectorX(Mparam_.nbcolclust_));
     m_Dataij2_ = m_Dataij_.square();
     m_Uil1_.resize(nbSample_,Mparam_.nbcolclust_) = 0;
     m_Uil2_.resize(nbSample_,Mparam_.nbcolclust_) = 0;
@@ -256,8 +256,8 @@ bool ContinuousLBModel::emInitStep()
 #endif
   if (initEMCols())
   {
-    v_logPiek_ = std::log(1.0/Mparam_.nbrowclust_)*(STK::Const::Vector<STK::Real>(Mparam_.nbrowclust_));
-    v_logRhol_ = std::log(1.0/Mparam_.nbcolclust_)*(STK::Const::Vector<STK::Real>(Mparam_.nbcolclust_));
+    v_logPiek_ = std::log(1.0/Mparam_.nbrowclust_)*(STK::Const::VectorX(Mparam_.nbrowclust_));
+    v_logRhol_ = std::log(1.0/Mparam_.nbcolclust_)*(STK::Const::VectorX(Mparam_.nbcolclust_));
     m_Dataij2_ = m_Dataij_.square();
     m_Uil1_.resize(nbSample_,Mparam_.nbcolclust_) = 0;
     m_Uil2_.resize(nbSample_,Mparam_.nbcolclust_) = 0;
@@ -311,7 +311,7 @@ bool ContinuousLBModel::initCEMCols()
   for ( int itr = 0; itr < Mparam_.nbinititerations_; ++itr)
   {
     m_Djl  = v_Vj2*STK::Const::Point<STK::Real>(Mparam_.nbcolclust_)
-           + STK::Const::Vector<STK::Real>(nbVar_)*STK::sumByRow(m_Mulk.square()).transpose()
+           + STK::Const::VectorX(nbVar_)*STK::sumByRow(m_Mulk.square()).transpose()
            - 2*(m_Vjk*m_Mulk.transpose());
     for (int j =0;j< UnknownLabelsCols_.size();j++)
     {
@@ -373,7 +373,7 @@ bool ContinuousLBModel::initEMCols()
   for ( int itr = 0; itr < Mparam_.nbinititerations_; ++itr)
   {
     m_Djl  = v_Vj2*STK::Const::Point<STK::Real>(Mparam_.nbcolclust_)
-           + STK::Const::Vector<STK::Real>(nbVar_)*STK::sumByRow(m_Mulk.square()).transpose()
+           + STK::Const::VectorX(nbVar_)*STK::sumByRow(m_Mulk.square()).transpose()
            - 2*(m_Vjk*m_Mulk.transpose());
     m_Rjl_ = (m_Djl-STK::maxByRow(m_Djl)*STK::Const::PointX(Mparam_.nbcolclust_)).exp();
     m_Rjl_ /= (STK::sumByRow(m_Rjl_)*STK::Const::PointX(Mparam_.nbcolclust_));
@@ -421,7 +421,7 @@ void ContinuousLBModel::consoleOut()
 
 void ContinuousLBModel::selectRandomRowsFromData(MatrixReal& _m_kj)
 {
-  VectorInteger v_temp= randSample(nbSample_,Mparam_.nbrowclust_);
+  VectorInt v_temp= randSample(nbSample_,Mparam_.nbrowclust_);
   for ( int k = 0; k < Mparam_.nbrowclust_; ++k)
   {
     //_m_kj.row(k) = m_Dataij_.row(v_temp(k));
@@ -431,7 +431,7 @@ void ContinuousLBModel::selectRandomRowsFromData(MatrixReal& _m_kj)
 
 void ContinuousLBModel::generateRandomMean(const MatrixReal & m_jk, MatrixReal & mean_lk)
 {
-  VectorInteger v_temp= randSample(nbVar_,Mparam_.nbcolclust_);
+  VectorInt v_temp= randSample(nbVar_,Mparam_.nbcolclust_);
   for ( int l = 0; l < Mparam_.nbcolclust_; ++l)
   {
     //mean_lk.row(l) = m_jk.row(v_temp[l]);

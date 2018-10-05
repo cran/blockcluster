@@ -40,24 +40,24 @@ BinaryLBModel::BinaryLBModel( MatrixBinary const&  m_Dataij
                             , a_(a), b_(b)
                             , m_Dataij_(m_Dataij)
 {
-  m_Uil_.resize(nbSample_,Mparam_.nbcolclust_) = 0;
-  m_Vjk_.resize(nbVar_,Mparam_.nbrowclust_) = 0.;
-
-  m_Rjl_.resize(nbVar_   ,Mparam_.nbcolclust_) = 1.0/(Mparam_.nbcolclust_);
-  v_Rl_.resize(Mparam_.nbcolclust_) = STK::Real(nbVar_)/(Mparam_.nbcolclust_);
-
-
-  m_Tik_.resize(nbSample_,Mparam_.nbrowclust_) = 1.0/(Mparam_.nbrowclust_);
-  v_Tk_.resize(Mparam_.nbrowclust_) = STK::Real(nbSample_)/(Mparam_.nbrowclust_);
-
-  m_Alphakl_.resize(Mparam_.nbrowclust_,Mparam_.nbcolclust_) = 0;
-  m_Alphakl1old_.resize(Mparam_.nbrowclust_,Mparam_.nbcolclust_) = 0;
-  m_Alphaklold_.resize(Mparam_.nbrowclust_,Mparam_.nbcolclust_) = 0;
-
-  m_akl_.resize(Mparam_.nbrowclust_,Mparam_.nbcolclust_) = 0;
-
-  v_logPiek_ = std::log(1.0/Mparam_.nbrowclust_)*(STK::Const::Vector<STK::Real>(Mparam_.nbrowclust_));
-  v_logRhol_ = std::log(1.0/Mparam_.nbcolclust_)*(STK::Const::Vector<STK::Real>(Mparam_.nbcolclust_));
+//  m_Uil_.resize(nbSample_,Mparam_.nbcolclust_) = 0;
+//  m_Vjk_.resize(nbVar_,Mparam_.nbrowclust_) = 0.;
+//
+//  m_Rjl_.resize(nbVar_   ,Mparam_.nbcolclust_) = 1.0/(Mparam_.nbcolclust_);
+//  v_Rl_.resize(Mparam_.nbcolclust_) = STK::Real(nbVar_)/(Mparam_.nbcolclust_);
+//
+//
+//  m_Tik_.resize(nbSample_,Mparam_.nbrowclust_) = 1.0/(Mparam_.nbrowclust_);
+//  v_Tk_.resize(Mparam_.nbrowclust_) = STK::Real(nbSample_)/(Mparam_.nbrowclust_);
+//
+//  m_Alphakl_.resize(Mparam_.nbrowclust_,Mparam_.nbcolclust_) = 0;
+//  m_Alphakl1old_.resize(Mparam_.nbrowclust_,Mparam_.nbcolclust_) = 0;
+//  m_Alphaklold_.resize(Mparam_.nbrowclust_,Mparam_.nbcolclust_) = 0;
+//
+//  m_akl_.resize(Mparam_.nbrowclust_,Mparam_.nbcolclust_) = 0;
+//
+//  v_logPiek_ = std::log(1.0/Mparam_.nbrowclust_)*(STK::Const::VectorX(Mparam_.nbrowclust_));
+//  v_logRhol_ = std::log(1.0/Mparam_.nbcolclust_)*(STK::Const::VectorX(Mparam_.nbcolclust_));
 
 #ifdef COVERBOSE
   std::cout << "BinaryLBModel::BinaryLBModel done"<<std::endl;
@@ -68,31 +68,31 @@ BinaryLBModel::BinaryLBModel( MatrixBinary const&  m_Dataij
 }
 
 BinaryLBModel::BinaryLBModel( MatrixBinary const&  m_Dataij
-                            , VectorInteger const& rowlabels
-                            , VectorInteger const& collabels
+                            , VectorInt    const& rowlabels
+                            , VectorInt    const& collabels
                             , ModelParameters const& Mparam
                             , int a,int b)
                             : ICoClustModel(Mparam,rowlabels,collabels)
                             , a_(a), b_(b)
                             , m_Dataij_(m_Dataij)
 {
-  m_Uil_.resize(nbSample_,nbVar_) = 0;
-
-  m_Vjk_.resize(nbVar_,Mparam_.nbrowclust_) = 0;
-  v_Rl_  = STK::Const::Vector<double>(nbVar_);
-
-  m_Tik_.resize(nbSample_,Mparam_.nbrowclust_) = 0;
-  m_Rjl_.resize(nbVar_,Mparam_.nbcolclust_) = 0;
-
-  m_Alphakl_.resize(Mparam_.nbrowclust_,nbVar_) = 0;
-
-  m_Alphakl1old_.resize(Mparam_.nbrowclust_,Mparam_.nbcolclust_) = 0;
-  m_Alphaklold_.resize(Mparam_.nbrowclust_,Mparam_.nbcolclust_) = 0;
-
-  m_akl_.resize(Mparam_.nbrowclust_,Mparam_.nbcolclust_) = 0;
-
-  v_logPiek_ = std::log(1.0/Mparam_.nbrowclust_)*(STK::Const::Vector<STK::Real>(Mparam_.nbrowclust_));
-  v_logRhol_ = std::log(1.0/Mparam_.nbcolclust_)*(STK::Const::Vector<STK::Real>(Mparam_.nbcolclust_));
+//  m_Uil_.resize(nbSample_,nbVar_) = 0;
+//
+//  m_Vjk_.resize(nbVar_,Mparam_.nbrowclust_) = 0;
+//  v_Rl_  = STK::Const::Vector<double>(nbVar_);
+//
+//  m_Tik_.resize(nbSample_,Mparam_.nbrowclust_) = 0;
+//  m_Rjl_.resize(nbVar_,Mparam_.nbcolclust_) = 0;
+//
+//  m_Alphakl_.resize(Mparam_.nbrowclust_,nbVar_) = 0;
+//
+//  m_Alphakl1old_.resize(Mparam_.nbrowclust_,Mparam_.nbcolclust_) = 0;
+//  m_Alphaklold_.resize(Mparam_.nbrowclust_,Mparam_.nbcolclust_) = 0;
+//
+//  m_akl_.resize(Mparam_.nbrowclust_,Mparam_.nbcolclust_) = 0;
+//
+//  v_logPiek_ = std::log(1.0/Mparam_.nbrowclust_)*(STK::Const::VectorX(Mparam_.nbrowclust_));
+//  v_logRhol_ = std::log(1.0/Mparam_.nbcolclust_)*(STK::Const::VectorX(Mparam_.nbcolclust_));
 
 #ifdef COVERBOSE
   std::cout << "BinaryLBModel::BinaryLBModel done"<<std::endl;
@@ -118,8 +118,9 @@ bool BinaryLBModel::cemInitStep()
       m_akl_.resize(Mparam_.nbrowclust_,Mparam_.nbcolclust_) = 0;
       m_Uil_.resize(nbSample_,Mparam_.nbcolclust_) = 0;
       m_Vjk_.resize(nbVar_,Mparam_.nbrowclust_) = 0;
-      v_logPiek_ = std::log(1.0/Mparam_.nbrowclust_)*(STK::Const::Vector<STK::Real>(Mparam_.nbrowclust_));
-      v_logRhol_ = std::log(1.0/Mparam_.nbcolclust_)*(STK::Const::Vector<STK::Real>(Mparam_.nbcolclust_));
+
+      v_logPiek_ = std::log(1.0/Mparam_.nbrowclust_)*(STK::Const::VectorX(Mparam_.nbrowclust_));
+      v_logRhol_ = std::log(1.0/Mparam_.nbcolclust_)*(STK::Const::VectorX(Mparam_.nbcolclust_));
 
 #ifdef COVERBOSE
       std::cout<<"BinaryLBModel::cemInitStep. Initialization done with success."<<std::endl;
@@ -150,8 +151,8 @@ bool BinaryLBModel::emInitStep()
       m_Uil_.resize(nbSample_,Mparam_.nbcolclust_) = 0;
       m_Vjk_.resize(nbVar_,Mparam_.nbrowclust_) = 0;
 
-      v_logPiek_ = std::log(1.0/Mparam_.nbrowclust_)*(STK::Const::Vector<STK::Real>(Mparam_.nbrowclust_));
-      v_logRhol_ = std::log(1.0/Mparam_.nbcolclust_)*(STK::Const::Vector<STK::Real>(Mparam_.nbcolclust_));
+      v_logPiek_ = std::log(1.0/Mparam_.nbrowclust_)*(STK::Const::VectorX(Mparam_.nbrowclust_));
+      v_logRhol_ = std::log(1.0/Mparam_.nbcolclust_)*(STK::Const::VectorX(Mparam_.nbcolclust_));
 #ifdef COVERBOSE
       std::cout<<"BinaryLBModel::emInitStep. Initialization done with success."<<std::endl;
       consoleOut();
@@ -174,8 +175,8 @@ void BinaryLBModel::finalizeOutput()
     }
   }
   // Calculate probability for Summary Matrix
-  m_epsilonkl_ = m_akl_.cast<STK::Real>().prod((-m_Alphakl_+1))
-               + (-m_akl_.cast<STK::Real>()+1).prod(m_Alphakl_);
+  m_epsilonkl_ = m_akl_.cast<STK::Real>().prod((1.-m_Alphakl_))
+               + (1.-m_akl_.cast<STK::Real>()).prod(m_Alphakl_);
 }
 
 void BinaryLBModel::consoleOut()
@@ -192,18 +193,17 @@ void BinaryLBModel::consoleOut()
 
 
 //Compute Bernoulli log-sum for all rows
-void BinaryLBModel::logSumRows(MatrixReal & m_sum)
+void BinaryLBModel::logSumRows(MatrixReal & m_sik)
 {
-  m_sum = m_Uil_*(((((m_Alphakl_+RealMin)/(((-m_Alphakl_+1))+RealMin)).log())).transpose())
-        + STK::Const::VectorX(nbSample_)*((v_logPiek_+(( ((-m_Alphakl_+1))+RealMin).log())*v_Rl_).transpose());
+  m_sik = m_Uil_*(((((m_Alphakl_+RealMin)/(((1.-m_Alphakl_))+RealMin)).log())).transpose())
+        + STK::Const::VectorX(nbSample_)*((v_logPiek_+(( ((1.-m_Alphakl_))+RealMin).log())*v_Rl_).transpose());
 }
 
 //Compute Bernoulli log-sum for all columns
-void BinaryLBModel::logSumCols(MatrixReal & m_sum)
+void BinaryLBModel::logSumCols(MatrixReal & m_sjl)
 {
-  m_sum = m_Vjk_*( ((m_Alphakl_+RealMin)/((-m_Alphakl_+1)+RealMin)).log())
-        + STK::Const::VectorX(nbVar_)
-          *( (v_logRhol_+(( ((-m_Alphakl_+1))+RealMin).log()).transpose()*v_Tk_).transpose());
+  m_sjl = m_Vjk_*( ((m_Alphakl_+RealMin)/((1.-m_Alphakl_)+RealMin)).log())
+        + STK::Const::VectorX(nbVar_)*( (v_logRhol_+(( ((1.-m_Alphakl_))+RealMin).log()).transpose()*v_Tk_).transpose());
 }
 
 //Run EM algorithm on data Matrix m_Uil_
@@ -342,9 +342,9 @@ int BinaryLBModel::nbFreeParameters() const
 
 STK::Real BinaryLBModel::estimateLikelihood()
 {
-  likelihood_ = (v_Tk_.transpose()* 
+  likelihood_ = (v_Tk_.transpose()*
   							( m_Alphakl_.prod((m_Alphakl_+RealMin).log())
-								+ ((-m_Alphakl_+1)).prod( ((-m_Alphakl_+1)+RealMin).log() )
+								+ ((1.-m_Alphakl_)).prod( ((1.-m_Alphakl_)+RealMin).log() )
 								)*v_Rl_
 			  				+ v_Tk_.dot(v_logPiek_) + v_Rl_.dot(v_logRhol_)
 			          - (m_Tik_.prod( (RealMin + m_Tik_).log()) ).sum()
@@ -404,9 +404,9 @@ void BinaryLBModel::displayCluster()
 void BinaryLBModel::initBernoulliLogSumRows(MatrixReal & _m_sum)
 {
   //Array2DReal m_Alphakltmp = m_Alphakl_+RealMin;
-//  _m_sum = m_Uil_* ( (m_Alphakl_+RealMin) / ((-m_Alphakl_+1)+RealMin) ).log().transpose()
-//         + STK::Const::Vector<STK::Real>(Mparam_.nbrowdata_)
-//           * ( ((-m_Alphakl_+1)+RealMin).log() * v_Rl_).transpose();
+//  _m_sum = m_Uil_* ( (m_Alphakl_+RealMin) / ((1.-m_Alphakl_)+RealMin) ).log().transpose()
+//         + STK::Const::VectorX(Mparam_.nbrowdata_)
+//           * ( ((1.-m_Alphakl_)+RealMin).log() * v_Rl_).transpose();
   STK::Law::Uniform u(0,1);
   _m_sum.rand(u);
 }
@@ -414,8 +414,8 @@ void BinaryLBModel::initBernoulliLogSumRows(MatrixReal & _m_sum)
 //Compute Bernoulli log-sum for all columns
 void BinaryLBModel::initBernoulliLogSumCols(MatrixReal & _m_sum)
 {
-  _m_sum = m_Vjk_*(((((m_Alphakl_+RealMin)/((-m_Alphakl_+1)+RealMin)).log())))+
-      STK::Const::Vector<STK::Real>(Mparam_.nbcoldata_)*(v_Tk_.transpose()*((((-m_Alphakl_+1)+RealMin).log())));
+  _m_sum = m_Vjk_*(((((m_Alphakl_+RealMin)/((1.-m_Alphakl_)+RealMin)).log())))+
+      STK::Const::VectorX(Mparam_.nbcoldata_)*(v_Tk_.transpose()*((((1.-m_Alphakl_)+RealMin).log())));
 }
 
 bool BinaryLBModel::initCEMRows()
@@ -427,7 +427,7 @@ bool BinaryLBModel::initCEMRows()
   selectRandomColsFromData(m_Uil_,cols);
 
   m_Vjk_.resize(nbVar_,Mparam_.nbrowclust_) = 0;
-  v_Rl_  = STK::Const::Vector<STK::Real>(cols);
+  v_Rl_  = STK::Const::VectorX(cols);
 
   m_Tik_.resize(nbSample_,Mparam_.nbrowclust_) = 0;
   m_Rjl_.resize(nbVar_,Mparam_.nbcolclust_) = 0;
@@ -522,7 +522,7 @@ bool BinaryLBModel::initEMRows()
   selectRandomColsFromData(m_Uil_,cols);
 
   m_Vjk_.resize(nbVar_,Mparam_.nbrowclust_) = 0;
-  v_Rl_  = STK::Const::Vector<STK::Real>(cols);
+  v_Rl_  = STK::Const::VectorX(cols);
 
   m_Tik_.resize(nbSample_,Mparam_.nbrowclust_) = 0;
   m_Rjl_.resize(nbVar_,Mparam_.nbcolclust_) = 0;
@@ -634,7 +634,7 @@ void BinaryLBModel::selectRandomColsFromData(MatrixReal& _m_il,int cols)
   else
   {
     //random shuffle Algorithm
-    VectorInteger _v_temp = randSample(nbVar_,cols);
+    VectorInt _v_temp = randSample(nbVar_,cols);
     for ( int l = 0; l < cols; ++l)
     { _m_il.col(l)=m_Dataij_.cast<STK::Real>().col(_v_temp[l]);}
   }
@@ -644,7 +644,7 @@ void BinaryLBModel::generateRandomBernoulliParameterRows(MatrixReal& _m_kl,int c
 {
   int index;
   STK::Real epsilon = 0.1;
-  VectorInteger _v_temp = randSample(nbSample_,Mparam_.nbrowclust_);
+  VectorInt _v_temp = randSample(nbSample_,Mparam_.nbrowclust_);
   for ( int k = 0; k < Mparam_.nbrowclust_; ++k)
   {
     index=_v_temp[k];
@@ -657,7 +657,7 @@ void BinaryLBModel::generateRandomBernoulliParameterRows(MatrixReal& _m_kl,int c
 void BinaryLBModel::generateRandomBernoulliParameterCols(MatrixReal& _m_kl)
 {
   int index;
-  VectorInteger _v_temp = randSample(nbVar_,Mparam_.nbcolclust_);
+  VectorInt _v_temp = randSample(nbVar_,Mparam_.nbcolclust_);
   for ( int l = 0; l < Mparam_.nbcolclust_; ++l)
   {
     index=_v_temp[l];
@@ -783,7 +783,7 @@ void BinaryLBModel::mGibbsStepRows()
       m_Alphakl_(k,l) = m_randgamma(k,l)/v_sumRng[k];
     }
   }
-  
+
 }
 
 void BinaryLBModel::mGibbsStepCols()

@@ -63,13 +63,13 @@ bool XStrategyAlgo::run()
 //int ntry_empty=0;  Unused
   bool non_empty = false;
   bool isinitialized = false;
-  for ( int itry = 0; itry < Stratparam_.nbtry_; ++itry)
+  for ( int itry = 0; itry < strategyParam_.nbtry_; ++itry)
   {
     non_empty = false;
     L1 = -RealMax;
     //set espilon to eps_xem
     p_Model_->setEpsilon(p_Model_->modelParameters().eps_xem_);
-    for (int ixem = 0; ixem < Stratparam_.nbxem_; ++ixem)
+    for (int ixem = 0; ixem < strategyParam_.nbxem_; ++ixem)
     {
       p_Model_->setEmptyCluster(true);
       for (int ntry_empty = 0; ntry_empty<100; ntry_empty++)
@@ -77,11 +77,11 @@ bool XStrategyAlgo::run()
         if (p_Init_->run())
         {
           isinitialized = true;
-          for ( int itr = 0; itr < Stratparam_.nbiter_xem_; ++itr)
+          for ( int itr = 0; itr < strategyParam_.nbiter_xem_; ++itr)
           {
             if(p_Algo_->run()) // run initial algorithm was successful
             {
-              (p_Model_->*Stratparam_.Stop_Criteria)();
+              (p_Model_->*strategyParam_.Stop_Criteria)();
               if (p_Model_->stopAlgo()) { break;} // algo convergence
             }
             else { break;} // algo divergence
@@ -117,11 +117,11 @@ bool XStrategyAlgo::run()
       //set epsilon to esp_XEM
       p_Model_->setEpsilon(p_Model_->modelParameters().eps_XEM_);
       p_Model_->copyThetaStart();
-      for ( int itr = 0; itr < Stratparam_.nbiter_XEM_; ++itr)
+      for ( int itr = 0; itr < strategyParam_.nbiter_XEM_; ++itr)
       {
         if(p_Algo_->run())
         {
-          (p_Model_->*Stratparam_.Stop_Criteria)();
+          (p_Model_->*strategyParam_.Stop_Criteria)();
           if (p_Model_->stopAlgo()) { break;}
         }
         else { break;}

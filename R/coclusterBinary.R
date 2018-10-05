@@ -14,9 +14,9 @@ NULL
 #' @param semisupervised Boolean value specifying whether to perform
 #' semi-supervised co-clustering or not. Make sure to provide row and/or
 #' column labels if specified value is true. The default value is false.
-#' @param rowlabels Vector specifying the class of rows.
+#' @param rowlabels Integer Vector specifying the class of rows.
 #' The class number starts from zero. Provide -1 for unknown row class. 
-#' @param collabels Vector specifying the class of columns.
+#' @param collabels Integer Vector specifying the class of columns.
 #' The class number starts from zero. Provide -1 for unknown column class.
 #' @param model This is the name of model. The following models exists for
 #' Binary data:
@@ -36,10 +36,10 @@ NULL
 
 #' @return Return an object of \code{\linkS4class{BinaryOptions}}.
 #' 
-#' @export
+# @export
 #' 
-#' @exportPattern "^[[:alpha:]]+"
-#' @useDynLib RCocluster
+# @exportPattern "^[[:alpha:]]+"
+# @useDynLib RCocluster
 #' 
 #' @examples
 #' 
@@ -53,54 +53,53 @@ NULL
 #' ## Plot the original and Co-clustered data 
 #' plot(out)
 #' 
-#' 
-coclusterBinary<-function( data, semisupervised = FALSE, rowlabels = numeric(0), collabels = numeric(0),
+coclusterBinary<-function( data, semisupervised = FALSE
+                         , rowlabels = integer(0), collabels = integer(0),
                            model = NULL, nbcocluster, strategy = coclusterStrategy(), a=1, b=1
 											   , nbCore = 1) 
 {
-	#Check for data
+	#Check for data and get dimensions
 	if(missing(data)){ stop("Data is missing.")}
 	if(!is.list(data))
   {
-		if(!is.matrix(data))
-    { stop("Data should be matrix.")}
+		if(!is.matrix(data)) { stop("Data should be matrix.")}
+    dimData = dim(data)
 	}
   else
 	{
-		if(!is.matrix(data[[1]]))
-			stop("Data should be matrix.")
+		if(!is.matrix(data[[1]])) { stop("Data should be matrix.")}
 		if(!is.numeric(data[[2]])||!is.numeric(data[[3]]))
-			stop("Row/Column effects should be numeric vectors.")
+    { stop("Row/Column effects should be numeric vectors.")}
 		if(length(data[[2]])!=dim(data[[1]])[1]||length(data[[3]])!=dim(data[[1]])[2])
-			stop("Dimension mismatch in Row/column effects  and Data.")
+    { stop("Dimension mismatch in Row/column effects  and Data.")}
+    dimData = dim(data[[1]])
 	}
+
   #check for row and column labels
   if (semisupervised)
   {
     if(missing(rowlabels)&&missing(collabels))
-      stop("Missing row and column labels. At-least one should be provided to perform semi-supervised Co-clustering.")
+    { stop("Missing row and column labels. At-least one should be provided to perform semi-supervised Co-clustering.")}
     if(!missing(rowlabels)&&!is.numeric(rowlabels))
-      stop("Row labels should be a numeric vector.")
+    { stop("Row labels should be a numeric vector.")}
     if(!missing(collabels)&&!is.numeric(collabels))
-      stop("Column labels should be a numeric vector.")
-    if(!is.list(data)) dimData = dim(data)
-    else               dimData = dim(data[[1]])
+    { stop("Column labels should be a numeric vector.")}
     if(missing(rowlabels))      rowlabels = rep(-1,dimData[1])
     else if(missing(collabels)) collabels = rep(-1,dimData[2])
+    # check    
     if(dimData[1]!=length(rowlabels))
-      stop("rowlabels length does not match number of rows in data (also ensure to put -1 in unknown labels)")
+    {  stop("rowlabels length does not match number of rows in data (also ensure to put -1 in unknown labels)")}
     if(dimData[2]!=length(collabels))
-      stop("collabels length does not match number of columns in data (also  ensure to put -1 in unknown labels)")
+    { stop("collabels length does not match number of columns in data (also  ensure to put -1 in unknown labels)")}
   }
-	#check for number of coclusters
+  #check for number of coclusters
 	if(missing(nbcocluster))
 	{ stop("Mention number of CoClusters.")}
+	if(dimData[1]<nbcocluster[1])
+  { stop("Number of Row clusters exceeds numbers of rows.")}
+	if(dimData[2]<nbcocluster[2])
+  { stop("Number of Column clusters exceeds numbers of columns.")}
   
- 	if(!is.list(data)) dimData = dim(data)
-	else               dimData = dim(data[[1]])
-		
-	if(dimData[1]<nbcocluster[1]) stop("Number of Row cluters exceeds numbers of rows.")
-	if(dimData[2]<nbcocluster[2])	stop("Number of Column cluters exceeds numbers of columns.")
 	#check for Algorithm name (and make it compatible with version 1)
 	if(strategy@algo=="XEMStrategy")
   {
@@ -149,7 +148,7 @@ coclusterBinary<-function( data, semisupervised = FALSE, rowlabels = numeric(0),
   inpobj<-new( "BinaryOptions",data = data
 	           , rowlabels = rowlabels, collabels = collabels
 	           , semisupervised = semisupervised,
-		           datatype = "binary", model = model,nbcocluster = nbcocluster
+		           datatype = "binary", model = model, nbcocluster = nbcocluster
 					   , strategy = strategy
 				     , hyperparam = c(a,b))
 

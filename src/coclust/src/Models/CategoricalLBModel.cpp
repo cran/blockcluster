@@ -25,7 +25,7 @@
 #include <math.h>
 #include "CategoricalLBModel.h"
 
-CategoricalLBModel::CategoricalLBModel( MatrixInteger const& m_Dataij
+CategoricalLBModel::CategoricalLBModel( MatrixInt const& m_Dataij
                                       , ModelParameters const& Mparam
                                       , int a, int b)
                                       : ICoClustModel(Mparam) , m_Dataij_(m_Dataij)
@@ -65,9 +65,9 @@ CategoricalLBModel::CategoricalLBModel( MatrixInteger const& m_Dataij
   }
 }
 
-CategoricalLBModel::CategoricalLBModel( MatrixInteger const& m_Dataij
-                                      , VectorInteger const & rowlabels
-                                      , VectorInteger const & collabels
+CategoricalLBModel::CategoricalLBModel( MatrixInt const& m_Dataij
+                                      , VectorInt const & rowlabels
+                                      , VectorInt const & collabels
                                       , ModelParameters const& Mparam
                                       , int a, int b)
                                       : ICoClustModel(Mparam,rowlabels,collabels) , m_Dataij_(m_Dataij)
@@ -108,7 +108,7 @@ CategoricalLBModel::~CategoricalLBModel() {}
 
 void CategoricalLBModel::logSumRows(MatrixReal & m_sum)
 {
-  m_sum = STK::Const::Vector<STK::Real>(nbSample_)*v_logPiek_.transpose();
+  m_sum = STK::Const::VectorX(nbSample_)*v_logPiek_.transpose();
   for (int h = 0; h < r_; ++h) {
     m_sum +=  (m3_Yhij_[h].cast<STK::Real>()*m_Rjl_*m3_logAlhphahkl_[h].transpose());
   }
@@ -116,8 +116,8 @@ void CategoricalLBModel::logSumRows(MatrixReal & m_sum)
 
 bool CategoricalLBModel::cemInitStep()
 {
-  v_logPiek_ = std::log(1.0/Mparam_.nbrowclust_)*(STK::Const::Vector<STK::Real>(Mparam_.nbrowclust_));
-  v_logRhol_ = std::log(1.0/Mparam_.nbcolclust_)*(STK::Const::Vector<STK::Real>(Mparam_.nbcolclust_));
+  v_logPiek_ = std::log(1.0/Mparam_.nbrowclust_)*(STK::Const::VectorX(Mparam_.nbrowclust_));
+  v_logRhol_ = std::log(1.0/Mparam_.nbcolclust_)*(STK::Const::VectorX(Mparam_.nbcolclust_));
   if (initCEMRows())
   {
 #ifdef COVERBOSE
@@ -141,8 +141,8 @@ bool CategoricalLBModel::cemInitStep()
       }
       m_Uil_.resize(nbSample_,Mparam_.nbcolclust_) = 0;
       m_Vjk_.resize(nbVar_,Mparam_.nbrowclust_) = 0;
-      v_logPiek_ = std::log(1.0/Mparam_.nbrowclust_)*(STK::Const::Vector<STK::Real>(Mparam_.nbrowclust_));
-      v_logRhol_ = std::log(1.0/Mparam_.nbcolclust_)*(STK::Const::Vector<STK::Real>(Mparam_.nbcolclust_));
+      v_logPiek_ = std::log(1.0/Mparam_.nbrowclust_)*(STK::Const::VectorX(Mparam_.nbrowclust_));
+      v_logRhol_ = std::log(1.0/Mparam_.nbcolclust_)*(STK::Const::VectorX(Mparam_.nbcolclust_));
 #ifdef COVERBOSE
       std::cout<<"ContingencyLBModel::cemInitStep. Initialization done with success."<<std::endl;
       consoleOut();
@@ -157,8 +157,8 @@ bool CategoricalLBModel::cemInitStep()
 
 bool CategoricalLBModel::emInitStep()
 {
-  v_logPiek_ = std::log(1.0/Mparam_.nbrowclust_)*(STK::Const::Vector<STK::Real>(Mparam_.nbrowclust_));
-  v_logRhol_ = std::log(1.0/Mparam_.nbcolclust_)*(STK::Const::Vector<STK::Real>(Mparam_.nbcolclust_));
+  v_logPiek_ = std::log(1.0/Mparam_.nbrowclust_)*(STK::Const::VectorX(Mparam_.nbrowclust_));
+  v_logRhol_ = std::log(1.0/Mparam_.nbcolclust_)*(STK::Const::VectorX(Mparam_.nbcolclust_));
   if (initEMRows())
   {
 #ifdef COVERBOSE
@@ -182,8 +182,8 @@ bool CategoricalLBModel::emInitStep()
       }
       m_Uil_.resize(nbSample_,Mparam_.nbcolclust_) = 0;
       m_Vjk_.resize(nbVar_,Mparam_.nbrowclust_) = 0;
-      v_logPiek_ = std::log(1.0/Mparam_.nbrowclust_)*(STK::Const::Vector<STK::Real>(Mparam_.nbrowclust_));
-      v_logRhol_ = std::log(1.0/Mparam_.nbcolclust_)*(STK::Const::Vector<STK::Real>(Mparam_.nbcolclust_));
+      v_logPiek_ = std::log(1.0/Mparam_.nbrowclust_)*(STK::Const::VectorX(Mparam_.nbrowclust_));
+      v_logRhol_ = std::log(1.0/Mparam_.nbcolclust_)*(STK::Const::VectorX(Mparam_.nbcolclust_));
 #ifdef COVERBOSE
       std::cout<<"ContingencyLBModel::emInitStep. Initialization done with success."<<std::endl;
       consoleOut();
@@ -198,7 +198,7 @@ bool CategoricalLBModel::emInitStep()
 
 void CategoricalLBModel::logSumCols(MatrixReal & m_sum)
 {
-  m_sum = STK::Const::Vector<STK::Real>(nbVar_)*v_logRhol_.transpose();
+  m_sum = STK::Const::VectorX(nbVar_)*v_logRhol_.transpose();
   for (int h = 0; h < r_; ++h) {
     m_sum +=  (m3_Yhij_[h].transpose().cast<STK::Real>()*m_Tik_*m3_logAlhphahkl_[h]);
   }
@@ -585,7 +585,7 @@ void CategoricalLBModel::initBernoulliLogSumRows(MatrixReal & _m_sum)
 //  for (int k = 0; k < Mparam_.nbrowclust_; ++k)
 //  { _m_sum(i,k) = v_logPiek_[k] + (m3_Yijh_[i].cast<STK::Real>()*v_mlogtemphl[k]).sum();}
 //}
-  _m_sum = STK::Const::Vector<STK::Real>(nbSample_)*v_logPiek_.transpose();
+  _m_sum = STK::Const::VectorX(nbSample_)*v_logPiek_.transpose();
   for (int h = 0; h < r_; ++h) {
     _m_sum +=  (m3_Yhij_[h].cast<STK::Real>()*m_Rjl_*m3_logAlhphahkl_[h].transpose());
   }
@@ -609,7 +609,7 @@ void CategoricalLBModel::initBernoulliLogSumCols(MatrixReal & _m_sum)
 //  for (int l = 0;l < Mparam_.nbcolclust_; ++l)
 //  { _m_sum(j,l) = v_logRhol_[l] + (m3_Yjih_[j].cast<STK::Real>()*v_mlogtemphk[l]).sum();}
 //}
-  _m_sum = STK::Const::Vector<STK::Real>(nbVar_)*v_logRhol_.transpose();
+  _m_sum = STK::Const::VectorX(nbVar_)*v_logRhol_.transpose();
   for (int h = 0; h < r_; ++h) {
     _m_sum += (m3_Yhij_[h].transpose().cast<STK::Real>()*m_Tik_*m3_logAlhphahkl_[h]);
   }
@@ -625,7 +625,7 @@ bool CategoricalLBModel::initCEMRows()
   v_Ui_ = STK::sumByRow(m_Uil_);
 
   m_Vjk_.resize(nbVar_,Mparam_.nbrowclust_) = 0;
-  v_Rl_  = STK::Const::Vector<STK::Real>(cols);
+  v_Rl_  = STK::Const::VectorX(cols);
 
   m_Tik_.resize(nbSample_,Mparam_.nbrowclust_) = 0;
   m_Rjl_.resize(nbVar_,Mparam_.nbcolclust_) = 0;
@@ -679,7 +679,7 @@ bool CategoricalLBModel::initCEMRows()
     for (int h = 0; h < r_; ++h)
     {
       m3_Alphahkl_[h] = (((m_Tik_.transpose()*m3_Yhij_[h].cast<STK::Real>())*m_Rjl_)+b_-1)/(m_TbyRkl+RealMin);
-//    m3_Alphahkl_[h] = ((m_Tik_.transpose()*m3_Yhij_[h].cast<STK::Real>())*m_Rjl_); 
+//    m3_Alphahkl_[h] = ((m_Tik_.transpose()*m3_Yhij_[h].cast<STK::Real>())*m_Rjl_);
       if((((m3_Alphahkl_[h]-m3_Alphahklold_[h]).abs()/(m3_Alphahkl_[h]+RealMin)).sum())<Mparam_.initepsilon_)
       { break;}
     }
@@ -713,7 +713,7 @@ bool CategoricalLBModel::initCEMCols()
   for ( int itr = 0; itr < Mparam_.nbinititerations_; ++itr)
   {
     // CE-step
-    initBernoulliLogSumCols(m_sumjl); 
+    initBernoulliLogSumCols(m_sumjl);
     for (int j=0;j< UnknownLabelsCols_.size();j++)
     {
       int maxIndex;
@@ -756,7 +756,7 @@ bool CategoricalLBModel::initEMRows()
   v_Ui_ = STK::sumByRow(m_Uil_);
 
   m_Vjk_.resize(nbVar_,Mparam_.nbrowclust_) = 0;
-  v_Rl_  = STK::Const::Vector<STK::Real>(cols);
+  v_Rl_  = STK::Const::VectorX(cols);
 
   m_Tik_.resize(nbSample_,Mparam_.nbrowclust_) = 0;
   m_Rjl_.resize(nbVar_,Mparam_.nbcolclust_) = 0;
@@ -960,7 +960,7 @@ void CategoricalLBModel::selectRandomColsFromData(MatrixReal& _m_il,int cols)
   else
   {
     //random shuffle Algorithm
-    VectorInteger _v_temp = randSample(nbVar_,cols);
+    VectorInt _v_temp = randSample(nbVar_,cols);
     for ( int l = 0; l < cols; ++l)
     { _m_il.col(l)=m_Dataij_.cast<STK::Real>().col(_v_temp[l]);}
   }
@@ -970,7 +970,7 @@ void CategoricalLBModel::randomParameterRows(MatrixReal& _m_kl,int cols)
 {
   int index;
   STK::Real epsilon = 0.1;
-  VectorInteger _v_temp = randSample(nbSample_,Mparam_.nbrowclust_);
+  VectorInt _v_temp = randSample(nbSample_,Mparam_.nbrowclust_);
   for ( int k = 0; k < Mparam_.nbrowclust_; ++k)
   {
     index=_v_temp[k];
@@ -983,7 +983,7 @@ void CategoricalLBModel::randomParameterRows(MatrixReal& _m_kl,int cols)
 void CategoricalLBModel::randomParameterCols(MatrixReal& _m_kl)
 {
   int index;
-  VectorInteger _v_temp = randSample(nbVar_,Mparam_.nbcolclust_);
+  VectorInt _v_temp = randSample(nbVar_,Mparam_.nbcolclust_);
   for ( int l = 0; l < Mparam_.nbcolclust_; ++l)
   {
     index=_v_temp[l];
@@ -1000,8 +1000,8 @@ bool CategoricalLBModel::randomInit()
   std::cout<<"Initializing Model Parameters..with random"<<std::endl;
 #endif
   //Initialize random row and column partition
-  VectorReal probarows = (1.0/Mparam_.nbrowclust_)*STK::Const::Vector<STK::Real>(Mparam_.nbrowclust_);
-  VectorReal probacols = (1.0/Mparam_.nbcolclust_)*STK::Const::Vector<STK::Real>(Mparam_.nbcolclust_);
+  VectorReal probarows = (1.0/Mparam_.nbrowclust_)*STK::Const::VectorX(Mparam_.nbrowclust_);
+  VectorReal probacols = (1.0/Mparam_.nbcolclust_)*STK::Const::VectorX(Mparam_.nbcolclust_);
   v_Zi_ = partRnd(nbSample_,probarows);
   v_Wj_ = partRnd(nbVar_,probacols);
   m_Zik_.resize(nbSample_,Mparam_.nbrowclust_) = 0;
@@ -1062,40 +1062,38 @@ bool CategoricalLBModel::randomInit()
   v_Tk_.resize(Mparam_.nbrowclust_) = 0;
   v_Zi_.resize(nbSample_) = 0;
   v_Wj_.resize(nbVar_) = 0;
-  v_logPiek_ = std::log(1.0/Mparam_.nbrowclust_)*(STK::Const::Vector<STK::Real>(Mparam_.nbrowclust_));
-  v_logRhol_ = std::log(1.0/Mparam_.nbcolclust_)*(STK::Const::Vector<STK::Real>(Mparam_.nbcolclust_));
+  v_logPiek_ = std::log(1.0/Mparam_.nbrowclust_)*(STK::Const::VectorX(Mparam_.nbrowclust_));
+  v_logRhol_ = std::log(1.0/Mparam_.nbcolclust_)*(STK::Const::VectorX(Mparam_.nbcolclust_));
   return true;
 }
 
 STK::Real CategoricalLBModel::iclCriteriaValue()
 {
-  STK::Real criteria = 0.0;
-
-  criteria+= lgamma(Mparam_.nbrowclust_*a_)+lgamma(Mparam_.nbcolclust_*a_)
-          -(Mparam_.nbrowclust_+Mparam_.nbcolclust_)*lgamma(a_)
-          +Mparam_.nbrowclust_*Mparam_.nbcolclust_*(lgamma(r_*b_)-r_*lgamma(b_))
-          -lgamma(Mparam_.nbrowdata_+Mparam_.nbrowclust_*a_)
-          -lgamma(Mparam_.nbcoldata_+Mparam_.nbcolclust_*a_);
+  STK::Real criteria = lgamma(Mparam_.nbrowclust_*a_)+lgamma(Mparam_.nbcolclust_*a_)
+                     - (Mparam_.nbrowclust_+Mparam_.nbcolclust_)*lgamma(a_)
+                     + Mparam_.nbrowclust_*Mparam_.nbcolclust_*(lgamma(r_*b_)-r_*lgamma(b_))
+                     - lgamma(Mparam_.nbrowdata_+Mparam_.nbrowclust_*a_)
+                     - lgamma(Mparam_.nbcoldata_+Mparam_.nbcolclust_*a_);
 
   for (int k = 0; k < Mparam_.nbrowclust_; ++k)
-  { criteria+= lgamma(a_+ (v_Zi_== k).count());}
+  { criteria += lgamma(a_+ (v_Zi_== k).count());}
   for (int l = 0; l < Mparam_.nbcolclust_; ++l)
-  { criteria+= lgamma(a_+ (v_Wj_==l).count());}
+  { criteria += lgamma(a_+ (v_Wj_==l).count());}
 
   STK::ArrayXXi temp(Mparam_.nbrowclust_,Mparam_.nbcolclust_);
   for (int h = 0; h < r_; ++h)
   {
-    temp = ((m_Zik_.transpose()*m3_Yhij_[h].cast<STK::Real>())*m_Wjl_)+b_;
+    temp = ((m_Zik_.transpose()*m3_Yhij_[h].cast<int>())*m_Wjl_)+b_;
     for (int k = 0; k < Mparam_.nbrowclust_; ++k)
     {
       for (int l = 0; l < Mparam_.nbcolclust_; ++l)
-      { criteria+=lgamma(temp(k,l));}
+      { criteria += lgamma(temp(k,l));}
     }
   }
   for (int k = 0; k < Mparam_.nbrowclust_; ++k)
   {
     for (int l = 0; l < Mparam_.nbcolclust_; ++l)
-    { criteria-= lgamma(((v_Zi_== k).count())*((v_Wj_==l).count())+r_*b_);}
+    { criteria -= lgamma(((v_Zi_== k).count())*((v_Wj_==l).count())+r_*b_);}
   }
   return criteria;
 }
@@ -1120,7 +1118,7 @@ void CategoricalLBModel::consoleOut()
 #endif
 }
 
-const MatrixInteger& CategoricalLBModel::arrangedDataClusters()
+const MatrixInt& CategoricalLBModel::arrangedDataClusters()
 {
   arrangedDataCluster(m_ClusterDataij_,m_Dataij_);
   return m_ClusterDataij_;

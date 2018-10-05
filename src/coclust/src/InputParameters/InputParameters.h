@@ -132,7 +132,7 @@ class InputParameters : public STK::IPage
 
   protected:
     ModelParameters Mparam_;
-    StrategyParameters Stratparam_;
+    StrategyParameters strategyParam_;
     Strategy strategy_;
     std::string datafilename_;
     std::list<std::string> optionalfilenames_;
@@ -175,7 +175,7 @@ class InputParameters
 
   protected:
     ModelParameters Mparam_;
-    StrategyParameters Stratparam_;
+    StrategyParameters strategyParam_;
     Strategy strategy_;
     std::string datafilename_;
     std::list<std::string> optionalfilenames_;
@@ -196,7 +196,7 @@ inline const ModelParameters& InputParameters::GetModelparameters() const
 
 inline const StrategyParameters& InputParameters::GetStrategyparameters() const
 {
-  return Stratparam_;
+  return strategyParam_;
 }
 
 inline const Strategy& InputParameters::GetStrategy()
@@ -206,7 +206,7 @@ inline const Strategy& InputParameters::GetStrategy()
 
 inline void InputParameters::setAlgoparameters(StrategyParameters const& Aparam)
 {
-  Stratparam_ = Aparam;
+  strategyParam_ = Aparam;
 }
 
 inline void InputParameters::setModelparameters(ModelParameters const& Mparam)

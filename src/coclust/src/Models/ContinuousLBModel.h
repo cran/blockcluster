@@ -39,8 +39,8 @@ class ContinuousLBModel: public ICoClustModel
 {
   public:
     ContinuousLBModel( MatrixReal const& m_Dataij,ModelParameters const& Mparam);
-    ContinuousLBModel(MatrixReal const& m_Dataij,VectorInteger const & rowlabels,
-                       VectorInteger const & collabels,ModelParameters const& Mparam);
+    ContinuousLBModel(MatrixReal const& m_Dataij,VectorInt const & rowlabels,
+                       VectorInt const & collabels,ModelParameters const& Mparam);
     virtual ~ContinuousLBModel(){};
     virtual ContinuousLBModel* clone(){return new ContinuousLBModel(*this);}
     virtual void logSumRows(MatrixReal & _m_sum);

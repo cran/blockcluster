@@ -42,7 +42,7 @@ class IStrategy
     /** Constructor*/
     inline IStrategy(StrategyParameters const& Aparam)
     {
-      Stratparam_ = Aparam;
+      strategyParam_ = Aparam;
     }
     /** Virtual destructor*/
     inline virtual ~IStrategy(){};
@@ -61,7 +61,7 @@ class IStrategy
     ICoClustModel * p_Model_; /**<Pointer to Model to be run.*/
     IInit * p_Init_; /**Pointer to initialization to be run*/
     IAlgo * p_Algo_; /**Pointer to algorithm to be run*/
-    StrategyParameters Stratparam_;
+    StrategyParameters strategyParam_;
 };
 
 

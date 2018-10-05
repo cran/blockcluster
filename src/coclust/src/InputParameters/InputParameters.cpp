@@ -126,14 +126,14 @@ void InputParameters::ReadFromOptionFile( std::string optionfilename)
       = S_Init[rw.p_page("InputOptions")->option("Initialization").get(
                                                                        STK::String())];
 
-  Stratparam_.nbtry_
+  strategyParam_.nbtry_
       = rw.p_page("InputOptions")->option("nbtry").get(STK::Integer());
-  Stratparam_.nbxem_
+  strategyParam_.nbxem_
       = rw.p_page("InputOptions")->option("nbxem").get(STK::Integer());
-  Stratparam_.nbiter_xem_
+  strategyParam_.nbiter_xem_
       = rw.p_page("InputOptions")->option("nbiterations_xemstart").get(
                                                                        STK::Integer());
-  Stratparam_.nbiter_XEM_
+  strategyParam_.nbiter_XEM_
       = rw.p_page("InputOptions")->option("nbiterations_xem").get(
                                                                   STK::Integer());
 
@@ -165,46 +165,46 @@ void InputParameters::ReadFromOptionFile( std::string optionfilename)
   //set fixproportions
   switch (strategy_.Model_)
   {
-    case pik_rhol_epsilonkl:
+    case pik_rhol_epsilonkl_:
       Mparam_.fixedproportions_ = false;
       break;
-    case pik_rhol_epsilon:
+    case pik_rhol_epsilon_:
       Mparam_.fixedproportions_ = false;
       break;
-    case pi_rho_epsilon:
+    case pi_rho_epsilon_:
       Mparam_.fixedproportions_ = true;
       break;
-    case pi_rho_epsilonkl:
+    case pi_rho_epsilonkl_:
       Mparam_.fixedproportions_ = true;
       break;
-    case pik_rhol_sigma2:
+    case pik_rhol_sigma2_:
       Mparam_.fixedproportions_ = false;
       break;
-    case pik_rhol_sigma2kl:
+    case pik_rhol_sigma2kl_:
       Mparam_.fixedproportions_ = false;
       break;
-    case pi_rho_sigma2:
+    case pi_rho_sigma2_:
       Mparam_.fixedproportions_ = true;
       break;
-    case pi_rho_sigma2kl:
+    case pi_rho_sigma2kl_:
       Mparam_.fixedproportions_ = true;
       break;
-    case pik_rhol_unknown:
+    case pik_rhol_unknown_:
       Mparam_.fixedproportions_ = false;
       break;
-    case pik_rhol_known:
+    case pik_rhol_known_:
       Mparam_.fixedproportions_ = false;
       break;
-    case pi_rho_unknown:
+    case pi_rho_unknown_:
       Mparam_.fixedproportions_ = true;
       break;
-    case pi_rho_known:
+    case pi_rho_known_:
       Mparam_.fixedproportions_ = true;
       break;
-    case pi_rho_multi:
+    case pi_rho_multi_:
       Mparam_.fixedproportions_ = true;
       break;
-    case pik_rhol_multi:
+    case pik_rhol_multi_:
       Mparam_.fixedproportions_ = false;
       break;
     default:
@@ -215,13 +215,13 @@ void InputParameters::ReadFromOptionFile( std::string optionfilename)
   // Set stopping-criteria
   switch (strategy_.stopcriteria_)
   {
-    case Parameter:
-      Stratparam_.Stop_Criteria = &ICoClustModel::parameterStopCriteria;
+    case parameter_:
+      strategyParam_.Stop_Criteria = &ICoClustModel::parameterStopCriteria;
       break;
-    case Likelihood:
-      Stratparam_.Stop_Criteria = &ICoClustModel::likelihoodStopCriteria;
+    case likelihood_:
+      strategyParam_.Stop_Criteria = &ICoClustModel::likelihoodStopCriteria;
     default:
-      Stratparam_.Stop_Criteria = &ICoClustModel::parameterStopCriteria;
+      strategyParam_.Stop_Criteria = &ICoClustModel::parameterStopCriteria;
       break;
   }
 
@@ -236,40 +236,40 @@ void InputParameters::ReadFromOptionFile( std::string optionfilename)
 void InputParameters::initializeParamEnum()
 {
   //Datatype
-  S_DataType["Binary"] = Binary;
-  S_DataType["Contingency"] = Contingency;
-  S_DataType["Continuous"] = Continuous;
-  S_DataType["Categorical"] = Categorical;
+  S_DataType["Binary"] = binary_;
+  S_DataType["Contingency"] = contingency_;
+  S_DataType["Continuous"] = continuous_;
+  S_DataType["Categorical"] = categorical_;
 
   //Algorithm
-  S_Algorithm["BEM"] = BEM;
-  S_Algorithm["BCEM"] = BCEM;
-  S_Algorithm["BSEM"] = BSEM;
-  S_Algorithm["BGibbs"] = BGibbs;
+  S_Algorithm["BEM"] = bem_;
+  S_Algorithm["BCEM"] = bcem_;
+  S_Algorithm["BSEM"] = bsem_;
+  S_Algorithm["BGibbs"] = bgibbs_;
 
   //StopCriteria
-  S_StopCriteria["Parameter"] = Parameter;
-  S_StopCriteria["Likelihood"] = Likelihood;
+  S_StopCriteria["Parameter"] = parameter_;
+  S_StopCriteria["Likelihood"] = likelihood_;
 
   //Initialization
-  S_Init["cemInitStep"] = e_CEMInit;
-  S_Init["emInitStep"] = e_EMInit;
-  S_Init["randomInit"] = e_RandomInit;
+  S_Init["cemInitStep"] = e_CEMInit_;
+  S_Init["emInitStep"] = e_EMInit_;
+  S_Init["randomInit"] = e_RandomInit_;
 
   //Models
-  S_Model["pi_rho_epsilon"] = pi_rho_epsilon;
-  S_Model["pik_rhol_epsilon"] = pik_rhol_epsilon;
-  S_Model["pi_rho_epsilonkl"] = pi_rho_epsilonkl;
-  S_Model["pik_rhol_epsilonkl"] = pik_rhol_epsilonkl;
-  S_Model["pi_rho_unknown"] = pi_rho_unknown;
-  S_Model["pik_rhol_unknown"] = pik_rhol_unknown;
-  S_Model["pi_rho_known"] = pi_rho_known;
-  S_Model["pik_rhol_known"] = pik_rhol_known;
-  S_Model["pi_rho_sigma2"] = pi_rho_sigma2;
-  S_Model["pik_rhol_sigma2"] = pik_rhol_sigma2;
-  S_Model["pi_rho_sigma2kl"] = pi_rho_sigma2kl;
-  S_Model["pik_rhol_sigma2kl"] = pik_rhol_sigma2kl;
-  S_Model["pik_rhol_sigma2kl"] = pik_rhol_multi;
-  S_Model["pik_rhol_sigma2kl"] = pi_rho_multi;
+  S_Model["pi_rho_epsilon"] = pi_rho_epsilon_;
+  S_Model["pik_rhol_epsilon"] = pik_rhol_epsilon_;
+  S_Model["pi_rho_epsilonkl"] = pi_rho_epsilonkl_;
+  S_Model["pik_rhol_epsilonkl"] = pik_rhol_epsilonkl_;
+  S_Model["pi_rho_unknown"] = pi_rho_unknown_;
+  S_Model["pik_rhol_unknown"] = pik_rhol_unknown_;
+  S_Model["pi_rho_known"] = pi_rho_known_;
+  S_Model["pik_rhol_known"] = pik_rhol_known_;
+  S_Model["pi_rho_sigma2"] = pi_rho_sigma2_;
+  S_Model["pik_rhol_sigma2"] = pik_rhol_sigma2_;
+  S_Model["pi_rho_sigma2kl"] = pi_rho_sigma2kl_;
+  S_Model["pik_rhol_sigma2kl"] = pik_rhol_sigma2kl_;
+  S_Model["pik_rhol_sigma2kl"] = pik_rhol_multi_;
+  S_Model["pik_rhol_sigma2kl"] = pi_rho_multi_;
 }
 

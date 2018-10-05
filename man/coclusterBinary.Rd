@@ -4,8 +4,8 @@
 \alias{coclusterBinary}
 \title{Co-Clustering function for Binary data.}
 \usage{
-coclusterBinary(data, semisupervised = FALSE, rowlabels = numeric(0),
-  collabels = numeric(0), model = NULL, nbcocluster,
+coclusterBinary(data, semisupervised = FALSE, rowlabels = integer(0),
+  collabels = integer(0), model = NULL, nbcocluster,
   strategy = coclusterStrategy(), a = 1, b = 1, nbCore = 1)
 }
 \arguments{
@@ -15,10 +15,10 @@ coclusterBinary(data, semisupervised = FALSE, rowlabels = numeric(0),
 semi-supervised co-clustering or not. Make sure to provide row and/or
 column labels if specified value is true. The default value is false.}
 
-\item{rowlabels}{Vector specifying the class of rows.
+\item{rowlabels}{Integer Vector specifying the class of rows.
 The class number starts from zero. Provide -1 for unknown row class.}
 
-\item{collabels}{Vector specifying the class of columns.
+\item{collabels}{Integer Vector specifying the class of columns.
 The class number starts from zero. Provide -1 for unknown column class.}
 
 \item{model}{This is the name of model. The following models exists for
@@ -60,6 +60,5 @@ out<-coclusterBinary(binarydata,nbcocluster=c(2,3))
 summary(out)
 ## Plot the original and Co-clustered data 
 plot(out)
-
 
 }

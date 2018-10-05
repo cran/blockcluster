@@ -33,8 +33,8 @@ ContinuousLBModelequalsigma::ContinuousLBModelequalsigma( MatrixReal const& m_Da
                            , m_Dataij_(m_Dataij)
 {}
 
-ContinuousLBModelequalsigma::ContinuousLBModelequalsigma(MatrixReal const& m_Dataij,VectorInteger const & rowlabels,
-                                                         VectorInteger const & collabels,ModelParameters const& Mparam)
+ContinuousLBModelequalsigma::ContinuousLBModelequalsigma(MatrixReal const& m_Dataij,VectorInt const & rowlabels,
+                                                         VectorInt const & collabels,ModelParameters const& Mparam)
                            : ICoClustModel(Mparam,rowlabels,collabels)
                            , m_Dataij_(m_Dataij)
 {}
@@ -43,14 +43,14 @@ void ContinuousLBModelequalsigma::logSumRows(MatrixReal & m_sumik)
 {
 //  std::cout << m_Mukl_.square().cols() << "\n";
 //  std::cout << v_Rl_.rows() << "\n";
-  m_sumik = STK::Const::Vector<STK::Real>(nbSample_)
+  m_sumik = STK::Const::VectorX(nbSample_)
             * (v_logPiek_- (0.5*(m_Mukl_.square()*v_Rl_))/Sigma2_).transpose()
           + (m_Uil1_*m_Mukl_.transpose())/Sigma2_ ;
 }
 
 void ContinuousLBModelequalsigma::logSumCols(MatrixReal & m_sumjl)
 {
-  m_sumjl = STK::Const::Vector<STK::Real>(nbVar_)
+  m_sumjl = STK::Const::VectorX(nbVar_)
             * (v_logRhol_.transpose() - (0.5*v_Tk_.transpose()*m_Mukl_.square())/Sigma2_)
           + (m_Vjk1_*m_Mukl_)/Sigma2_ ;
 }
@@ -208,8 +208,8 @@ bool ContinuousLBModelequalsigma::cemInitStep()
 #endif
   if (initCEMCols())
   {
-    v_logPiek_ = std::log(1.0/Mparam_.nbrowclust_)*(STK::Const::Vector<STK::Real>(Mparam_.nbrowclust_));
-    v_logRhol_ = std::log(1.0/Mparam_.nbcolclust_)*(STK::Const::Vector<STK::Real>(Mparam_.nbcolclust_));
+    v_logPiek_ = std::log(1.0/Mparam_.nbrowclust_)*(STK::Const::VectorX(Mparam_.nbrowclust_));
+    v_logRhol_ = std::log(1.0/Mparam_.nbcolclust_)*(STK::Const::VectorX(Mparam_.nbcolclust_));
     m_Dataij2_ = m_Dataij_.square();
     m_Uil1_.resize(nbSample_,Mparam_.nbcolclust_) = 0;
     m_Uil2_.resize(nbSample_,Mparam_.nbcolclust_) = 0;
@@ -238,8 +238,8 @@ bool ContinuousLBModelequalsigma::emInitStep()
 #endif
   if (initEMCols())
   {
-    v_logPiek_ = std::log(1.0/Mparam_.nbrowclust_)*(STK::Const::Vector<STK::Real>(Mparam_.nbrowclust_));
-    v_logRhol_ = std::log(1.0/Mparam_.nbcolclust_)*(STK::Const::Vector<STK::Real>(Mparam_.nbcolclust_));
+    v_logPiek_ = std::log(1.0/Mparam_.nbrowclust_)*(STK::Const::VectorX(Mparam_.nbrowclust_));
+    v_logRhol_ = std::log(1.0/Mparam_.nbcolclust_)*(STK::Const::VectorX(Mparam_.nbcolclust_));
     m_Dataij2_ = m_Dataij_.square();
     m_Uil1_.resize(nbSample_,Mparam_.nbcolclust_) = 0;
     m_Uil2_.resize(nbSample_,Mparam_.nbcolclust_) = 0;
@@ -292,7 +292,7 @@ bool ContinuousLBModelequalsigma::initCEMCols()
   {
     p_Mul2 = ( STK::sumByRow(m_Mulk.square()) ).transpose();
     m_Djl = v_Vj2*STK::Const::Point<STK::Real>(Mparam_.nbcolclust_)
-          + STK::Const::Vector<STK::Real>(nbVar_) * p_Mul2 - 2*(m_Vjk*m_Mulk.transpose());
+          + STK::Const::VectorX(nbVar_) * p_Mul2 - 2*(m_Vjk*m_Mulk.transpose());
     for ( int j=0;j< (int)UnknownLabelsCols_.size();j++)
     {
       m_Djl.row(UnknownLabelsCols_[j]).minElt(minIndex);
@@ -352,7 +352,7 @@ bool ContinuousLBModelequalsigma::initEMCols()
   {
     p_Mul2 = ( STK::sumByRow(m_Mulk.square()) ).transpose();
     m_Djl = v_Vj2*STK::Const::Point<STK::Real>(Mparam_.nbcolclust_)
-          + STK::Const::Vector<STK::Real>(nbVar_) * p_Mul2 - 2*(m_Vjk*m_Mulk.transpose());
+          + STK::Const::VectorX(nbVar_) * p_Mul2 - 2*(m_Vjk*m_Mulk.transpose());
     m_Rjl_ = (m_Djl-STK::maxByRow(m_Djl)*STK::Const::PointX(Mparam_.nbcolclust_)).exp();
     m_Rjl_ /= (STK::sumByRow(m_Rjl_)*STK::Const::PointX(Mparam_.nbcolclust_));
     for ( int j=0;j< (int)UnknownLabelsCols_.size();j++)
@@ -396,14 +396,14 @@ void ContinuousLBModelequalsigma::consoleOut()
 }
 void ContinuousLBModelequalsigma::selectRandomRowsFromData(MatrixReal& _m_kj)
 {
-  VectorInteger v_temp= randSample(nbSample_,Mparam_.nbrowclust_);
+  VectorInt v_temp= randSample(nbSample_,Mparam_.nbrowclust_);
   for ( int k = 0; k < Mparam_.nbrowclust_; ++k)
   { _m_kj.row(k) = m_Dataij_.row(v_temp[k]);}
 }
 
 void ContinuousLBModelequalsigma::generateRandomMean(const MatrixReal & m_jk, MatrixReal & mean_lk)
 {
-  VectorInteger v_temp= randSample(nbVar_,Mparam_.nbcolclust_);
+  VectorInt v_temp= randSample(nbVar_,Mparam_.nbcolclust_);
   for ( int l = 0; l < Mparam_.nbcolclust_; ++l)
   { mean_lk.row(l) = m_jk.row(v_temp[l]);}
 }

@@ -36,7 +36,7 @@ NULL
 #' ## Plot the original and Co-clustered data 
 #' plot(out)
 #' 
-#' @import methods
+# @import methods
 #' 
 #' @name blockcluster
 #' @rdname blockcluster
@@ -80,8 +80,8 @@ NULL
 #' @param ... Additional argument(s) . Currently there is no additional arguments.  
 #' @name summary
 #' @rdname summary-methods
-#' @docType methods
-#' @exportMethod summary
+# @docType methods
+# @exportMethod summary
 #' 
 NULL
 
@@ -100,11 +100,11 @@ NULL
 #' and distributions and mixture densities for Co-clusters respectively.
 #' Default is "cocluster" plot.
 #' 
-#' @importFrom graphics plot
+# @importFrom graphics plot
 #' @name plot
 #' @rdname plot-methods
-#' @docType methods
-#' @exportMethod plot
+# @docType methods
+# @exportMethod plot
 NULL
 
 #' Simulated Gaussian Data-set
@@ -113,7 +113,7 @@ NULL
 #' in rows and three clusters in columns.
 #'
 #' @name gaussiandata
-#' @docType data
+# @docType data
 #' @keywords datasets
 #' @format A data matrix with 1000 rows and 100 columns.
 #'
@@ -127,7 +127,7 @@ NULL
 #' clusters in columns.  
 #'
 #' @name binarydata
-#' @docType data
+# @docType data
 #' @keywords datasets
 #' @format A data matrix with 1000 rows and 100 columns.
 #'
@@ -141,7 +141,7 @@ NULL
 #' clusters in columns.  
 #'
 #' @name categoricaldata
-#' @docType data
+# @docType data
 #' @keywords datasets
 #' @format A data matrix with 1000 rows and 100 columns.
 #'
@@ -155,7 +155,7 @@ NULL
 #' this data-set. It consist of two clusters in rows and three clusters in columns.  
 #'
 #' @name contingencydataunknown
-#' @docType data
+# @docType data
 #' @keywords datasets
 #' @format A data matrix with 1000 rows and 100 columns.
 #'
@@ -169,7 +169,7 @@ NULL
 #' this data-set. It consist of two clusters in rows and three clusters in columns.  
 #'
 #' @name contingencydatalist
-#' @docType data
+# @docType data
 #' @keywords datasets
 #' @format A data list consisting of following data:
 #' \describe{

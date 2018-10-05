@@ -62,15 +62,15 @@ class BinaryLBModel : public ICoClustModel
      * @param a,b Bayesian hyperparameters
      * */
     BinaryLBModel( MatrixBinary const&  m_Dataij
-                 , VectorInteger const& rowlabels
-                 , VectorInteger const& collabels
+                 , VectorInt const& rowlabels
+                 , VectorInt const& collabels
                  , ModelParameters const& Mparam
                  , int a=1,int b=1);
 
     /** cloning */
     virtual BinaryLBModel* clone(){return new BinaryLBModel(*this);}
-    virtual void logSumRows(MatrixReal & _m_sum);
-    virtual void logSumCols(MatrixReal & _m_sum);
+    virtual void logSumRows(MatrixReal & _m_sik);
+    virtual void logSumCols(MatrixReal & _m_sjl);
     virtual void mStepFull();
     virtual bool emRows();
     virtual bool cemRows();

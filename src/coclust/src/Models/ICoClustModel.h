@@ -41,11 +41,9 @@
  */
 class ICoClustModel
 {
+  private:
     /** Default constructor */
-    inline ICoClustModel(): nbSample_(0), nbVar_(0)
-                          , likelihood_(0), Lmax_(0)
-                          , empty_cluster_(true), stopAlgo_(true), dimprod_(0)
-    {};
+    ICoClustModel();
 
   public:
     /** Constructor
@@ -57,8 +55,8 @@ class ICoClustModel
      * @param rowlabels Row clusters for each row (-1 for unknown cluster for each row)
      * @param collabels Column clusters for each column (-1 unknown cluster for each column)
      * */
-    ICoClustModel( ModelParameters const& Mparam, VectorInteger const & rowlabels,
-                   VectorInteger const & collabels);
+    ICoClustModel( ModelParameters const& Mparam, VectorInt const & rowlabels,
+                   VectorInt const & collabels);
     /** Destructor*/
     inline virtual ~ICoClustModel(){};
 
@@ -141,7 +139,7 @@ class ICoClustModel
     /**Get Error message*/
     std::string errorMsg(){return Error_msg_;}
     /**Set Error message*/
-    void SetErrormsg(const std::string& s){ Error_msg_ = s;}
+    void setMsg(const std::string& s){ Error_msg_ = s;}
     /**Get status of empty cluster*/
     bool isEmptyCluster() const {return empty_cluster_;}
     /**set the value for Empty Cluster*/
@@ -173,19 +171,19 @@ class ICoClustModel
     /** Draw conditional column classification vector*/
     void colClassMatrixDraw();
     /**Set the known and unknown row labels for semi-supervised coclustering*/
-    void setRowLabels(VectorInteger const&);
+    void setRowLabels(VectorInt const&);
     /**Set the known  and unknown column labels for semi-supervised coclustering*/
-    void setColLabels(VectorInteger const&);
+    void setColLabels(VectorInt const&);
     /** Get the likelihood value*/
     STK::Real likelihood() const;
     /** This function will return the row classification vector.
      * @return Row classification vector
      */
-    VectorInteger const& rowClassificationVector() const;
+    VectorInt const& rowClassificationVector() const;
     /** This function will return the column classification vector.
      * @return COlumn classification vector
      */
-    VectorInteger const& columnClassificationVector() const;
+    VectorInt const& columnClassificationVector() const;
     /** This function will return the row proportions of mixtures models.
      * @return Row proportions of mixing models.
      */
@@ -213,7 +211,7 @@ class ICoClustModel
     //variables use in case of semi-supervised co-clustering
     STK::Array1D<int> UnknownLabelsRows_, UnknownLabelsCols_ ;
     STK::Array1D<std::pair<int,int> > knownLabelsRows_, knownLabelsCols_;
-    VectorInteger v_nbRowClusterMembers_,v_nbColClusterMembers_;
+    VectorInt v_nbRowClusterMembers_,v_nbColClusterMembers_;
 
     ModelParameters Mparam_;
     STK::Real likelihood_,Lmax_;
@@ -228,9 +226,9 @@ class ICoClustModel
              , v_logPiekstart_, v_logRholstart_
              , v_logPiekmax_, v_logRholmax_;
     /** Row and column classification matrices respectively*/
-    MatrixInteger m_Zik_,m_Wjl_;
+    MatrixInt m_Zik_,m_Wjl_;
     /**Row and column classification vector*/
-    VectorInteger v_Zi_, v_Wj_;
+    VectorInt v_Zi_, v_Wj_;
     /** Boolean Variable used to identify whether the stopping condition
      *  is reached or not*/
     bool stopAlgo_;
@@ -241,7 +239,7 @@ class ICoClustModel
      *  @param n Max integer value
      *  @param k Number of random integers to be generated (should not exceed n)
      */
-    VectorInteger randSample(int n,int k);
+    VectorInt randSample(int n,int k);
     /** compute the vector v_Tk_ and check if the size block is not too small
      *  @return true if the size block is under the threshold, false otherwise
      **/
@@ -259,7 +257,7 @@ class ICoClustModel
      *  @return the minimal number of individuals in class */
     int randomFuzzyRjl();
 
-    VectorInteger partRnd(int n,VectorReal proba);
+    VectorInt partRnd(int n,VectorReal proba);
     VectorReal cumSum(VectorReal proba);
     PointReal unifRnd(STK::Real a, STK::Real b, int col);
 
@@ -280,10 +278,10 @@ inline void ICoClustModel::setEpsilon(STK::Real Epsilon)
 inline bool ICoClustModel::stopAlgo()
 { return stopAlgo_;}
 
-inline  VectorInteger const& ICoClustModel::rowClassificationVector() const
+inline  VectorInt const& ICoClustModel::rowClassificationVector() const
 { return v_Zi_;}
 
-inline  VectorInteger const& ICoClustModel::columnClassificationVector() const
+inline  VectorInt const& ICoClustModel::columnClassificationVector() const
 { return v_Wj_;}
 
 inline VectorReal const& ICoClustModel::rowProportions() const
@@ -310,14 +308,14 @@ void ICoClustModel::arrangedDataCluster(T& m_ClusterDataij_,const T& m_Dataij_)
   m_ClusterDataij_ = 0;
   //Rearrange data into clusters
 
-  VectorInteger rowincrement(Mparam_.nbrowclust_, 0);
-  VectorInteger nbindrows(Mparam_.nbrowclust_+1, 0);
+  VectorInt rowincrement(Mparam_.nbrowclust_, 0);
+  VectorInt nbindrows(Mparam_.nbrowclust_+1, 0);
 
   for ( int k = 1; k < Mparam_.nbrowclust_; ++k)
   { nbindrows[k] = (v_Zi==(k-1)).count()+nbindrows[k-1];}
 
-  VectorInteger colincrement(Mparam_.nbcolclust_, 0);
-  VectorInteger nbindcols(Mparam_.nbcolclust_+1, 0);
+  VectorInt colincrement(Mparam_.nbcolclust_, 0);
+  VectorInt nbindcols(Mparam_.nbcolclust_+1, 0);
 
   for ( int l = 1; l < Mparam_.nbcolclust_; ++l)
   { nbindcols[l]= (v_Wj==(l-1)).count()+nbindcols[l-1];}

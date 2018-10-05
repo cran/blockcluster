@@ -30,7 +30,7 @@
  **/
 
 /** @file ICoClust.h
- *  @brief 
+ *  @brief
  **/
 
 #ifndef IDataExchange_H_
@@ -63,19 +63,21 @@ class IDataExchange
     void instantiateInit(IInit*& init);
     void setInput(Rcpp::S4 & obj);
 
-    StrategyParameters& GetStrategyParameters(){return Stratparam_;}
-    void setStrategyParameters(StrategyParameters& strat){Stratparam_ = strat;}
+    StrategyParameters& GetStrategyParameters(){return strategyParam_;}
+    void setStrategyParameters(StrategyParameters& strat){strategyParam_ = strat;}
     virtual ~IDataExchange();
 
   protected:
-    Strategy strategy_;
-    StrategyParameters Stratparam_;
-    ModelParameters Mparam_;
-    VectorInteger v_rowlabels_,v_collabels_;
-    std::map<std::string,Algorithm> S_Algorithm;
-    std::map<std::string,StopCriteria> S_StopCriteria;
-    std::map<std::string,DataType> S_DataType;
+    Strategy           strategy_;
+    StrategyParameters strategyParam_;
+    ModelParameters    Mparam_;
+    VectorInt          v_rowlabels_,v_collabels_;
+    //RVectorInt;
+
+    std::map<std::string,Algorithm>      S_Algorithm;
+    std::map<std::string,StopCriteria>   S_StopCriteria;
+    std::map<std::string,DataType>       S_DataType;
     std::map<std::string,Initialization> S_Init;
-    std::map<std::string,Model> S_Model;
+    std::map<std::string,Model>          S_Model;
 };
 #endif /*IDataExchange_H_*/

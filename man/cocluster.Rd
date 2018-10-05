@@ -4,9 +4,9 @@
 \alias{cocluster}
 \title{Co-Clustering function.}
 \usage{
-cocluster(data, datatype, semisupervised = FALSE, rowlabels = numeric(0),
-  collabels = numeric(0), model = NULL, nbcocluster,
-  strategy = coclusterStrategy(), nbCore = 1)
+cocluster(data, datatype, semisupervised = FALSE,
+  rowlabels = integer(0), collabels = integer(0), model = NULL,
+  nbcocluster, strategy = coclusterStrategy(), nbCore = 1)
 }
 \arguments{
 \item{data}{Input data as matrix (or list containing data matrix, numeric vector for row effects and numeric 
@@ -17,9 +17,9 @@ vector column effects in case of contingency data with known row and column effe
 \item{semisupervised}{Boolean value specifying whether to perform semi-supervised co-clustering or not. Make sure to provide row and/or
 column labels if specified value is true. The default value is false.}
 
-\item{rowlabels}{Vector specifying the class of rows. The class number starts from zero. Provide -1 for unknown row class.}
+\item{rowlabels}{Integer Vector specifying the class of rows. The class number starts from zero. Provide -1 for unknown row class.}
 
-\item{collabels}{Vector specifying the class of columns. The class number starts from zero. Provide -1 for unknown column class.}
+\item{collabels}{Integer Vector specifying the class of columns. The class number starts from zero. Provide -1 for unknown column class.}
 
 \item{model}{This is the name of model. The following models exists for various types of data:
 \tabular{rlll}{
@@ -66,6 +66,5 @@ out<-cocluster(binarydata,datatype="binary",nbcocluster=c(2,3))
 summary(out)
 #Plot the original and Co-clustered data 
 plot(out)
-
 
 }

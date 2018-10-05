@@ -5,15 +5,10 @@
 \name{summary,strategy-method}
 \alias{summary,strategy-method}
 \alias{summary}
-\alias{summary}
 \alias{summary,BinaryOptions-method}
-\alias{summary}
 \alias{summary,ContingencyOptions-method}
-\alias{summary}
 \alias{summary,ContinuousOptions-method}
-\alias{summary}
 \alias{summary,CategoricalOptions-method}
-\alias{summary}
 \title{Summary function.}
 \usage{
 \S4method{summary}{strategy}(object, ...)

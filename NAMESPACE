@@ -1,27 +1,27 @@
-export(coclusterBinary)
-export(coclusterCategorical)
-export(coclusterContingency)
-export(coclusterContinuous)
-export(coclusterStrategy)
+export(cocluster
+      ,coclusterBinary
+      ,coclusterCategorical
+      ,coclusterContingency
+      ,coclusterContinuous
+      ,coclusterStrategy
+      )
 
-exportClasses(BinaryOptions)
-exportClasses(CategoricalOptions)
-exportClasses(CommonOptions)
-exportClasses(ContingencyOptions)
-exportClasses(ContinuousOptions)
-exportClasses(strategy)
+exportClasses(BinaryOptions
+             ,CategoricalOptions
+             ,CommonOptions
+             ,ContingencyOptions
+             ,ContinuousOptions
+             ,strategy
+             )
 
-exportMethods(plot)
-exportMethods(summary)
-exportPattern("^[[:alpha:]]+")
+exportMethods(plot,summary)
 
 import(rtkore)
-
-importFrom(graphics,plot)
+importFrom( "methods", "show", "callNextMethod", "new"
+          , "validObject", "is", ".hasSlot", "hasArg")
+importFrom( "graphics", "plot", "abline", "barplot", "hist"
+          , "image", "layout", "legend", "par", "points", "title")
 importFrom("grDevices", "gray")
-importFrom("graphics", "abline", "barplot", "hist", "image", "layout",
-             "legend", "par", "points", "title")
-importFrom("methods", "show", "hasArg", "new")
 importFrom("stats", "dnorm")
-  
+
 useDynLib(blockcluster)

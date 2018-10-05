@@ -57,36 +57,37 @@ void IDataExchange::setInput(Rcpp::S4 & obj)
 {
   //Get Strategy
   Rcpp::S4 strategy(obj.slot("strategy"));
-  strategy_.Algo_ = S_Algorithm[Rcpp::as<std::string>(strategy.slot("algo"))];
-  strategy_.stopcriteria_ = S_StopCriteria[Rcpp::as<std::string>(strategy.slot("stopcriteria"))];
-  strategy_.Init_ = S_Init[Rcpp::as<std::string>(strategy.slot("initmethod"))];
-  strategy_.DataType_ = S_DataType[Rcpp::as<std::string>(obj.slot("datatype"))];
-  strategy_.Model_ = S_Model[Rcpp::as<std::string>(obj.slot("model"))];
+  strategy_.Algo_          = S_Algorithm[Rcpp::as<std::string>(strategy.slot("algo"))];
+  strategy_.stopcriteria_  = S_StopCriteria[Rcpp::as<std::string>(strategy.slot("stopcriteria"))];
+  strategy_.Init_          = S_Init[Rcpp::as<std::string>(strategy.slot("initmethod"))];
+  strategy_.DataType_      = S_DataType[Rcpp::as<std::string>(obj.slot("datatype"))];
+  strategy_.Model_         = S_Model[Rcpp::as<std::string>(obj.slot("model"))];
   strategy_.SemiSupervised = Rcpp::as<bool>(obj.slot("semisupervised"));
+
   //Get strategy parameters
-  Stratparam_.nbiter_xem_ = Rcpp::as<int>(strategy.slot("nbiterationsxem"));
-  Stratparam_.nbiter_XEM_ = Rcpp::as<int>(strategy.slot("nbiterationsXEM"));
-  Stratparam_.nbtry_ = Rcpp::as<int>(strategy.slot("nbtry"));
-  Stratparam_.nbxem_ = Rcpp::as<int>(strategy.slot("nbxem"));
+  strategyParam_.nbiter_xem_ = Rcpp::as<int>(strategy.slot("nbiterationsxem"));
+  strategyParam_.nbiter_XEM_ = Rcpp::as<int>(strategy.slot("nbiterationsXEM"));
+  strategyParam_.nbtry_      = Rcpp::as<int>(strategy.slot("nbtry"));
+  strategyParam_.nbxem_      = Rcpp::as<int>(strategy.slot("nbxem"));
 
   //get row/column labels if semisupervised
   if(strategy_.SemiSupervised)
   {
-    v_rowlabels_ = STK::RVector<int>((SEXP(obj.slot("rowlabels"))));
-    v_collabels_ = STK::RVector<int>((SEXP(obj.slot("collabels"))));
+    v_rowlabels_ = RVectorInt((SEXP(obj.slot("rowlabels"))));
+    v_collabels_ = RVectorInt((SEXP(obj.slot("collabels"))));
   }
 
   // Set stopping-criteria
   switch (strategy_.stopcriteria_)
   {
-    case Parameter:
-      Stratparam_.Stop_Criteria = &ICoClustModel::parameterStopCriteria;
+    case parameter_:
+      strategyParam_.Stop_Criteria = &ICoClustModel::parameterStopCriteria;
       break;
-    case Likelihood:
-      Stratparam_.Stop_Criteria = &ICoClustModel::likelihoodStopCriteria;
+    case likelihood_:
+      strategyParam_.Stop_Criteria = &ICoClustModel::likelihoodStopCriteria;
       break;
     default:
-      Stratparam_.Stop_Criteria = &ICoClustModel::parameterStopCriteria;
+      strategyParam_.Stop_Criteria = &ICoClustModel::parameterStopCriteria;
       break;
   }
   //Set various  model parameters
@@ -113,66 +114,66 @@ void IDataExchange::setInput(Rcpp::S4 & obj)
 void IDataExchange::initializeParamEnum()
 {
   //Datatype
-  S_DataType["binary"] = Binary;
-  S_DataType["contingency"] = Contingency;
-  S_DataType["continuous"] = Continuous;
-  S_DataType["continuous"] = Categorical;
+  S_DataType["binary"]      = binary_;
+  S_DataType["contingency"] = contingency_;
+  S_DataType["continuous"]  = continuous_;
+  S_DataType["continuous"]  = categorical_;
 
   //Algorithm
-  S_Algorithm["BEM"] = BEM;
-  S_Algorithm["BCEM"] = BCEM;
-  S_Algorithm["BSEM"] = BSEM;
-  S_Algorithm["BGibbs"] = BGibbs;
+  S_Algorithm["BEM"]   = bem_;
+  S_Algorithm["BCEM"]   = bcem_;
+  S_Algorithm["BSEM"]   = bsem_;
+  S_Algorithm["BGibbs"] = bgibbs_;
 
   //StopCriteria
-  S_StopCriteria["Parameter"] = Parameter;
-  S_StopCriteria["Likelihood"] = Likelihood;
+  S_StopCriteria["Parameter"] = parameter_;
+  S_StopCriteria["Likelihood"] = likelihood_;
 
   //Initialization
-  S_Init["cemInitStep"] = e_CEMInit;
-  S_Init["emInitStep"] = e_EMInit;
-  S_Init["randomInit"] = e_RandomInit;
+  S_Init["cemInitStep"] = e_CEMInit_;
+  S_Init["emInitStep"] = e_EMInit_;
+  S_Init["randomInit"] = e_RandomInit_;
 
   //Models
-  S_Model["pi_rho_epsilon"] = pi_rho_epsilon;
-  S_Model["pik_rhol_epsilon"] = pik_rhol_epsilon;
-  S_Model["pi_rho_epsilonkl"] = pi_rho_epsilonkl;
-  S_Model["pik_rhol_epsilonkl"] = pik_rhol_epsilonkl;
-  S_Model["pi_rho_unknown"] = pi_rho_unknown;
-  S_Model["pik_rhol_unknown"] = pik_rhol_unknown;
-  S_Model["pi_rho_known"] = pi_rho_known;
-  S_Model["pik_rhol_known"] = pik_rhol_known;
-  S_Model["pi_rho_sigma2"] = pi_rho_sigma2;
-  S_Model["pik_rhol_sigma2"] = pik_rhol_sigma2;
-  S_Model["pi_rho_sigma2kl"] = pi_rho_sigma2kl;
-  S_Model["pik_rhol_sigma2kl"] = pik_rhol_sigma2kl;
-  S_Model["pi_rho_multi"] = pi_rho_multi;
-  S_Model["pik_rhol_multi"] = pik_rhol_multi;
+  S_Model["pi_rho_epsilon"] = pi_rho_epsilon_;
+  S_Model["pik_rhol_epsilon"] = pik_rhol_epsilon_;
+  S_Model["pi_rho_epsilonkl"] = pi_rho_epsilonkl_;
+  S_Model["pik_rhol_epsilonkl"] = pik_rhol_epsilonkl_;
+  S_Model["pi_rho_unknown"] = pi_rho_unknown_;
+  S_Model["pik_rhol_unknown"] = pik_rhol_unknown_;
+  S_Model["pi_rho_known"] = pi_rho_known_;
+  S_Model["pik_rhol_known"] = pik_rhol_known_;
+  S_Model["pi_rho_sigma2"] = pi_rho_sigma2_;
+  S_Model["pik_rhol_sigma2"] = pik_rhol_sigma2_;
+  S_Model["pi_rho_sigma2kl"] = pi_rho_sigma2kl_;
+  S_Model["pik_rhol_sigma2kl"] = pik_rhol_sigma2kl_;
+  S_Model["pi_rho_multi"] = pi_rho_multi_;
+  S_Model["pik_rhol_multi"] = pik_rhol_multi_;
 }
 
 void IDataExchange::instantiateAlgo(IAlgo*& algo,IStrategy*& strategy)
 {
   switch (strategy_.Algo_)
   {
-    case BEM:
+    case bem_:
       algo = new EMAlgo();
-      strategy = new XStrategyAlgo(Stratparam_);
+      strategy = new XStrategyAlgo(strategyParam_);
       break;
-    case BCEM:
+    case bcem_:
       algo = new CEMAlgo();
-      strategy = new XStrategyAlgo(Stratparam_);
+      strategy = new XStrategyAlgo(strategyParam_);
       break;
-    case BSEM:
+    case bsem_:
       algo = new SEMAlgo();
-      strategy = new XStrategyforSEMAlgo(Stratparam_);
+      strategy = new XStrategyforSEMAlgo(strategyParam_);
       break;
-    case BGibbs:
+    case bgibbs_:
       algo = new GibbsAlgo();
-      strategy = new XStrategyforSEMAlgo(Stratparam_);
+      strategy = new XStrategyforSEMAlgo(strategyParam_);
       break;
     default:
       algo = new EMAlgo();
-      strategy = new XStrategyAlgo(Stratparam_);
+      strategy = new XStrategyAlgo(strategyParam_);
       break;
   }
 }
@@ -181,13 +182,13 @@ void IDataExchange::instantiateInit(IInit*& init)
 {
   switch (strategy_.Init_)
   {
-    case e_CEMInit:
+    case e_CEMInit_:
       init = new CEMInit();
       break;
-    case e_EMInit:
+    case e_EMInit_:
       init = new emInit();
       break;
-    case e_RandomInit:
+    case e_RandomInit_:
       init = new RandomInit();
       break;
     default:

@@ -39,8 +39,8 @@ class ContinuousLBModelequalsigma: public ICoClustModel
 {
   public:
     ContinuousLBModelequalsigma( MatrixReal const& m_Dataij,ModelParameters const& Mparam);
-    ContinuousLBModelequalsigma(MatrixReal const& m_Dataij,VectorInteger const & rowlabels,
-                       VectorInteger const & collabels,ModelParameters const& Mparam);
+    ContinuousLBModelequalsigma(MatrixReal const& m_Dataij,VectorInt const & rowlabels,
+                       VectorInt const & collabels,ModelParameters const& Mparam);
     /** cloning */
     virtual ContinuousLBModelequalsigma* clone(){return new ContinuousLBModelequalsigma(*this);}
     virtual void logSumRows(MatrixReal & _m_sum);

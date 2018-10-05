@@ -6,7 +6,7 @@ PKG_CPPFLAGS = `${R_HOME}/bin/Rscript -e "rtkore:::CxxFlags()"`
 PKG_CXXFLAGS = -DRPACKAGE `${R_HOME}/bin/Rscript -e "rtkore:::CppFlags()"` \
                $(SHLIB_OPENMP_CXXFLAGS)
 PKG_LIBS     =  $(COCLUSTLIB) `$(R_HOME)/bin/Rscript -e "rtkore:::LdFlags()"` $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS) \
-                $(SHLIB_OPENMP_CFLAGS)
+                $(SHLIB_OPENMP_CXXFLAGS)
 
 CO_CPPFLAGS  = $(ALL_CPPFLAGS) #-DCOVERBOSE
 CO_CXXFLAGS  = $(ALL_CXXFLAGS)

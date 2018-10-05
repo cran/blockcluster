@@ -11,7 +11,7 @@ with the parameters in base class.
 }
 \details{
 \describe{
-\item{classmean:}{The mean value of each co-cluster.}  
-\item{classvariance:}{The variance of each co-cluster.} 
+\item{classmean:}{The mean value of each co-cluster.}
+\item{classvariance:}{The variance of each co-cluster.}
 }
 }

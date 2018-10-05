@@ -32,10 +32,10 @@ NULL
 #' or \code{\linkS4class{ContinuousOptions}} depending on whether the data-type is Binary, Contingency or Continuous
 #' respectively.
 #' 
-#' @export
+# @export
 #' 
-#' @exportPattern "^[[:alpha:]]+"
-#' @useDynLib RCocluster
+# @exportPattern "^[[:alpha:]]+"
+# @useDynLib RCocluster
 #' 
 #' @examples
 #' 
@@ -51,29 +51,28 @@ NULL
 #' 
 #' 
 coclusterContinuous<-function( data, semisupervised = FALSE
-                             , rowlabels = numeric(0), collabels = numeric(0)
+                             , rowlabels = integer(0), collabels = integer(0)
                              , model = NULL, nbcocluster
                              , strategy = coclusterStrategy()
 												     , nbCore = 1) 
 {
-	#Check for data
+	#Check for data and get dimensions
 	if(missing(data)){ stop("Data is missing.")}
-
-		if(!is.list(data))
-    {
-			if(!is.matrix(data))
-      { stop("Data should be matrix.")}
-		}
-    else
-		{
-			if(!is.matrix(data[[1]]))
-				stop("Data should be matrix.")
-			if(!is.numeric(data[[2]])||!is.numeric(data[[3]]))
-				stop("Row/Column effects should be numeric vectors.")
-			if(length(data[[2]])!=dim(data[[1]])[1]||length(data[[3]])!=dim(data[[1]])[2])
-				stop("Dimension mismatch in Row/column effects  and Data.")
-		}
-  
+	if(!is.list(data))
+  {
+		if(!is.matrix(data)) { stop("Data should be matrix.")}
+    dimention = dim(data)
+	}
+  else
+	{
+		if(!is.matrix(data[[1]])) {	stop("Data should be matrix.")}
+		if(!is.numeric(data[[2]])||!is.numeric(data[[3]]))
+    {	stop("Row/Column effects should be numeric vectors.")}
+		if(length(data[[2]])!=dim(data[[1]])[1]||length(data[[3]])!=dim(data[[1]])[2])
+    {	stop("Dimension mismatch in Row/column effects  and Data.")}
+    dimention = dim(data[[1]])
+	}
+    
   #check for row and column labels
   if (semisupervised)
   {
@@ -83,9 +82,6 @@ coclusterContinuous<-function( data, semisupervised = FALSE
       stop("Row labels should be a numeric vector.")
     if(!missing(collabels)&&!is.numeric(collabels))
       stop("Column labels should be a numeric vector.")
-    
-    if(!is.list(data)) dimention = dim(data)
-    else               dimention = dim(data[[1]])
     
     if(missing(rowlabels))      rowlabels = rep(-1,dimention[1])
     else if(missing(collabels)) collabels = rep(-1,dimention[2])
@@ -100,9 +96,6 @@ coclusterContinuous<-function( data, semisupervised = FALSE
 	if(missing(nbcocluster))
 	{ stop("Mention number of CoClusters.")}
   
- 	if(!is.list(data)) dimention = dim(data)
-	else               dimention = dim(data[[1]])
-		
 	if(dimention[1]<nbcocluster[1]) stop("Number of Row cluters exceeds numbers of rows.")
 	if(dimention[2]<nbcocluster[2])	stop("Number of Column cluters exceeds numbers of columns.")
 	#check for Algorithm name (and make it compatible with version 1)

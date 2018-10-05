@@ -35,22 +35,22 @@
 bool XStrategyforSEMAlgo::run()
 {
 #ifdef COVERBOSE
-  std::cout<<"Running XStrategy.."<<"\n";
+  std::cout<<"Running XStrategyforSEMAlgo\n";
 #endif
   STK::Real Lmax = -RealMax,L1 = -RealMax,Lcurrent;
   int ntry_empty=0;
   bool non_empty = false;
-  for ( int itry = 0; itry < Stratparam_.nbtry_; ++itry) {
+  for ( int itry = 0; itry < strategyParam_.nbtry_; ++itry) {
     non_empty = false;
     L1 = -RealMax;
-    for ( int ixem = 0; ixem < Stratparam_.nbxem_; ++ixem) {
+    for ( int ixem = 0; ixem < strategyParam_.nbxem_; ++ixem) {
       ntry_empty = -1;
       p_Model_->setEmptyCluster(true);
       while(p_Model_->isEmptyCluster()&&ntry_empty<100)
       {
         if (p_Init_->run())
         {
-            for ( int itr = 0; itr < Stratparam_.nbiter_xem_; ++itr)
+            for ( int itr = 0; itr < strategyParam_.nbiter_xem_; ++itr)
             {
               if (p_Algo_->run()) {
                 Lcurrent = p_Model_->estimateLikelihood();
@@ -75,7 +75,7 @@ bool XStrategyforSEMAlgo::run()
         Lmax = Lcurrent;
         p_Model_->modifyThetaMax();
       }
-        for ( int itr = 0; itr < Stratparam_.nbiter_XEM_; ++itr)
+        for ( int itr = 0; itr < strategyParam_.nbiter_XEM_; ++itr)
         {
           if (p_Algo_->run()) {
             Lcurrent = p_Model_->estimateLikelihood();
@@ -89,11 +89,12 @@ bool XStrategyforSEMAlgo::run()
     }
 
   }
-  if(non_empty){
+  if(non_empty)
+  {
     p_Model_->copyThetaMax();
     p_Model_->finalizeOutput();
 #ifdef COVERBOSE
-    std::cout<<"Algorithm over."<<"\n";
+    std::cout<<"Strategy over.\n";
     p_Model_->consoleOut();
     std::cout<<"\nLmax:"<<Lmax<<"\n";
 #endif

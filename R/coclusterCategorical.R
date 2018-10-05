@@ -12,9 +12,9 @@ NULL
 #' @param data Input data as matrix (or list containing data matrix.)
 #' @param semisupervised Boolean value specifying whether to perform semi-supervised co-clustering or not. Make sure to provide row and/or
 #' column labels if specified value is true. The default value is false.
-#' @param rowlabels Vector specifying the class of rows. The class number starts from zero.
+#' @param rowlabels Integer Vector specifying the class of rows. The class number starts from zero.
 #' Provide -1 for unknown row class. 
-#' @param collabels Vector specifying the class of columns.
+#' @param collabels Integer Vector specifying the class of columns.
 #' The class number starts from zero. Provide -1 for unknown column class.
 #' @param model This is the name of model. The following models exists for various types of data:
 #' \tabular{rlll}{
@@ -32,10 +32,10 @@ NULL
 #' or \code{\linkS4class{ContinuousOptions}} depending on whether the data-type is Binary, Contingency or Continuous
 #' respectively.
 #' 
-#' @export
+# @export
 #' 
-#' @exportPattern "^[[:alpha:]]+"
-#' @useDynLib RCocluster
+# @exportPattern "^[[:alpha:]]+"
+# @useDynLib RCocluster
 #' 
 #' @examples
 #' 
@@ -49,7 +49,8 @@ NULL
 #' ## Plot the original and Co-clustered data 
 #' plot(out)
 #' 
-coclusterCategorical<-function(data, semisupervised = FALSE, rowlabels = numeric(0), collabels = numeric(0),
+coclusterCategorical<-function( data, semisupervised = FALSE
+                              , rowlabels = integer(0), collabels = integer(0),
                                model = NULL, nbcocluster, strategy = coclusterStrategy(), a=1, b=1
 													    , nbCore = 1)
 {
@@ -71,7 +72,10 @@ coclusterCategorical<-function(data, semisupervised = FALSE, rowlabels = numeric
 				stop("Dimension mismatch in Row/column effects  and Data.")
 		}
   
-  #check for row and column labels
+    if(!is.list(data)) dimData = dim(data)
+    else               dimData = dim(data[[1]])
+    
+    #check for row and column labels
   if (semisupervised)
   {
     if(missing(rowlabels)&&missing(collabels))
@@ -80,9 +84,6 @@ coclusterCategorical<-function(data, semisupervised = FALSE, rowlabels = numeric
       stop("Row labels should be a numeric vector.")
     if(!missing(collabels)&&!is.numeric(collabels))
       stop("Column labels should be a numeric vector.")
-    
-    if(!is.list(data)) dimData = dim(data)
-    else               dimData = dim(data[[1]])
     
     if(missing(rowlabels))      rowlabels = rep(-1,dimData[1])
     else if(missing(collabels)) collabels = rep(-1,dimData[2])
@@ -97,9 +98,6 @@ coclusterCategorical<-function(data, semisupervised = FALSE, rowlabels = numeric
 	if(missing(nbcocluster))
 	{ stop("Mention number of CoClusters.")}
   
- 	if(!is.list(data)) dimData = dim(data)
-	else               dimData = dim(data[[1]])
-		
 	if(dimData[1]<nbcocluster[1]) stop("Number of Row clusters exceeds numbers of rows.")
 	if(dimData[2]<nbcocluster[2])	stop("Number of Column clusters exceeds numbers of columns.")
 	#check for Algorithm name (and make it compatible with version 1)

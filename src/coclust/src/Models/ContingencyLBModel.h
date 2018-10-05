@@ -39,8 +39,8 @@ class ContingencyLBModel: public ICoClustModel
 {
   public:
     ContingencyLBModel( MatrixReal const& m_Dataij,ModelParameters const& Mparam);
-    ContingencyLBModel(MatrixReal const& m_Dataij,VectorInteger const & rowlabels,
-                       VectorInteger const & collabels,ModelParameters const& Mparam);
+    ContingencyLBModel(MatrixReal const& m_Dataij,VectorInt const & rowlabels,
+                       VectorInt const & collabels,ModelParameters const& Mparam);
     virtual ~ContingencyLBModel(){};
     virtual ContingencyLBModel* clone(){return new ContingencyLBModel(*this);}
     virtual void logSumRows(MatrixReal & _m_sum);

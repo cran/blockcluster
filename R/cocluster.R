@@ -13,8 +13,8 @@ NULL
 #' @param datatype This is the type of data which can be "binary" , "contingency", "continuous" or "categorical".
 #' @param semisupervised Boolean value specifying whether to perform semi-supervised co-clustering or not. Make sure to provide row and/or
 #' column labels if specified value is true. The default value is false.
-#' @param rowlabels Vector specifying the class of rows. The class number starts from zero. Provide -1 for unknown row class. 
-#' @param collabels Vector specifying the class of columns. The class number starts from zero. Provide -1 for unknown column class.
+#' @param rowlabels Integer Vector specifying the class of rows. The class number starts from zero. Provide -1 for unknown row class. 
+#' @param collabels Integer Vector specifying the class of columns. The class number starts from zero. Provide -1 for unknown column class.
 #' @param model This is the name of model. The following models exists for various types of data:
 #' \tabular{rlll}{
 #'     Model  \tab Data-type \tab Proportions \tab Dispersion/Variance \cr
@@ -42,10 +42,10 @@ NULL
 #' or \code{\linkS4class{ContinuousOptions}} depending on whether the data-type is Binary, Contingency or Continuous
 #' respectively.
 #' 
-#' @export
+# @export
 #' 
-#' @exportPattern "^[[:alpha:]]+"
-#' @useDynLib blockcluster
+# @exportPattern "^[[:alpha:]]+"
+# @useDynLib blockcluster
 #' 
 #' @examples
 #' 
@@ -59,11 +59,9 @@ NULL
 #' #Plot the original and Co-clustered data 
 #' plot(out)
 #' 
-#' 
-
-
 cocluster<-function( data, datatype
-                   , semisupervised = FALSE, rowlabels = numeric(0), collabels = numeric(0)
+                   , semisupervised = FALSE
+                   , rowlabels = integer(0), collabels = integer(0)
                    , model = NULL, nbcocluster, strategy = coclusterStrategy()
 							     , nbCore =1
 							     ) 

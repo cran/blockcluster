@@ -33,7 +33,7 @@
 #' @param epsilonXEM Tolerance value used during XEM step. Default value is 1e-10
 #' 
 #' @return Object of class \code{\linkS4class{strategy}}
-#' @export
+# @export
 #' 
 #' @examples
 #' #Default strategy values
@@ -75,7 +75,7 @@ coclusterStrategy<-function(algo = "BEM",initmethod=character(),stopcriteria = "
 #' 
 #' @rdname coclusterStrategy
 #' @name strategy-class
-#' @exportClass strategy
+# @exportClass strategy
 #' 
 
 setClass(

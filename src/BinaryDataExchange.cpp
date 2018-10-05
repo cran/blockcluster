@@ -30,7 +30,7 @@
  **/
 
 /** @file BinaryCoClust.cpp
- *  @brief 
+ *  @brief
  **/
 
 #include "BinaryDataExchange.h"
@@ -50,50 +50,44 @@ void BinaryDataExchange::dataOutput(Rcpp::S4& obj,ICoClustModel* model,bool succ
     obj.slot("message") = "Co-Clustering successfully terminated!";
     BinaryLBModel* ptrLBM;
     BinaryLBModelequalepsilon* ptrLBMeq;
-    MatrixReal dispersion;
     switch (strategy_.Model_)
     {
-      case pik_rhol_epsilonkl:
-         ptrLBM = dynamic_cast<BinaryLBModel*>(model);
-        obj.slot("classmean") = STK::wrap(ptrLBM->mean());
-        //STK::wrap(ptrLBM->mean());
-        obj.slot("classdispersion") = STK::wrap(ptrLBM->dispersion());
-        //STK::wrap(ptrLBM->dispersion());
-        obj.slot("coclusterdata") = STK::wrap(ptrLBM->arrangedDataClusters());
-        // STK::wrap(ptrLBM->arrangedDataClusters());
-        break;
-      case pik_rhol_epsilon:
-        ptrLBMeq = dynamic_cast<BinaryLBModelequalepsilon*>(model);
-        dispersion = ptrLBMeq->dispersion()*STK::Const::Array<STK::Real>(Mparam_.nbrowclust_,Mparam_.nbcolclust_);
-        obj.slot("classmean") = STK::wrap(ptrLBMeq->mean());
-        obj.slot("classdispersion") = STK::wrap(dispersion);
-        obj.slot("coclusterdata") = STK::wrap(ptrLBMeq->arrangedDataClusters());
-        break;
-      case pi_rho_epsilonkl:
+      case pik_rhol_epsilonkl_:
         ptrLBM = dynamic_cast<BinaryLBModel*>(model);
-        obj.slot("classmean") = STK::wrap(ptrLBM->mean());
+        obj.slot("classmean")       = STK::wrap(ptrLBM->mean());
         obj.slot("classdispersion") = STK::wrap(ptrLBM->dispersion());
-        obj.slot("coclusterdata") = STK::wrap(ptrLBM->arrangedDataClusters());
+        obj.slot("coclusterdata")   = STK::wrap(ptrLBM->arrangedDataClusters());
         break;
-      case pi_rho_epsilon:
+      case pik_rhol_epsilon_:
         ptrLBMeq = dynamic_cast<BinaryLBModelequalepsilon*>(model);
-        dispersion = ptrLBMeq->dispersion()*STK::Const::Array<STK::Real>(Mparam_.nbrowclust_,Mparam_.nbcolclust_);
-        obj.slot("classmean") = STK::wrap(ptrLBMeq->mean());
-        obj.slot("classdispersion") = STK::wrap(dispersion);
-        obj.slot("coclusterdata") = STK::wrap(ptrLBMeq->arrangedDataClusters());
+        obj.slot("classmean")       = STK::wrap(ptrLBMeq->mean());
+        obj.slot("classdispersion") = STK::wrap(ptrLBMeq->dispersion()*STK::Const::Array<STK::Real>(Mparam_.nbrowclust_,Mparam_.nbcolclust_));
+        obj.slot("coclusterdata")   = STK::wrap(ptrLBMeq->arrangedDataClusters());
+        break;
+      case pi_rho_epsilonkl_:
+        ptrLBM = dynamic_cast<BinaryLBModel*>(model);
+        obj.slot("classmean")       = STK::wrap(ptrLBM->mean());
+        obj.slot("classdispersion") = STK::wrap(ptrLBM->dispersion());
+        obj.slot("coclusterdata")   = STK::wrap(ptrLBM->arrangedDataClusters());
+        break;
+      case pi_rho_epsilon_:
+        ptrLBMeq = dynamic_cast<BinaryLBModelequalepsilon*>(model);
+        obj.slot("classmean")       = STK::wrap(ptrLBMeq->mean());
+        obj.slot("classdispersion") = STK::wrap(ptrLBMeq->dispersion()*STK::Const::Array<STK::Real>(Mparam_.nbrowclust_,Mparam_.nbcolclust_));
+        obj.slot("coclusterdata")   = STK::wrap(ptrLBMeq->arrangedDataClusters());
         break;
       default:
         Rcpp::stop("Wrong Model in BinaryDataExchange. Please report Bug.");
         break;
     }
-    obj.slot("rowclass") = STK::wrap(model->rowClassificationVector());
-    obj.slot("colclass") = STK::wrap(model->columnClassificationVector());
-    obj.slot("rowproportions") = STK::wrap(model->rowProportions());
+    obj.slot("rowclass")          = STK::wrap(model->rowClassificationVector());
+    obj.slot("colclass")          = STK::wrap(model->columnClassificationVector());
+    obj.slot("rowproportions")    = STK::wrap(model->rowProportions());
     obj.slot("columnproportions") = STK::wrap(model->colProportions());
-    obj.slot("rowposteriorprob") = STK::wrap(model->rowPosteriorProb());
-    obj.slot("colposteriorprob") = STK::wrap(model->colPosteriorProb());
-    obj.slot("likelihood") = model->likelihood();
-    obj.slot("ICLvalue") = model->iclCriteriaValue();
+    obj.slot("rowposteriorprob")  = STK::wrap(model->rowPosteriorProb());
+    obj.slot("colposteriorprob")  = STK::wrap(model->colPosteriorProb());
+    obj.slot("likelihood")        = model->likelihood();
+    obj.slot("ICLvalue")          = model->iclCriteriaValue();
   }
 }
 
@@ -117,19 +111,19 @@ void BinaryDataExchange::instantiateModel(ICoClustModel*& model)
   {
     switch (strategy_.Model_)
     {
-      case pik_rhol_epsilonkl:
+      case pik_rhol_epsilonkl_:
         Mparam_.fixedproportions_ = false;
         model = new BinaryLBModel(m_Dataij_,Mparam_,a_,b_);
         break;
-      case pik_rhol_epsilon:
+      case pik_rhol_epsilon_:
         Mparam_.fixedproportions_ = false;
         model = new BinaryLBModelequalepsilon(m_Dataij_,Mparam_,a_,b_);
         break;
-      case pi_rho_epsilonkl:
+      case pi_rho_epsilonkl_:
         Mparam_.fixedproportions_ = true;
         model = new BinaryLBModel(m_Dataij_,Mparam_,a_,b_);
         break;
-      case pi_rho_epsilon:
+      case pi_rho_epsilon_:
         Mparam_.fixedproportions_ = true;
         model = new BinaryLBModelequalepsilon(m_Dataij_,Mparam_,a_,b_);
         break;
@@ -142,19 +136,19 @@ void BinaryDataExchange::instantiateModel(ICoClustModel*& model)
   {
     switch (strategy_.Model_)
     {
-      case pik_rhol_epsilonkl:
+      case pik_rhol_epsilonkl_:
         Mparam_.fixedproportions_ = false;
         model = new BinaryLBModel(m_Dataij_,v_rowlabels_, v_collabels_,Mparam_,a_,b_);
         break;
-      case pik_rhol_epsilon:
+      case pik_rhol_epsilon_:
         Mparam_.fixedproportions_ = false;
         model = new BinaryLBModelequalepsilon(m_Dataij_,v_rowlabels_, v_collabels_,Mparam_,a_,b_);
         break;
-      case pi_rho_epsilonkl:
+      case pi_rho_epsilonkl_:
         Mparam_.fixedproportions_ = true;
         model = new BinaryLBModel(m_Dataij_,v_rowlabels_, v_collabels_,Mparam_,a_,b_);
         break;
-      case pi_rho_epsilon:
+      case pi_rho_epsilon_:
         Mparam_.fixedproportions_ =true;
         model = new BinaryLBModelequalepsilon(m_Dataij_,v_rowlabels_, v_collabels_,Mparam_,a_,b_);
         break;

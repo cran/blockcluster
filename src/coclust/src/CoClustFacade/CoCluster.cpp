@@ -52,15 +52,24 @@ bool CoCluster::run()
   {
     if(p_Strategy_->run())
     {
-      p_Model_->SetErrormsg("Co-Clustering successfully terminated!");
+      p_Model_->setMsg("Co-Clustering successfully terminated!");
       return true;
     }
+    else
+    { return false;}
   }
   catch (std::exception & e)
   {
-    p_Model_->SetErrormsg(e.what());
+    p_Model_->setMsg(e.what());
 #ifdef COVERBOSE
     std::cout << "CoCluster::run() failed." <<e.what();
+#endif
+  }
+  catch (STK::Exception & e)
+  {
+    p_Model_->setMsg(e.error());
+#ifdef COVERBOSE
+    std::cout << "CoCluster::run() failed." <<e.error();
 #endif
   }
   return false;

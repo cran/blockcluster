@@ -11,7 +11,7 @@ with the parameters in base class.
 }
 \details{
 \describe{
-\item{classgamma:}{The value of poisson parameter (gamma) for each co-cluster.}  
+\item{classgamma:}{The value of poisson parameter (gamma) for each co-cluster.}
 \item{datamui:}{Rows effect (if known).}
 \item{datanuj:}{Columns effect (if known).}
 }

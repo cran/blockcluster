@@ -59,8 +59,8 @@ class BinaryLBModelequalepsilon : public ICoClustModel
      * @param a,b bayesian hyperparameters
      **/
     BinaryLBModelequalepsilon( MatrixBinary const&  m_Dataij
-                             , VectorInteger const & rowlabels
-                             , VectorInteger const & collabels
+                             , VectorInt const & rowlabels
+                             , VectorInt const & collabels
                              , ModelParameters const& Mparam
                              , int a=1, int b=1);
 

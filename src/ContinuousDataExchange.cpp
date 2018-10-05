@@ -30,7 +30,7 @@
  **/
 
 /** @file ContinuousCoClust.cpp
- *  @brief 
+ *  @brief
  **/
 
 #include "ContinuousDataExchange.h"
@@ -53,26 +53,26 @@ void ContinuousDataExchange::dataOutput(Rcpp::S4& obj,ICoClustModel* model,bool 
     MatrixReal variance;
     switch (strategy_.Model_)
     {
-      case pik_rhol_sigma2kl:
+      case pik_rhol_sigma2kl_:
          ptrLBM = dynamic_cast<ContinuousLBModel*>(model);
         obj.slot("classmean") = STK::wrap(ptrLBM->mean());
         obj.slot("classvariance") = STK::wrap(ptrLBM->sigma2());
         obj.slot("coclusterdata") = STK::wrap(ptrLBM->arrangedDataClusters());
         break;
-      case pik_rhol_sigma2:
+      case pik_rhol_sigma2_:
         ptrLBMeq = dynamic_cast<ContinuousLBModelequalsigma*>(model);
         variance = ptrLBMeq->sigma2()*STK::Const::Array<STK::Real>(Mparam_.nbrowclust_,Mparam_.nbcolclust_);
         obj.slot("classmean") = STK::wrap(ptrLBMeq->mean());
         obj.slot("classvariance") = STK::wrap(variance);
         obj.slot("coclusterdata") = STK::wrap(ptrLBMeq->arrangedDataClusters());
         break;
-      case pi_rho_sigma2kl:
+      case pi_rho_sigma2kl_:
         ptrLBM = dynamic_cast<ContinuousLBModel*>(model);
         obj.slot("classmean") = STK::wrap(ptrLBM->mean());
         obj.slot("classvariance") = STK::wrap(ptrLBM->sigma2());
         obj.slot("coclusterdata") = STK::wrap(ptrLBM->arrangedDataClusters());
         break;
-      case pi_rho_sigma2:
+      case pi_rho_sigma2_:
         ptrLBMeq = dynamic_cast<ContinuousLBModelequalsigma*>(model);
         variance = ptrLBMeq->sigma2()*STK::Const::Array<STK::Real>(Mparam_.nbrowclust_,Mparam_.nbcolclust_);
         obj.slot("classmean") = STK::wrap(ptrLBMeq->mean());
@@ -84,14 +84,14 @@ void ContinuousDataExchange::dataOutput(Rcpp::S4& obj,ICoClustModel* model,bool 
         break;
     }
 
-    obj.slot("rowclass") = STK::wrap(model->rowClassificationVector());
-    obj.slot("colclass") = STK::wrap(model->columnClassificationVector());
-    obj.slot("rowproportions") = STK::wrap(model->rowProportions());
+    obj.slot("rowclass")          = STK::wrap(model->rowClassificationVector());
+    obj.slot("colclass")          = STK::wrap(model->columnClassificationVector());
+    obj.slot("rowproportions")    = STK::wrap(model->rowProportions());
     obj.slot("columnproportions") = STK::wrap(model->colProportions());
-    obj.slot("rowposteriorprob") = STK::wrap(model->rowPosteriorProb());
-    obj.slot("colposteriorprob") = STK::wrap(model->colPosteriorProb());
-    obj.slot("likelihood") = model->likelihood();
-    obj.slot("ICLvalue") = model->iclCriteriaValue();
+    obj.slot("rowposteriorprob")  = STK::wrap(model->rowPosteriorProb());
+    obj.slot("colposteriorprob")  = STK::wrap(model->colPosteriorProb());
+    obj.slot("likelihood")        = model->likelihood();
+    obj.slot("ICLvalue")          = model->iclCriteriaValue();
   }
 }
 
@@ -109,19 +109,19 @@ void ContinuousDataExchange::instantiateModel(ICoClustModel*& model)
   {
     switch (strategy_.Model_)
     {
-      case pik_rhol_sigma2kl:
+      case pik_rhol_sigma2kl_:
         Mparam_.fixedproportions_ = false;
         model = new ContinuousLBModel(m_Dataij_,Mparam_);
         break;
-      case pik_rhol_sigma2:
+      case pik_rhol_sigma2_:
         Mparam_.fixedproportions_ = false;
         model = new ContinuousLBModelequalsigma(m_Dataij_,Mparam_);
         break;
-      case pi_rho_sigma2kl:
+      case pi_rho_sigma2kl_:
         Mparam_.fixedproportions_ =true;
         model = new ContinuousLBModel(m_Dataij_,Mparam_);
         break;
-      case pi_rho_sigma2:
+      case pi_rho_sigma2_:
         Mparam_.fixedproportions_ =true;
         model = new ContinuousLBModelequalsigma(m_Dataij_,Mparam_);
         break;
@@ -134,19 +134,19 @@ void ContinuousDataExchange::instantiateModel(ICoClustModel*& model)
   {
     switch (strategy_.Model_)
     {
-      case pik_rhol_sigma2kl:
+      case pik_rhol_sigma2kl_:
         Mparam_.fixedproportions_ = false;
         model = new ContinuousLBModel(m_Dataij_,v_rowlabels_,v_collabels_,Mparam_);
         break;
-      case pik_rhol_sigma2:
+      case pik_rhol_sigma2_:
         Mparam_.fixedproportions_ = false;
         model = new ContinuousLBModelequalsigma(m_Dataij_,v_rowlabels_,v_collabels_,Mparam_);
         break;
-      case pi_rho_sigma2kl:
+      case pi_rho_sigma2kl_:
         Mparam_.fixedproportions_ =true;
         model = new ContinuousLBModel(m_Dataij_,v_rowlabels_,v_collabels_,Mparam_);
         break;
-      case pi_rho_sigma2:
+      case pi_rho_sigma2_:
         Mparam_.fixedproportions_ =true;
         model = new ContinuousLBModelequalsigma(m_Dataij_,v_rowlabels_,v_collabels_,Mparam_);
         break;

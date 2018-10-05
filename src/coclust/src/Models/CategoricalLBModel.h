@@ -32,9 +32,9 @@
 class CategoricalLBModel:public ICoClustModel
 {
   public:
-    CategoricalLBModel(MatrixInteger const& m_Dataij,ModelParameters const& Mparam,int a=1,int b=1);
-    CategoricalLBModel(MatrixInteger const& m_Dataij,VectorInteger const & rowlabels,
-                       VectorInteger const & collabels,ModelParameters const& Mparam,int a=1,int b=1);
+    CategoricalLBModel(MatrixInt const& m_Dataij,ModelParameters const& Mparam,int a=1,int b=1);
+    CategoricalLBModel(MatrixInt const& m_Dataij,VectorInt const & rowlabels,
+                       VectorInt const & collabels,ModelParameters const& Mparam,int a=1,int b=1);
     virtual CategoricalLBModel* clone(){return new CategoricalLBModel(*this);}
     virtual void logSumRows(MatrixReal & m_sum);
     virtual void logSumCols(MatrixReal & m_sum);
@@ -59,7 +59,7 @@ class CategoricalLBModel:public ICoClustModel
     virtual void copyThetaMax();
     virtual void modifyThetaMax();
     virtual STK::Real estimateLikelihood();
-    const MatrixInteger& arrangedDataClusters();
+    const MatrixInt& arrangedDataClusters();
     inline const std::vector<MatrixReal>& mean(){return m3_Alphahkl_;}
     /** @return the number of free parameters of the distribution of a block.*/
     virtual int nbFreeParameters() const;
@@ -69,8 +69,8 @@ class CategoricalLBModel:public ICoClustModel
   protected:
     /// hyper-parameters
     int a_,b_;
-    MatrixInteger const& m_Dataij_;
-    MatrixInteger m_ClusterDataij_;
+    MatrixInt const& m_Dataij_;
+    MatrixInt m_ClusterDataij_;
     /// matrices of the posterior probabilities of the rows/columns
     MatrixReal m_Uil_, m_Vjk_;
     /// Vector of the summed matrices

@@ -31,6 +31,11 @@
 
 #define MINSIZE 3
 
+ICoClustModel::ICoClustModel(): nbSample_(0), nbVar_(0)
+                              , likelihood_(0), Lmax_(0)
+                              , empty_cluster_(true), stopAlgo_(true), dimprod_(0)
+{}
+
 ICoClustModel::ICoClustModel( ModelParameters const& Mparam)
                             : nbSample_(Mparam.nbrowdata_)
                             , nbVar_(Mparam.nbcoldata_)
@@ -39,7 +44,7 @@ ICoClustModel::ICoClustModel( ModelParameters const& Mparam)
                             , Lmax_(-STK::Arithmetic<STK::Real>::infinity())
                             , empty_cluster_(false)
                             , stopAlgo_(false)
-							, dimprod_(nbSample_*nbVar_)
+							              , dimprod_(nbSample_*nbVar_)
 {
   v_nbRowClusterMembers_.resize(Mparam.nbrowclust_) = 0;
   v_nbColClusterMembers_.resize(Mparam.nbcolclust_) = 0;
@@ -55,15 +60,16 @@ ICoClustModel::ICoClustModel( ModelParameters const& Mparam)
 }
 
 ICoClustModel::ICoClustModel( ModelParameters const& Mparam
-                            , VectorInteger const& rowlabels
-                            , VectorInteger const& collabels)
+                            , VectorInt const& rowlabels
+                            , VectorInt const& collabels
+                            )
                             : nbSample_(Mparam.nbrowdata_)
                             , nbVar_(Mparam.nbcoldata_)
                             , Mparam_(Mparam)
                             , likelihood_(-STK::Arithmetic<STK::Real>::infinity())
                             , empty_cluster_(false)
                             , stopAlgo_(false)
-							, dimprod_(nbSample_*nbVar_)
+							              , dimprod_(nbSample_*nbVar_)
 {
   v_nbRowClusterMembers_.resize(Mparam.nbrowclust_) = 0;
   v_nbColClusterMembers_.resize(Mparam.nbcolclust_) = 0;
@@ -76,9 +82,9 @@ ICoClustModel::ICoClustModel( ModelParameters const& Mparam
 }
 
 /* sample k integer from {0,1,...,n-1} */
-VectorInteger ICoClustModel::randSample(int n,int k)
+VectorInt ICoClustModel::randSample(int n,int k)
 {
-  VectorInteger v_temp(n), v_randint(k);
+  VectorInt v_temp(n), v_randint(k);
   for ( int j = 0; j < n; ++j) { v_temp[j]=j;}
   for ( int lfirst = 0, lend = n; lfirst < k; ++lfirst)
   {
@@ -390,9 +396,9 @@ STK::Real ICoClustModel::iclCriteriaValue()
 
   STK::Real criteria = 0.0;
   //  Error_msg_ = "ICL creteria is not yet implemented for this model.";
-  criteria =  likelihood_ - std::log(Mparam_.nbrowdata_)*(Mparam_.nbrowclust_-1.)/2.
-              - std::log(Mparam_.nbcoldata_)*(Mparam_.nbcolclust_-1.)/2.
-              - std::log(Mparam_.nbcoldata_*Mparam_.nbrowdata_) * nbFreeParameters()/2.;
+  criteria = likelihood_ - std::log(Mparam_.nbrowdata_)*(Mparam_.nbrowclust_-1.)/2.
+           - std::log(Mparam_.nbcoldata_)*(Mparam_.nbcolclust_-1.)/2.
+           - std::log(Mparam_.nbcoldata_*Mparam_.nbrowdata_) * nbFreeParameters()/2.;
 #ifdef COVERBOSE
   std::cout<<Error_msg_<<"\n";
 #endif
@@ -418,16 +424,16 @@ int ICoClustModel::randomFuzzyRjl()
 }
 
 
-VectorInteger ICoClustModel::partRnd(int n, VectorReal proba)
+VectorInt ICoClustModel::partRnd(int n, VectorReal proba)
 {
   int clusters = proba.sizeRows();
-  VectorInteger v_Z(n, 0);
-  VectorInteger v_Randperm = randSample(n,n);
-  VectorInteger remainingclusters(n-clusters);
+  VectorInt v_Z(n, 0);
+  VectorInt v_Randperm = randSample(n,n);
+  VectorInt remainingclusters(n-clusters);
 
   for ( int ind = 0; ind < clusters; ++ind)
   { v_Z[v_Randperm[ind]] = ind+1;}
-  //   remainingclusters = (clusters+1)*MatrixInteger::Ones(n-clusters,1)
+  //   remainingclusters = (clusters+1)*MatrixInt::Ones(n-clusters,1)
   //- ((STK::Const::Array<STK::Real>(clusters,1)*(unifRnd(0,1,1,n-clusters))).array() < (cumSum(proba)*STK::Const::Array<STK::Real>(1,n-clusters)).array()).matrix().cast<int>().colwise().sum().transpose();
   remainingclusters = (clusters+1)*STK::Const::VectorXi(n-clusters)
   - STK::count(  (STK::Const::VectorX(clusters)*(unifRnd(0,1,n-clusters)))
@@ -466,7 +472,7 @@ PointReal ICoClustModel::unifRnd(STK::Real a,STK::Real b, int col)
   return m_temp;
 }
 
-void ICoClustModel::setRowLabels(VectorInteger const& rowlabels)
+void ICoClustModel::setRowLabels(VectorInt const& rowlabels)
 {
   int cluster, length = rowlabels.size();
   for ( int i = 0; i < length; ++i)
@@ -486,7 +492,7 @@ void ICoClustModel::setRowLabels(VectorInteger const& rowlabels)
   }
 }
 
-void ICoClustModel::setColLabels(VectorInteger const& collabels)
+void ICoClustModel::setColLabels(VectorInt const& collabels)
 {
   int cluster , length = collabels.size();
   for ( int j = 0; j < length; ++j)
@@ -516,8 +522,8 @@ void ICoClustModel::commonFinalizeOutput()
   }
   else
   {
-    v_Piek_ = (1.0/Mparam_.nbrowclust_)*STK::Const::Vector<STK::Real>(Mparam_.nbrowclust_);
-    v_Rhol_ = (1.0/Mparam_.nbcolclust_)*STK::Const::Vector<STK::Real>(Mparam_.nbcolclust_);
+    v_Piek_ = (1.0/Mparam_.nbrowclust_)*STK::Const::VectorX(Mparam_.nbrowclust_);
+    v_Rhol_ = (1.0/Mparam_.nbcolclust_)*STK::Const::VectorX(Mparam_.nbcolclust_);
   }
 
   int maxIndex;

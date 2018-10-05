@@ -58,39 +58,39 @@ RcppExport SEXP CoClustmain(SEXP robj, SEXP nbCore)
   BEGIN_RCPP
   //Initialize Rcpp object
   Rcpp::S4 CoClustobj(robj);
+  // initialize nbcore
   int nc = Rcpp::as<int>(nbCore), nbAvail = omp_get_num_procs();
   if (nc<=0 || nc > nbAvail ) nc = nbAvail;
-//omp_set_num_threads(omp_get_num_procs()); // Can be problematic with set.seed in R. And it might be better to give choice to the user, juste have to export OMP_NUM_THREADS = x
-  //set number of threads equal to number of processors
   omp_set_num_threads(nc);
+  //omp_set_num_threads(omp_get_num_procs()); // Can be problematic with set.seed in R. And it might be better to give choice to the user, juste have to export OMP_NUM_THREADS = x
 
-  std::map<std::string,DataType> S_DataType;
-  S_DataType["binary"] = Binary;
-  S_DataType["contingency"] = Contingency;
-  S_DataType["continuous"] = Continuous;
-  S_DataType["categorical"] = Categorical;
+  std::map<std::string, DataType> S_DataType;
+  S_DataType["binary"]       = binary_;
+  S_DataType["contingency"]  = contingency_;
+  S_DataType["continuous"]   = continuous_;
+  S_DataType["categorical"]  = categorical_;
   DataType datatype = S_DataType[Rcpp::as<std::string>(CoClustobj.slot("datatype"))];
   //Various pointers declarations
-  IStrategy * p_Strategy_ = NULL;
-  IAlgo * p_Algo_ = NULL;
-  ICoClustModel * p_Model_ = NULL;
-  ICoClustModel * p_FinalModel_ = NULL;
-  IInit * p_Init_ = NULL;
-  CoCluster* p_CoCluster_ = NULL;
-  IDataExchange * p_DataExchange_;
+  IStrategy     * p_Strategy_     =0;
+  IAlgo         * p_Algo_         =0;
+  ICoClustModel * p_Model_        =0;
+  ICoClustModel * p_FinalModel_   =0;
+  IInit         * p_Init_         =0;
+  CoCluster     * p_CoCluster_    =0;
+  IDataExchange * p_DataExchange_ =0;
 
   //set p_DataExchange_ to required case
   switch (datatype) {
-    case Binary:
+    case binary_:
       p_DataExchange_ = new BinaryDataExchange();
       break;
-    case Contingency:
+    case contingency_:
       p_DataExchange_ = new ContingencyDataExchange();
       break;
-    case Continuous:
+    case continuous_:
       p_DataExchange_ = new ContinuousDataExchange();
       break;
-    case Categorical:
+    case categorical_:
       p_DataExchange_ = new CategoricalDataExchange();
       break;
     default:
@@ -173,10 +173,10 @@ RcppExport SEXP CoClustmain(SEXP robj, SEXP nbCore)
   //Initialize Rcpp object
   Rcpp::S4 CoClustobj(robj);
   std::map<std::string,DataType> S_DataType;
-  S_DataType["binary"] = Binary;
-  S_DataType["contingency"] = Contingency;
-  S_DataType["continuous"] = Continuous;
-  S_DataType["categorical"] = Categorical;
+  S_DataType["binary"] = binary_;
+  S_DataType["contingency"] = contingency_;
+  S_DataType["continuous"] = continuous_;
+  S_DataType["categorical"] = categorical_;
 
   DataType datatype = S_DataType[Rcpp::as<std::string>(CoClustobj.slot("datatype"))];
 
@@ -191,16 +191,16 @@ RcppExport SEXP CoClustmain(SEXP robj, SEXP nbCore)
   //set p_DataExchange_ to required case
   switch (datatype)
   {
-    case Binary:
+    case binary_:
       p_DataExchange_ = new BinaryDataExchange();
       break;
-    case Contingency:
+    case contingency_:
       p_DataExchange_ = new ContingencyDataExchange();
       break;
-    case Continuous:
+    case continuous_:
       p_DataExchange_ = new ContinuousDataExchange();
       break;
-    case Categorical:
+    case categorical_:
       p_DataExchange_ = new CategoricalDataExchange();
       break;
     default:

@@ -32,66 +32,56 @@
 #ifndef ENUMERATIONS_H_
 #define ENUMERATIONS_H_
 
-/*
- * Enumeration for Data-type.
- */
+/** @brief Enumeration for Data-type. */
 enum DataType
 {
-    Binary = 1,
-    Contingency = 2,
-    Continuous = 3,
-    Categorical = 4
+  binary_      = 1,
+  contingency_ = 2,
+  continuous_  = 3,
+  categorical_ = 4
 };
 
-/*
- * Enumeration for Algorithms.
- */
+/**@ brief Enumeration for Algorithms.*/
 enum Algorithm
 {
-    BEM = 1,
-    BCEM = 2,
-    BSEM  = 3,
-    BGibbs  = 4
+  bem_    = 1,
+  bcem_   = 2,
+  bsem_   = 3,
+  bgibbs_ = 4
 };
 
-/**
- * Enumeration for Stopping Criteria.
- */
+/**@brief Enumeration for Stopping Criteria. */
 enum StopCriteria
 {
-    Parameter = 1,
-    Likelihood = 2
+  parameter_  = 1,
+  likelihood_ = 2
 };
 
-/**
- * Enumeration for Model Initialization.
- */
+/** @brief Enumeration for Model Initialization. */
 enum Initialization
 {
-    e_CEMInit = 1,
-    e_EMInit = 2,
-    e_RandomInit = 3
+  e_CEMInit_    = 1,
+  e_EMInit_     = 2,
+  e_RandomInit_ = 3
 };
 
-/**
- * Enumeration for all data Models.
- */
+/** @brief Enumeration for all Models. */
 enum Model
 {
-    pi_rho_epsilon = 1,
-    pik_rhol_epsilon = 2,
-    pi_rho_epsilonkl = 3,
-    pik_rhol_epsilonkl = 4,
-    pi_rho_unknown = 5,
-    pik_rhol_unknown = 6,
-    pi_rho_known = 7,
-    pik_rhol_known = 8,
-    pi_rho_sigma2 = 9,
-    pik_rhol_sigma2 = 10,
-    pi_rho_sigma2kl = 11,
-    pik_rhol_sigma2kl = 12,
-    pi_rho_multi = 13,
-    pik_rhol_multi = 14
+  pi_rho_epsilon_     = 1,
+  pik_rhol_epsilon_   = 2,
+  pi_rho_epsilonkl_   = 3,
+  pik_rhol_epsilonkl_ = 4,
+  pi_rho_unknown_     = 5,
+  pik_rhol_unknown_   = 6,
+  pi_rho_known_       = 7,
+  pik_rhol_known_     = 8,
+  pi_rho_sigma2_      = 9,
+  pik_rhol_sigma2_    = 10,
+  pi_rho_sigma2kl_    = 11,
+  pik_rhol_sigma2kl_  = 12,
+  pi_rho_multi_       = 13,
+  pik_rhol_multi_     = 14
 };
 
 #endif /* ENUMERATIONS_H_ */

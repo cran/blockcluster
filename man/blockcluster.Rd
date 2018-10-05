@@ -37,4 +37,5 @@ summary(out)
 ## Plot the original and Co-clustered data 
 plot(out)
 
+
 }

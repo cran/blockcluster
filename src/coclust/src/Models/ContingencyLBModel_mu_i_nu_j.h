@@ -48,8 +48,8 @@ class ContingencyLBModel_mu_i_nu_j: public ICoClustModel
      */
     ContingencyLBModel_mu_i_nu_j( MatrixReal const& m_Dataij, VectorReal const& v_Mui,
                                   VectorReal const& v_Nuj, ModelParameters const& Mparam);
-    ContingencyLBModel_mu_i_nu_j( MatrixReal const& m_Dataij, VectorInteger const & rowlabels
-                                , VectorInteger const & collabels
+    ContingencyLBModel_mu_i_nu_j( MatrixReal const& m_Dataij, VectorInt const & rowlabels
+                                , VectorInt const & collabels
                                 , VectorReal const& v_Mui
                                 , VectorReal const& v_Nuj
                                 , ModelParameters const& Mparam);
