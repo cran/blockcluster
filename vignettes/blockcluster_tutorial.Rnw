@@ -279,7 +279,7 @@ dispersion/variance for each block. Furthermore we have default set of input
 parameters which works well in most cases which are explained in further
 details in Section~\ref{sec:coclusterStrategy}. The package also comes with OpenMP
 support (If supported by your Operating system and R). You need to set the number of
-threads in you environment (export OMP\_NUM\_THREADS).
+threads in you environment ({\bf nbCore}).
 
 \subsubsection{The coclusterBinary function}
 The \verb+coclusterBinary+ function is a specialization of the \verb+cocluster+
@@ -289,7 +289,7 @@ function for binary data. The prototype of the function is as follows:
 coclusterBinary( data, semisupervised = FALSE
    , rowlabels = numeric(0), collabels = numeric(0)
    , model = NULL, nbcocluster, strategy = coclusterStrategy()
-   , a=1, b=1)
+   , a=1, b=1, nbCore=1)
 \end{lstlisting}
 This function has two
 additional parameters $a$ and $b$ corresponding to the bayesian form of the
@@ -299,12 +299,12 @@ The available binary models are given in the table~\ref{tab:binarymodeltypes}.
 \centering
  \begin{tabular}{|c|c|c|c|c|}
 \hline
-     Model  & Datatype & Proportions & Dispersion/Variance & Initialization\\
+     Model  & Datatype & Proportions & Dispersion/Variance\\
 \hline
-     {\bf pik\_rhol\_epsilonkl} & binary & unequal & unequal & CEM/EM\\
-     {\bf pik\_rhol\_epsilon} & binary & unequal & equal & CEM/EM\\
-     {\bf pi\_rho\_epsilonkl} & binary & equal & unequal & CEM/EM\\
-     {\bf pi\_rho\_epsilon} & binary & equal & equal & CEM/EM\\
+     {\bf pik\_rhol\_epsilonkl} & binary & unequal & unequal\\
+     {\bf pik\_rhol\_epsilon} & binary & unequal & equal\\
+     {\bf pi\_rho\_epsilonkl} & binary & equal & unequal\\
+     {\bf pi\_rho\_epsilon} & binary & equal & equal\\
 \hline
  \end{tabular}
 \caption{Binary models available in package {\bf blockcluster}.}
@@ -320,7 +320,7 @@ function for categorical data. The prototype of the function is as follows:
 coclusterCategorical( data, semisupervised = FALSE
    , rowlabels = numeric(0), collabels = numeric(0)
    , model = NULL, nbcocluster, strategy = coclusterStrategy()
-   , a=1, b=1)
+   , a=1, b=1, nbCore=1)
 \end{lstlisting}
 This function has two additional parameters $a$ and $b$ corresponding to the
 bayesian form of the likelihood function. The default value correspond to the
@@ -328,12 +328,12 @@ case "no prior". The availables categorical models are given in the
 table~\ref{tab:categoricalmodeltypes}.
 \begin{table}[h!]
 \centering
- \begin{tabular}{|c|c|c|c|c|}
+ \begin{tabular}{|c|c|c|c|}
 \hline
-     Model & Datatype & Proportions & Dispersion/Variance & Initialization\\
+     Model & Datatype & Proportions & Dispersion/Variance\\
 \hline
- {\bf pik\_rhol\_multi} & categorical & unequal & N.A & Random\\
- {\bf pi\_rho\_multi}  & categorical & equal & N.A & Random\\
+ {\bf pik\_rhol\_multi} & categorical & unequal & N.A \\
+ {\bf pi\_rho\_multi}   & categorical & equal   & N.A \\
 \hline
  \end{tabular}
 \caption{Categorical models available in package {\bf blockcluster}.}
@@ -347,19 +347,19 @@ function for continuous data. The prototype of the function is as follows:
 # cocluster for continuous data (Gaussian models)
 coclusterContinuous( data, semisupervised = FALSE
    , rowlabels = numeric(0), collabels = numeric(0)
-   , model = NULL, nbcocluster, strategy = coclusterStrategy())
+   , model = NULL, nbcocluster, strategy = coclusterStrategy(), nbCore=1)
 \end{lstlisting}
 The availables continuous models are given in the table~\ref{tab:continuousmodeltypes}.
 \begin{table}[h!]
 \centering
- \begin{tabular}{|c|c|c|c|c|}
+ \begin{tabular}{|c|c|c|c|}
 \hline
-     Model  & Datatype & Proportions & Dispersion/Variance & Initialization\\
+     Model      & Datatype & Proportions & Dispersion/Variance\\
 \hline
-     {\bf pik\_rhol\_sigma2kl} & continuous & unequal & unequal & CEM/EM\\
-     {\bf pik\_rhol\_sigma} & continuous & unequal & equal & CEM/EM\\
-     {\bf pi\_rho\_sigma2kl} & continuous & equal & unequal & CEM/EM\\
-     {\bf pi\_rho\_sigma2} & continuous & equal & equal & CEM/EM\\
+ {\bf pik\_rhol\_sigma2kl} & continuous & unequal & unequal\\
+ {\bf pik\_rhol\_sigma 2}  & continuous & unequal & equal \\
+ {\bf pi\_rho\_sigma2kl}   & continuous & equal & unequal \\
+ {\bf pi\_rho\_sigma2}     & continuous & equal & equal \\
 \hline
  \end{tabular}
 \caption{Continuous models available in package {\bf blockcluster}.}
@@ -378,14 +378,14 @@ coclusterContingency( data, semisupervised = FALSE
 The availables contingency models are given in the table~\ref{tab:contingencymodeltypes}.
 \begin{table}[h!]
 \centering
- \begin{tabular}{|c|c|c|c|c|}
+ \begin{tabular}{|c|c|c|c|}
 \hline
-     Model  & Datatype & Proportions & Dispersion/Variance & Initialization\\
+     Model  & Datatype & Proportions & Dispersion/Variance\\
 \hline
-     {\bf pik\_rhol\_unknown} & contingency & unequal & N.A & CEM/EM\\
-     {\bf pi\_rho\_unknown} & contingency & equal & N.A & CEM/EM\\
-     {\bf pik\_rhol\_known} & contingency & unequal & N.A & Random\\
-     {\bf pi\_rho\_known} & contingency & equal & N.A & Random\\
+     {\bf pik\_rhol\_unknown} & contingency & unequal & N.A\\
+     {\bf pi\_rho\_unknown} & contingency & equal & N.A \\
+     {\bf pik\_rhol\_known} & contingency & unequal & N.A \\
+     {\bf pi\_rho\_known} & contingency & equal & N.A \\
 \hline
  \end{tabular}
 \caption{Contingency models available in package {\bf blockcluster}.}
@@ -399,25 +399,24 @@ coclusterStrategy} which can be used to set the values of various input
 parameters. The prototype of the function is as follows:
 
 \begin{lstlisting}
-coclusterStrategy( algo = "BEM", initmethod = character()
+coclusterStrategy( algo = "BEM", initmethod = "emInitStep"
                  , stopcriteria = "Parameter", semisupervised = FALSE
-                 , nbiterationsxem = 50,  nbiterationsXEM = 500
+                 , nbinitmax = 100, nbiterationsxem = 50, nbiterationsXEM = 500
                  , nbinititerations = 10, initepsilon = 0.01
                  , nbiterations_int = 5, epsilon_int = 0.01
                  , epsilonxem = 1e-04, epsilonXEM = 1e-10, nbtry = 2
                  , nbxem = 5)
 \end{lstlisting}
 
-In the following example, we call the function {\bf coclusterStrategy} without any arguments and
-then we called the overloaded function {\bf summary} to see default values of various input parameters.
+In the following example, we call the function {\bf coclusterStrategy} without
+any arguments and then we called the overloaded function {\bf summary} to see
+default values of various input parameters.
 << >>=
 defaultstrategy <- coclusterStrategy()
 summary(defaultstrategy)
 @
 
-One thing which is worth noting in the summary output (above) is that there is
-no default value for initialization method. It will be set automatically
-depending on the type of input model. To set these input parameters, we have to
+To set these input parameters, we have to
 pass appropriate arguments to function {\bf coclusterStrategy} as shown in
 example below where we set {\bf nbtry}, {\bf nbxem} and {\bf algo} parameters.
 << >>=
@@ -428,14 +427,15 @@ perform Co-clustering using the newly set input parameters. The various input
 arguments for the function {\bf coclusterStrategy} are as follows:
 \begin{itemize}
 \item {\bf algo:} The valid values for this parameter are "BEM" (Default),
-"BCEM", "BSEM" and "BGibbs" (only for Binary model) which are respectively Block EM, Block Classification EM,
-Block Stochastic EM algorithms and Gibbs sampling.
+"BCEM", "BSEM" and "BGibbs" (only for Binary model) which are respectively
+Block EM, Block Classification EM, Block Stochastic EM algorithms and Gibbs
+sampling.
 \item {\bf stopcriteria:} It specifies the stopping criteria. It can be based
 on either relative change in parameters value (preferred) or relative change in
 log-likelihood. Valid criterion values are "Parameter" and "Likelihood".
 Default criteria is "Parameter".
 \item{\bf initmethod:} Method to initialize model parameters. The valid values
-are "cemInitStep", "emInitStep" and "randomInit" depending on the data type (See previous Tables).
+are "cemInitStep", "emInitStep" and "randomInit".
 \item{\bf nbinititerations:} Number of Global iterations used in initialization
 step. Default value is 10.
 \item{\bf initepsilon:} Tolerance value used inside initialization. Default
@@ -465,26 +465,37 @@ You might be wondering why there are so many types of iterations and tolerances 
 \end{enumerate}
 The following strategy is employed to run various algorithms.
 \begin{enumerate}
-\item Run the BEM Algorithm for {\bf 'nbxem'} number of times (with high tolerance and low number of iterations) and keep the best model
-parameters (based on likelihood) among these runs. We call this step {\bf 'xem'} step.
-\item Starting with the  best model parameters, run the algorithm again but this time with a low value of epsilon (low tolerance) 
-and a high number of iterations. We call this step {\bf 'XEM'} step.
-\item Repeat above two steps for {\bf 'nbtry'} number of times and keep the best model estimation.
+\item Run the BEM Algorithm for {\bf 'nbxem'} number of times (with high
+tolerance and low number of iterations) and keep the best model parameters
+(based on likelihood) among these runs. We call this step {\bf 'xem'} step.
+\item Starting with the  best model parameters, run the algorithm again but
+this time with a low value of epsilon (low tolerance) and a high number of
+iterations. We call this step {\bf 'XEM'} step.
+\item Repeat above two steps for {\bf 'nbtry'} number of times and keep the
+best model estimation.
 \end{enumerate}
 With this background, the various input parameters are explained as follows. 
 \begin{itemize}
- \item {\bf nbxem, nbtry:} As explained above these numbers represents the number of time we run {\bf 'xem'} step and {\bf 'xem'+'XEM'} step respectively.
+ \item {\bf nbxem, nbtry:} As explained above these numbers represents the
+ number of time we run {\bf 'xem'} step and {\bf 'xem'+'XEM'} step respectively.
 The tuning of the values of {\bf 'nbxem'} and {\bf 'nbtry'} 
-need to be done intuitively, and could have a substantial effect on final results. A good way to set these values
-is to run co-clustering few number of times and check if final log-likelihood is stable. If not, one may need to increase these values.
-In practice, it is better to
-increment {\bf 'nbxem'} as it could lead to better (stable) results without compromising too much the running time.
-\item {\bf nbiterationsxem, nbiterationsXEM:} These are number of iterations for BEM algorithm i.e the number of times we run EM on rows and EM on columns. As the 
-name suggests, they are respectively for {\bf 'xem'} and {\bf 'XEM'} steps. 
-\item {\bf nbiterations\_int:} This is the number of iterations for EM algorithm on rows/columns.
-\item {\bf epsilonxem, epsilonXEM:} These are tolerance values for BEM algorithm during {\bf 'xem'} and {\bf 'XEM'} step respectively. 
-\item {\bf epsilon\_int:} This is the tolerance value for EM algorithm on rows/columns.
-\item {\bf initepsilon, nbinititerations:} These are the tolerance value and number of iterations respectively used during initialization of model parameters.
+need to be done intuitively, and could have a substantial effect on final
+results. A good way to set these values is to run co-clustering few number of
+times and check if final log-likelihood is stable. If not, one may need to
+increase these values. In practice, it is better to increment {\bf 'nbxem'} as
+it could lead to better (stable) results without compromising too much the
+running time.
+\item {\bf nbiterationsxem, nbiterationsXEM:} These are number of iterations
+for BEM algorithm i.e the number of times we run EM on rows and EM on columns.
+As the name suggests, they are respectively for {\bf 'xem'} and {\bf 'XEM'} steps.
+\item {\bf nbiterations\_int:} This is the number of iterations for EM
+algorithm on rows/columns.
+\item {\bf epsilonxem, epsilonXEM:} These are tolerance values for BEM
+algorithm during {\bf 'xem'} and {\bf 'XEM'} step respectively.
+\item {\bf epsilon\_int:} This is the tolerance value for EM algorithm on
+rows/columns.
+\item {\bf initepsilon, nbinititerations:} These are the tolerance value and
+number of iterations respectively used during initialization of model parameters.
 \end{itemize}
 
 \subsection{Model Parameters}
@@ -592,8 +603,10 @@ out<-coclusterBinary(binarydata, nbcocluster=c(2,3))
 summary(out)
 @
 
-Note that you also get the explicit Integrated Complete Likelihood (ICL) value in case of
-binary and categorical models, and asymptotic value otherwise. This value can be used for model selection. The
+Note that you also get the explicit Integrated Complete Likelihood (ICL) value 
+in case of
+binary and categorical models, and asymptotic value otherwise. 
+This value can be used for model selection. The
 following {\bf R} command is used to plot the original and co-clustered data
 (Figure~\ref{fig:binarydata}(a)) with default value of {\bf asp} which is $0$
 (FALSE). When {\bf asp} is FALSE, R graphics will optimize the output figure
@@ -603,8 +616,11 @@ conserve the original aspect ratio, set the value of {\bf asp} as $1$ or TRUE.
 plot(out, asp = 0)
 @
 
-To Plot various block distributions (Figure~\ref{fig:binarydata}(b)), the following {\bf R} command is used with
-{\bf type} argument of overloaded {\bf plot} function set to 'distribution' ({\bf type} is 'cocluster' by default which plots the original and Co-clustered
+To Plot various block distributions (Figure~\ref{fig:binarydata}(b)), the 
+following {\bf R} command is used with
+{\bf type} argument of overloaded {\bf plot} function set to
+'distribution' ({\bf type} is 'cocluster' by default which plots the original
+and Co-clustered
 data as shown in (Figure~\ref{fig:binarydata}(a))).
 <<fig=FALSE>>=
 plot(out, type = 'distribution')
@@ -623,6 +639,7 @@ plot(out, type = 'distribution')
  block along with various mixture densities (b).}
 \label{fig:binarydata}
 \end{figure}
+
 
 
 \section{Examples with real datasets}
@@ -762,4 +779,61 @@ questions, suggestions or remarks, do not hesitate to put it on public forum at
 
 \bibliographystyle{plain}
 \bibliography{biblio}
+
+\appendix
+
+\section{Examples}
+In this appendix, we present the main functions allowing to launch the various
+implemented model in {\bf blockcluster}.
+
+\subsection{Example with simulated binary dataset}
+
+<<fig=FALSE>>=
+data(binarydata)
+out<-coclusterBinary(binarydata,nbcocluster=c(3,2), model="pik_rhol_epsilon")
+summary(out)
+plot(out)
+@
+
+\subsection{Example with simulated categorical dataset}
+
+<<fig=FALSE>>=
+data(categoricaldata)
+out<-coclusterCategorical(categoricaldata,nbcocluster=c(3,2))
+summary(out)
+@
+
+\subsection{Examples with simulated Poisson dataset}
+
+<<fig=FALSE>>=
+data(contingencydataunknown)
+out<-coclusterContingency( contingencydataunknown, nbcocluster=c(2,3))
+summary(out)
+@
+
+Contingency models using known row/column effects
+<<fig=FALSE>>=
+data(contingencydataunknown)
+mui= rep(1,nrow(contingencydataunknown)) 
+nuj= rep(1,ncol(contingencydataunknown)) 
+out<-coclusterContingency( list(contingencydataunknown, mui, nuj)
+                         , nbcocluster=c(2,3), model="pik_rhol_known")
+summary(out)
+@
+
+\subsection{Examples with simulated Gaussian dataset}
+
+<<fig=FALSE>>=
+data(gaussiandata)
+out<-coclusterContinuous(gaussiandata,nbcocluster=c(2,3))
+summary(out)
+@
+
+Gaussian model using common variance
+<<fig=FALSE>>=
+data(gaussiandata)
+out<-coclusterContinuous(gaussiandata,nbcocluster=c(2,3), model="pik_rhol_sigma2")
+summary(out)
+@
+
 \end{document}

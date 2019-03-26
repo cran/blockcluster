@@ -24,20 +24,34 @@
 
 #ifndef CATEGORICALLBMODEL_H_
 #define CATEGORICALLBMODEL_H_
+
 /**@file CategoricalLBModel.h
- * @brief 
+ * @brief
  */
 #include "ICoClustModel.h"
 
 class CategoricalLBModel:public ICoClustModel
 {
   public:
-    CategoricalLBModel(MatrixInt const& m_Dataij,ModelParameters const& Mparam,int a=1,int b=1);
-    CategoricalLBModel(MatrixInt const& m_Dataij,VectorInt const & rowlabels,
-                       VectorInt const & collabels,ModelParameters const& Mparam,int a=1,int b=1);
+    CategoricalLBModel( MatrixInt const& m_Dataij
+                      , ModelParameters const& Mparam
+                      , STK::Real a=1, STK::Real b=1
+                      );
+    CategoricalLBModel( MatrixInt const& m_Dataij
+                      , VectorInt const & rowlabels
+                      , VectorInt const & collabels
+                      , ModelParameters const& Mparam
+                      , STK::Real a=1, STK::Real b=1
+                      );
     virtual CategoricalLBModel* clone(){return new CategoricalLBModel(*this);}
+
     virtual void logSumRows(MatrixReal & m_sum);
     virtual void logSumCols(MatrixReal & m_sum);
+
+//    virtual bool cemInitStep();
+//    virtual bool emInitStep();
+//    virtual bool randomInitStep();
+
     virtual void mStepFull(){};
     virtual bool emRows();
     virtual bool cemRows();
@@ -47,19 +61,18 @@ class CategoricalLBModel:public ICoClustModel
     virtual bool semCols();
     virtual bool GibbsRows();
     virtual bool GibbsCols();
+
+    virtual STK::Real computeLnLikelihood();
+    virtual bool initStopCriteria();
     virtual void parameterStopCriteria();
-    virtual bool cemInitStep();
-    virtual bool emInitStep();
-    virtual bool randomInit();
     virtual STK::Real iclCriteriaValue();
-    virtual void finalizeOutput();
     virtual void consoleOut();
-    virtual void modifyThetaStart();
-    virtual void copyThetaStart();
-    virtual void copyThetaMax();
-    virtual void modifyThetaMax();
-    virtual STK::Real estimateLikelihood();
-    const MatrixInt& arrangedDataClusters();
+
+    virtual void saveThetaInit();
+    virtual void modifyTheta();
+    virtual void copyTheta();
+
+    MatrixInt const& arrangedDataClusters();
     inline const std::vector<MatrixReal>& mean(){return m3_Alphahkl_;}
     /** @return the number of free parameters of the distribution of a block.*/
     virtual int nbFreeParameters() const;
@@ -68,39 +81,40 @@ class CategoricalLBModel:public ICoClustModel
 
   protected:
     /// hyper-parameters
-    int a_,b_;
+    STK::Real a_,b_;
     MatrixInt const& m_Dataij_;
     MatrixInt m_ClusterDataij_;
-    /// matrices of the posterior probabilities of the rows/columns
-    MatrixReal m_Uil_, m_Vjk_;
     /// Vector of the summed matrices
     VectorReal v_Ui_,v_Vj_;
     int r_; //number of categories
     /// parameters sets
-    std::vector<MatrixReal> m3_Alphahkl_,m3_Alphahklold_,m3_Alphahkl1_,
-    m3_Alphahkl1old_,m3_Alphahklstart_,m3_Alphahklmax_,m3_logAlhphahkl_;
+    std::vector<MatrixReal> m3_Alphahkl_,m3_Alphahklold_;
+    std::vector<MatrixReal> m3_Alphahkl1_, m3_Alphahkl1old_;
+    std::vector<MatrixReal> m3_Alphahkltemp_, m3_logAlphahkl_;
     // TODO replace binary matrices by sparse matrices
     /// binary matrices
     std::vector<MatrixBinary> m3_Yhij_,m3_Yijh_,m3_Yjih_;//different ways to store data
 
     virtual void mStepRows();
     virtual void mStepCols();
+    /** compute logRhol during the m-step */
+    virtual void mSteplogRhol();
+    /** compute logPiek during the m-step */
+    virtual void mSteplogPiek();
+
     virtual void mGibbsStepRows();
     virtual void mGibbsStepCols();
 
-    // Functions used to operate on data in intermediate steps when running the Initialization
-    bool initCEMRows();
-    bool initCEMCols();
-    bool initEMRows();
-    bool initEMCols();
-    void initBernoulliLogSumRows(MatrixReal & m_sum);
-    void initBernoulliLogSumCols(MatrixReal & m_sum);
-    void selectRandomColsFromData(MatrixReal& m,int col);
-    void randomParameterRows(MatrixReal& m,int col);
-    void randomParameterCols(MatrixReal& m);
+    /** Compute m_Vjk_ array for all models */
+    virtual void computeVjk();
+    /** Compute m_Uil_ array for all models */
+    virtual void computeUil();
 
+  private:
+    void initializeStorages();
 };
 
-
+inline void CategoricalLBModel::computeUil(){}
+inline void CategoricalLBModel::computeVjk(){}
 
 #endif /* CATEGORICALLBMODEL_H_ */

@@ -38,13 +38,24 @@
 class ContingencyLBModel: public ICoClustModel
 {
   public:
-    ContingencyLBModel( MatrixReal const& m_Dataij,ModelParameters const& Mparam);
-    ContingencyLBModel(MatrixReal const& m_Dataij,VectorInt const & rowlabels,
-                       VectorInt const & collabels,ModelParameters const& Mparam);
+    ContingencyLBModel( MatrixReal const& m_Dataij
+                      , ModelParameters const& Mparam
+                      );
+    ContingencyLBModel( MatrixReal const& m_Dataij
+                      , VectorInt const & rowlabels
+                      , VectorInt const & collabels
+                      , ModelParameters const& Mparam
+                      );
     virtual ~ContingencyLBModel(){};
     virtual ContingencyLBModel* clone(){return new ContingencyLBModel(*this);}
-    virtual void logSumRows(MatrixReal & _m_sum);
-    virtual void logSumCols(MatrixReal & _m_sum);
+
+    virtual void logSumRows(MatrixReal & m_sum);
+    virtual void logSumCols(MatrixReal & m_sum);
+
+//    virtual bool cemInitStep();
+//    virtual bool emInitStep();
+//    virtual bool randomInitStep();
+
     virtual void mStepFull();
     virtual bool emRows();
     virtual bool cemRows();
@@ -54,16 +65,16 @@ class ContingencyLBModel: public ICoClustModel
     virtual bool semCols();
     virtual bool GibbsRows();
     virtual bool GibbsCols();
-    virtual STK::Real estimateLikelihood();
+
+    virtual STK::Real computeLnLikelihood();
+    virtual bool initStopCriteria();
     virtual void parameterStopCriteria();
-    virtual bool cemInitStep();
-    virtual bool emInitStep();
-    virtual void finalizeOutput();
     virtual void consoleOut();
-    virtual void modifyThetaStart();
-    virtual void copyThetaStart();
-    virtual void copyThetaMax();
-    virtual void modifyThetaMax();
+
+    virtual void saveThetaInit();
+    virtual void modifyTheta();
+    virtual void copyTheta();
+
     MatrixReal const& arrangedDataClusters();
     /** @return the number of free parameters of the distribution of a block.*/
     virtual int nbFreeParameters() const;
@@ -76,25 +87,20 @@ class ContingencyLBModel: public ICoClustModel
     MatrixReal const& m_Dataij_;
     MatrixReal m_ClusterDataij_;
     STK::Real DataSum_;
-    MatrixReal m_Vjk_;
-    MatrixReal m_Uil_;
-    MatrixReal m_Gammakl_, m_Gammaklold_, m_Gammakl1_, m_Gammakl1old_,m_Gammaklstart_,m_Gammaklmax_;
-    VectorReal v_muk_;
+    MatrixReal m_Gammakl_, m_Gammaklold_;
+    MatrixReal m_Gammakl1_, m_Gammakl1old_;
+    MatrixReal m_Gammakltemp_;
     VectorReal v_Ui_,v_Vj_;
     MatrixReal m_Ykl_;
 
     //M-steps
-    void mStepRows();
-    void mStepCols();
+    virtual void mStepRows();
+    virtual void mStepCols();
 
-    // Functions to be used for internal computation in model initialization
-    bool initCEMRows();
-    bool initCEMCols();
-    bool initEMRows();
-    bool initEMCols();
-    void selectRandomColsFromData(MatrixReal& m,int col);
-    void randomPoissonParameterRows(MatrixReal& m,int col);
-    void randomPoissonParameterCols(MatrixReal& m);
+    /** Compute m_Vjk_ array for all models */
+    virtual void computeVjk();
+    /** Compute m_Uil_ array for all models */
+    virtual void computeUil();
 };
 
 inline MatrixReal const& ContingencyLBModel::gamma() const
@@ -102,23 +108,21 @@ inline MatrixReal const& ContingencyLBModel::gamma() const
 
 inline void ContingencyLBModel::mStepRows()
 {
-  if(!Mparam_.fixedproportions_)
-  { v_logPiek_=(v_Tk_/nbSample_).log();}
-
-  m_Ykl_ = m_Tik_.transpose()*m_Uil_;
-  m_Gammakl_ = m_Ykl_/(v_Tk_* v_Rl_.transpose());
-  //m_Gammakl_ = m_Ykl_/(STK::sumByRow(m_Ykl_)*v_Yl_.transpose());
+  mSteplogPiek();
+  m_Gammakl_ = (m_Tik_.transpose()*m_Uil_)/(v_Tk_* v_Rl_.transpose());
 }
 
 inline void ContingencyLBModel::mStepCols()
 {
-  if(!Mparam_.fixedproportions_)
-  { v_logRhol_=(v_Rl_/nbVar_).log();}
-
-  m_Ykl_     = m_Vjk_.transpose()*m_Rjl_;
-  m_Gammakl_ = m_Ykl_/(v_Tk_* v_Rl_.transpose());
-  //m_Gammakl_ = m_Ykl_/(v_Yk_* STK::sum(m_Ykl_));
+  mSteplogRhol();
+  m_Gammakl_ = (m_Vjk_.transpose()*m_Rjl_)/(v_Tk_* v_Rl_.transpose());
 }
+
+inline void ContingencyLBModel::computeUil()
+{ m_Uil_= m_Dataij_*m_Rjl_;}
+
+inline void ContingencyLBModel::computeVjk()
+{ m_Vjk_ = m_Dataij_.transpose()*m_Tik_;}
 
 
 #endif /* CONTINGENCYLBMODEL_H_ */

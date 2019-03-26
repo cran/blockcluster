@@ -31,22 +31,15 @@
 #include "EMAlgo.h"
 
 EMAlgo::EMAlgo()
-{
-  // TODO Auto-generated constructor stub
-
-}
+{}
 
 EMAlgo::~EMAlgo()
-{
-  // TODO Auto-generated destructor stub
-}
+{}
 
 bool EMAlgo::run()
 {
-  if (p_Model_->emRows()) {
-    if (p_Model_->emCols()) {
-      return true;
-    }
-  }
-  return false;
+  bool flag = true;
+  flag &= p_Model_->emRows();
+  flag |= p_Model_->emCols();
+  return flag;
 }

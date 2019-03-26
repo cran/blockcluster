@@ -99,8 +99,8 @@ void ContinuousDataExchange::dataInput(Rcpp::S4 & obj)
 {
   STK::RMatrix<STK::Real> data(SEXP(obj.slot("data")));
   m_Dataij_ = data;
-  Mparam_.nbrowdata_ = m_Dataij_.sizeRows();
-  Mparam_.nbcoldata_ = m_Dataij_.sizeCols();
+  Mparam_.nbRow_ = m_Dataij_.sizeRows();
+  Mparam_.nbCol_ = m_Dataij_.sizeCols();
 }
 
 void ContinuousDataExchange::instantiateModel(ICoClustModel*& model)

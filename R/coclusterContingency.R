@@ -16,7 +16,7 @@ NULL
 #' specified value is true. The default value is false.
 #' @param rowlabels Integer Vector specifying the class of rows. The class number starts from zero. Provide -1 for unknown row class. 
 #' @param collabels Integer Vector specifying the class of columns. The class number starts from zero. Provide -1 for unknown column class.
-#' @param model This is the name of model. The following models exists for various types of data:
+#' @param model This is the name of model. The following models exists for Poisson data:
 #' \tabular{rlll}{
 #'     pik_rhol_unknown(default) \tab contingency \tab unequal \tab N.A \cr
 #'     pi_rho_unknown \tab contingency \tab equal \tab N.A \cr
@@ -58,25 +58,21 @@ coclusterContingency<-function( data, semisupervised = FALSE
 {
 	#Check for data
 	if(missing(data)){ stop("Data is missing.")}
-
-		if(!is.list(data))
-    {
-			if(!is.matrix(data))
-      { stop("Data should be matrix.")}
-		}
-    else
-		{
-			if(!is.matrix(data[[1]]))
-				stop("Data should be matrix.")
-			if(!is.numeric(data[[2]])||!is.numeric(data[[3]]))
-				stop("Row/Column effects should be numeric vectors.")
-			if(length(data[[2]])!=dim(data[[1]])[1]||length(data[[3]])!=dim(data[[1]])[2])
-				stop("Dimension mismatch in Row/column effects  and Data.")
-		}
+  if(!is.list(data))
+  {
+    if(!is.matrix(data)) { stop("Data should be matrix.")}
+    dimData = dim(data)
+  }
+  else
+  {
+    if(!is.matrix(data[[1]])) { stop("Data should be matrix.")}
+    if(!is.numeric(data[[2]])||!is.numeric(data[[3]]))
+    { stop("Row/Column effects should be numeric vectors.")}
+    if(length(data[[2]])!=dim(data[[1]])[1]||length(data[[3]])!=dim(data[[1]])[2])
+    { stop("Dimension mismatch in Row/column effects  and Data.")}
+    dimData = dim(data[[1]])
+  }
   
-    if(!is.list(data)) dimention = dim(data)
-    else               dimention = dim(data[[1]])
-    
     #check for row and column labels
   if (semisupervised)
   {
@@ -87,22 +83,22 @@ coclusterContingency<-function( data, semisupervised = FALSE
     if(!missing(collabels)&&!is.numeric(collabels))
       stop("Column labels should be a numeric vector.")
     
-    if(missing(rowlabels))      rowlabels = rep(-1,dimention[1])
-    else if(missing(collabels)) collabels = rep(-1,dimention[2])
+    if(missing(rowlabels))      rowlabels = rep(-1,dimData[1])
+    else if(missing(collabels)) collabels = rep(-1,dimData[2])
     
-    if(dimention[1]!=length(rowlabels))
+    if(dimData[1]!=length(rowlabels))
       stop("rowlabels length does not match number of rows in data (also ensure to put -1 in unknown labels)")
     
-    if(dimention[2]!=length(collabels))
+    if(dimData[2]!=length(collabels))
       stop("collabels length does not match number of columns in data (also  ensure to put -1 in unknown labels)")
   }
 	#check for number of coclusters
-	if(missing(nbcocluster))
-	{ stop("Mention number of CoClusters.")}
-  
-	if(dimention[1]<nbcocluster[1]) stop("Number of Row clusters exceeds numbers of rows.")
-	if(dimention[2]<nbcocluster[2])	stop("Number of Column clutsers exceeds numbers of columns.")
-	#check for Algorithm name (and make it compatible with version 1)
+  if(missing(nbcocluster))     { stop("Mention number of CoClusters.")}
+  if(dimData[1]<nbcocluster[1]){ stop("Number of Row clusters exceeds numbers of rows.")}
+  if(dimData[2]<nbcocluster[2]){ stop("Number of Column clusters exceeds numbers of columns.")}
+  if(nbcocluster[1]<1 || nbcocluster[2]<1) { stop("Number of cluster must be at least 1.")}
+
+  #check for Algorithm name (and make it compatible with version 1)
 	if(strategy@algo=="XEMStrategy")
   {
     warning("The algorithm 'XEMStrategy' is renamed as BEM!")
@@ -135,20 +131,20 @@ coclusterContingency<-function( data, semisupervised = FALSE
 	if((model=="pi_rho_known"||model=="pik_rhol_known")&& (length(data)!=3))
 	{stop("Missing Row/Column effects.")}
 	
-	if(length(strategy@initmethod)==0)
-  {
-		if((model=="pi_rho_known"||model=="pik_rhol_known"))
-		{ strategy@initmethod = "randomInit"}
-		else
-    { strategy@initmethod = "cemInitStep"}
-	}
-	else
-	{
-     if(strategy@initmethod!="randomInit"&&(model=="pi_rho_known"||model=="pik_rhol_known"))
-     { stop("Incorrect initialization method, valid method(s) are: randomInit")}
-     else if((strategy@initmethod!="cemInitStep" && strategy@initmethod!="emInitStep")&&(model=="pi_rho_unknown"||model=="pik_rhol_unknown"))
-       stop("Incorrect initialization method, valid method(s) are: cemInitStep, emInitStep")
-	}
+	if(length(strategy@initmethod)==0){ strategy@initmethod = "emInitStep"}
+  ## {
+  ##   if((model=="pi_rho_known"||model=="pik_rhol_known"))
+  ##   { strategy@initmethod = "emInitStep"}
+  ##   else
+  ##   { strategy@initmethod = "emInitStep"}
+  ## }
+  ## else
+  ## {
+  ##    if(strategy@initmethod!="randomInit"&&(model=="pi_rho_known"||model=="pik_rhol_known"))
+  ##    { stop("Incorrect initialization method, valid method(s) are: randomInit")}
+  ##    else if((strategy@initmethod!="cemInitStep" && strategy@initmethod!="emInitStep")&&(model=="pi_rho_unknown"||model=="pik_rhol_unknown"))
+  ##      stop("Incorrect initialization method, valid method(s) are: cemInitStep, emInitStep")
+  ## }
 	#  check nbCore
 	if(!is.numeric(nbCore) && length(nbCore) != 1) stop("nbCore must be an integer")
 	# check options
@@ -159,9 +155,10 @@ coclusterContingency<-function( data, semisupervised = FALSE
                    , datatype = "contingency", model = model, nbcocluster = nbcocluster, strategy = strategy)
   else
      inpobj<-new( "ContingencyOptions",data = data[[1]]
+                , datamui=data[[2]],datanuj=data[[3]]
                 , semisupervised = semisupervised
                 , rowlabels = rowlabels, collabels = collabels
-                , datatype = "contingency", model = model, nbcocluster = nbcocluster, strategy = strategy,datamui=data[[2]],datanuj=data[[3]])
+                , datatype = "contingency", model = model, nbcocluster = nbcocluster, strategy = strategy)
 
   .Call("CoClustmain",inpobj, nbCore,PACKAGE = "blockcluster")
   cat(inpobj@message,"\n")

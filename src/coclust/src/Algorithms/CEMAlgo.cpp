@@ -31,22 +31,15 @@
 #include "CEMAlgo.h"
 
 CEMAlgo::CEMAlgo()
-{
-  // TODO Auto-generated constructor stub
-
-}
+{}
 
 CEMAlgo::~CEMAlgo()
-{
-  // TODO Auto-generated destructor stub
-}
+{}
 
 bool CEMAlgo::run()
 {
-  if (p_Model_->cemRows()) {
-    if (p_Model_->cemCols()) {
-      return true;
-    }
-  }
-  return false;
+  bool flag = true;
+  flag &= p_Model_->cemRows();
+  flag |= p_Model_->cemCols();
+  return flag;
 }

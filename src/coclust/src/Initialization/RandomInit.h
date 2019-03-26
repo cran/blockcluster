@@ -30,12 +30,11 @@
 #ifndef RANDOMINIT_H_
 #define RANDOMINIT_H_
 
-/** @brief This class provides functionalities for Random initialization. It is  derived from IInit
- * abstract class.
- *
- */
 #include "IInit.h"
 
+/** @brief This class provides functionalities for Random initialization.
+ * It is  derived from IInit abstract class.
+ */
 class RandomInit: public IInit
 {
   public:
@@ -46,6 +45,6 @@ class RandomInit: public IInit
 
 inline bool RandomInit::run()
 {
-  return p_Model_->randomInit();
+  return p_Model_->randomInitStep();
 }
 #endif /* RANDOMINIT_H_ */

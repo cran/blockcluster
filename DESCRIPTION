@@ -1,10 +1,10 @@
 Package: blockcluster
 Type: Package
-Title: Co-clustering Package for Binary, Categorical, Contingency and
+Title: Co-Clustering Package for Binary, Categorical, Contingency and
         Continuous Data-Sets
-Version: 4.3.2
+Version: 4.4.3
 Encoding: UTF-8
-Date: 2018-10-02
+Date: 2019-03-22
 Authors@R: c( person("Serge", "Iovleff", role = c("aut","cre"), email = "Serge.Iovleff@stkpp.org")
             , person("Parmeet", "Singh Bhatia", role = "aut", email = "bhatia.parmeet@gmail.com")
             , person("Josselin", "Demont", role = "ctb")
@@ -32,7 +32,7 @@ License: GPL (>= 3)
 URL: https://gforge.inria.fr/projects/cocluster/
 BugReports: https://gforge.inria.fr/forum/forum.php?forum_id=11190&group_id=3679
 LazyLoad: yes
-Depends: R (>= 3.0.2), rtkore (>= 1.0.0)
+Depends: R (>= 3.0.2), rtkore (>= 1.5.5)
 Imports: methods
 LinkingTo: Rcpp
 SystemRequirements: GNU make
@@ -40,8 +40,8 @@ Collate: 'coclusterStrategy.R' 'RCocluster.R' 'optionclasses.R'
         'cocluster.R' 'coclusterBinary.R' 'coclusterCategorical.R'
         'coclusterContingency.R' 'coclusterContinuous.R' 'onattach.R'
 NeedsCompilation: yes
-Packaged: 2018-10-03 12:50:06 UTC; iovleff
-RoxygenNote: 6.1.0
+Packaged: 2019-03-26 15:06:02 UTC; iovleff
+RoxygenNote: 6.1.1
 Author: Serge Iovleff [aut, cre],
   Parmeet Singh Bhatia [aut],
   Josselin Demont [ctb],
@@ -52,4 +52,4 @@ Author: Serge Iovleff [aut, cre],
   Gilles Celeux [ctb]
 Maintainer: Serge Iovleff <Serge.Iovleff@stkpp.org>
 Repository: CRAN
-Date/Publication: 2018-10-05 11:50:03 UTC
+Date/Publication: 2019-03-26 18:00:02 UTC

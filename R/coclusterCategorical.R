@@ -16,10 +16,10 @@ NULL
 #' Provide -1 for unknown row class. 
 #' @param collabels Integer Vector specifying the class of columns.
 #' The class number starts from zero. Provide -1 for unknown column class.
-#' @param model This is the name of model. The following models exists for various types of data:
+#' @param model This is the name of model. The following models exists for categorical data:
 #' \tabular{rlll}{
 #'     pik_rhol_multi \tab categorical \tab unequal \tab unequal \cr
-#'     pi_rho_multi \tab categorical \tab equal \tab unequal \cr
+#'     pi_rho_multi  \tab categorical \tab equal \tab unequal \cr
 #' }
 #' 
 #' @param nbcocluster Integer vector specifying the number of row and column clusters respectively.
@@ -56,26 +56,22 @@ coclusterCategorical<-function( data, semisupervised = FALSE
 {
 	#Check for data
 	if(missing(data)){ stop("Data is missing.")}
-
-		if(!is.list(data))
-    {
-			if(!is.matrix(data))
-      { stop("Data should be matrix.")}
-		}
-    else
-		{
-			if(!is.matrix(data[[1]]))
-				stop("Data should be matrix.")
-			if(!is.numeric(data[[2]])||!is.numeric(data[[3]]))
-				stop("Row/Column effects should be numeric vectors.")
-			if(length(data[[2]])!=dim(data[[1]])[1]||length(data[[3]])!=dim(data[[1]])[2])
-				stop("Dimension mismatch in Row/column effects  and Data.")
-		}
-  
-    if(!is.list(data)) dimData = dim(data)
-    else               dimData = dim(data[[1]])
+  if(!is.list(data))
+  {
+    if(!is.matrix(data)) { stop("Data should be matrix.")}
+    dimData = dim(data)
+  }
+  else
+  {
+    if(!is.matrix(data[[1]])) { stop("Data should be matrix.")}
+    if(!is.numeric(data[[2]])||!is.numeric(data[[3]]))
+    { stop("Row/Column effects should be numeric vectors.")}
+    if(length(data[[2]])!=dim(data[[1]])[1]||length(data[[3]])!=dim(data[[1]])[2])
+    { stop("Dimension mismatch in Row/column effects  and Data.")}
+    dimData = dim(data[[1]])
+  }
     
-    #check for row and column labels
+  #check for row and column labels
   if (semisupervised)
   {
     if(missing(rowlabels)&&missing(collabels))
@@ -100,7 +96,9 @@ coclusterCategorical<-function( data, semisupervised = FALSE
   
 	if(dimData[1]<nbcocluster[1]) stop("Number of Row clusters exceeds numbers of rows.")
 	if(dimData[2]<nbcocluster[2])	stop("Number of Column clusters exceeds numbers of columns.")
-	#check for Algorithm name (and make it compatible with version 1)
+  if(nbcocluster[1]<1 || nbcocluster[2]<1)
+  { stop("Number of cluster must be at least 1.")}
+  #check for Algorithm name (and make it compatible with version 1)
 	if(strategy@algo=="XEMStrategy")
   {
     warning("The algorithm 'XEMStrategy' is renamed as BEM!")
@@ -126,12 +124,12 @@ coclusterCategorical<-function( data, semisupervised = FALSE
 		}
   }
 	# checking for strategy
-	if(length(strategy@initmethod)==0) {strategy@initmethod = "randomInit"}
-	else
-	{
-		if(strategy@initmethod!="randomInit")
-			stop("In coclusterCategorical. Incorrect initialization method, valid method(s) are: randomInit")
-	}
+	if(length(strategy@initmethod)==0) {strategy@initmethod = "emInitStep"}
+  ## else
+  ## {
+  ##   if(strategy@initmethod!="randomInit")
+  ##     stop("In coclusterCategorical. Incorrect initialization method, valid method(s) are: randomInit")
+  ## }
 	# checking for hyperparameters
   if ((a <=0)||(b<=0)) { stop("hyper-parameters must be positive")}
   #strategy@hyperparam = c(a,b);

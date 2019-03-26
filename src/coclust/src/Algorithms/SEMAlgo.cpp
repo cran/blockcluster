@@ -31,22 +31,16 @@
 #include "SEMAlgo.h"
 
 SEMAlgo::SEMAlgo()
-{
-  // TODO Auto-generated constructor stub
-
-}
+{}
 
 SEMAlgo::~SEMAlgo()
-{
-  // TODO Auto-generated destructor stub
-}
+{}
 
 bool SEMAlgo::run()
 {
-  if (p_Model_->semRows()) {
-    if (p_Model_->semCols()) {
-      return true;
-    }
-  }
+  bool flag = true;
+  flag &= p_Model_->semRows();
+  flag |= p_Model_->semCols();
+  return flag;
   return false;
 }

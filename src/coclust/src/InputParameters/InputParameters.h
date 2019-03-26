@@ -29,11 +29,8 @@
 #ifndef INPUTPARAMETERS_H_
 #define INPUTPARAMETERS_H_
 
-#include <string>
-#include <map>
-#include <list>
 #include "../typedefs/typedef.h"
-#include <DManager.h>
+#include <list>
 #include "../enumerations/enumerations.h"
 
 /**
@@ -42,6 +39,7 @@
 struct StrategyParameters
 {
     //iterations for various stages of XStrategy and between EM algo for Rows and Columns
+    int nbinitmax_;
     int nbtry_;
     int nbxem_;
     int nbiter_xem_;
@@ -71,8 +69,8 @@ struct ModelParameters
     //other input options, self explanatory
     int nbrowclust_;
     int nbcolclust_;
-    int nbrowdata_;
-    int nbcoldata_;
+    int nbRow_;
+    int nbCol_;
 
     //proportion
     bool fixedproportions_;
@@ -93,9 +91,11 @@ struct Strategy
     bool SemiSupervised;
 };
 
-/** @brief This class contains all the parameters that are required to run various algorithms. This class publicly inherits IPage class defined in STKpp
- * project http://www.stkpp.org/html/classSTK_1_1IPage.html which allow easy access to reading and writing option values
- * from text file provided by the user.
+/** @brief This class contains all the parameters that are required to run various algorithms.
+ *  This class publicly inherits IPage class defined in STKpp
+ *  project http://www.stkpp.org/html/classSTK_1_1IPage.html
+ *  which allow easy access to reading and writing option values
+ *  from text file provided by the user.
  */
 #ifdef STK_DMANAGER
 class InputParameters : public STK::IPage
@@ -179,43 +179,32 @@ class InputParameters
     Strategy strategy_;
     std::string datafilename_;
     std::list<std::string> optionalfilenames_;
-    std::map<std::string,Algorithm> S_Algorithm;
-    std::map<std::string,StopCriteria> S_StopCriteria;
-    std::map<std::string,DataType> S_DataType;
-    std::map<std::string,Initialization> S_Init;
-    std::map<std::string,Model> S_Model;
+    std::map<std::string,Algorithm>       S_Algorithm;
+    std::map<std::string,StopCriteria>    S_StopCriteria;
+    std::map<std::string,DataType>        S_DataType;
+    std::map<std::string,Initialization>  S_Init;
+    std::map<std::string,Model>           S_Model;
 
 };
 #endif
 
 
 inline const ModelParameters& InputParameters::GetModelparameters() const
-{
-  return Mparam_;
-}
+{ return Mparam_;}
 
 inline const StrategyParameters& InputParameters::GetStrategyparameters() const
-{
-  return strategyParam_;
-}
+{ return strategyParam_;}
 
 inline const Strategy& InputParameters::GetStrategy()
-{
-  return strategy_;
-}
+{ return strategy_;}
 
 inline void InputParameters::setAlgoparameters(StrategyParameters const& Aparam)
-{
-  strategyParam_ = Aparam;
-}
+{ strategyParam_ = Aparam;}
 
 inline void InputParameters::setModelparameters(ModelParameters const& Mparam)
-{
-  Mparam_ = Mparam;
-}
+{ Mparam_ = Mparam;}
 
 inline void InputParameters::setStrategy(Strategy const& strat)
-{
-  strategy_ = strat;
-}
+{ strategy_ = strat;}
+
 #endif /* INPUTPARAMETERS_H_ */

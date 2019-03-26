@@ -30,12 +30,11 @@
 #ifndef CEMINIT_H_
 #define CEMINIT_H_
 
-/** @brief This class provides functionalities for CEM initialization. It is  derived from IInit
- * abstract class.
- *
- */
 #include "IInit.h"
 
+/** @brief This class provides functionalities for CEM initialization.
+ *  It is  derived from IInit abstract class.
+ */
 class CEMInit: public IInit
 {
   public:

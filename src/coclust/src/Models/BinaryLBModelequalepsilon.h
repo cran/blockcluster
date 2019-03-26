@@ -50,7 +50,8 @@ class BinaryLBModelequalepsilon : public ICoClustModel
      **/
     BinaryLBModelequalepsilon( MatrixBinary const& m_Dataij
                              , ModelParameters const& Mparam
-                             , int a=1, int b=1);
+                             , STK::Real a=1, STK::Real b=1
+                             );
     /**Constructor for unsupervised co-clustering
      * @param m_Dataij a constant reference on the data set.
      * @param rowlabels various labels for rows (-1  for unknown row label)
@@ -62,41 +63,44 @@ class BinaryLBModelequalepsilon : public ICoClustModel
                              , VectorInt const & rowlabels
                              , VectorInt const & collabels
                              , ModelParameters const& Mparam
-                             , int a=1, int b=1);
-
+                             , STK::Real a=1, STK::Real b=1
+                             );
+    /**Destructor*/
+    virtual ~BinaryLBModelequalepsilon(){};
     /** cloning */
     virtual BinaryLBModelequalepsilon* clone(){return new BinaryLBModelequalepsilon(*this);}
-    virtual void logSumRows(MatrixReal & _m_sum);
-    virtual void logSumCols(MatrixReal & _m_sum);
-    virtual void mStepFull();
-    virtual bool emRows();
-    virtual bool cemRows();
-    virtual bool emCols();
-    virtual bool cemCols();
-    virtual bool semRows();
-    virtual bool semCols();
-    virtual bool GibbsRows();
-    virtual bool GibbsCols();
-    virtual STK::Real estimateLikelihood();
-    virtual void parameterStopCriteria();
-    virtual bool cemInitStep();
-    virtual bool emInitStep();
-    virtual void finalizeOutput();
-    virtual void consoleOut();
-    virtual STK::Real iclCriteriaValue();
-    //virtual void UpdateAllUsingConditionalProbabilities();
-    virtual void modifyThetaStart();
-    virtual void copyThetaStart();
-    virtual void copyThetaMax();
-    virtual void modifyThetaMax();
+
     /** @return the number of free parameters of the distribution of a block.*/
     virtual int nbFreeParameters() const;
     /**Return class mean BinaryLBModelequalepsilon::m_akl_ for all the blocks (co-clusters)*/
     MatrixBinary const& mean() const;
     /**Return Class despersion BinaryLBModelequalepsilon::m_epsilonkl_ for all the blocks (co-clusters) */
     STK::Real dispersion() const;
-    /**Destructor*/
-    virtual ~BinaryLBModelequalepsilon(){};
+
+    virtual void logSumRows(MatrixReal & _m_sum);
+    virtual void logSumCols(MatrixReal & _m_sum);
+
+    virtual void mStepFull();
+
+    virtual bool emRows();
+    virtual bool cemRows();
+    virtual bool semRows();
+    virtual bool GibbsRows();
+
+    virtual bool emCols();
+    virtual bool cemCols();
+    virtual bool semCols();
+    virtual bool GibbsCols();
+
+    virtual STK::Real computeLnLikelihood();
+    virtual bool initStopCriteria();
+    virtual void parameterStopCriteria();
+    virtual void consoleOut();
+    virtual STK::Real iclCriteriaValue();
+
+    virtual void saveThetaInit();
+    virtual void modifyTheta();
+    virtual void copyTheta();
 
     MatrixBinary const& arrangedDataClusters();
 #ifndef RPACKAGE
@@ -106,32 +110,25 @@ class BinaryLBModelequalepsilon : public ICoClustModel
 
   protected:
     //Variables involved in Bernoulli model
-    int a_,b_;//hyper-parameters
+    STK::Real a_,b_;//hyper-parameters
     MatrixBinary const&  m_Dataij_;
     MatrixBinary m_ClusterDataij_;
-    MatrixReal m_Xjl_,m_Xik_,m_Tk_Rl_;
-    MatrixReal m_Vjk_;
-    MatrixReal m_Uil_,m_Ukl_;
+    MatrixReal m_Xjl_, m_Xik_, m_Tk_Rl_;
+    MatrixReal m_Ukl_;
     VectorReal v_Ui_;
-    MatrixReal m_Ykl_,m_Ykl_old2_,m_Ykl_old1_;
-    MatrixBinary m_Akl_,m_Aklstart_,m_Aklmax_;
-    STK::Real Epsilon_,Epsilonstart_,Epsilonmax_;
+    MatrixReal m_Ykl_, m_Ykl_old2_, m_Ykl_old1_;
+    MatrixBinary m_Akl_, m_Akltemp_;
+    STK::Real Epsilon_, Epsilontemp_;
     STK::Real W1_,W1_old_;
 
     //M-steps
-    void mStepRows();
-    void mStepCols();
+    virtual void mStepRows();
+    virtual void mStepCols();
 
-    // Functions used to operate on data in intermediate steps when running the Initialization
-    bool initCEMRows();
-    bool initCEMCols();
-    bool initEMRows();
-    bool initEMCols();
-    void initBernoulliLogSumRows(MatrixReal & m_sum);
-    void initBernoulliLogSumCols(MatrixReal & m_sum);
-    void selectRandomColsFromData(MatrixReal& m,int col);
-    void SelectRandomRows(MatrixReal& m_lk);
-    void generateRandomMean(MatrixBinary& m);
+    /** Compute m_Vjk_ array for all models */
+    virtual void computeVjk();
+    /** Compute m_Uil_ array for all models */
+    virtual void computeUil();
 };
 
 
@@ -145,37 +142,33 @@ inline STK::Real BinaryLBModelequalepsilon::dispersion() const
 
 inline void BinaryLBModelequalepsilon::mStepRows()
 {
-  if(!Mparam_.fixedproportions_) { v_logPiek_=(v_Tk_/nbSample_).log();}
-
+  mSteplogPiek();
   m_Ykl_   = m_Tik_.transpose()*m_Uil_;
   m_Tk_Rl_ = v_Tk_*v_Rl_.transpose()/2.0;
-  for ( int k = 0; k < Mparam_.nbrowclust_; ++k)
-  {
-    for ( int l = 0; l < Mparam_.nbcolclust_; ++l)
-    {
-      m_Akl_(k,l) = (m_Ykl_(k,l)>=m_Tk_Rl_(k,l)) ? 1 :0;
-    }
-  }
+  m_Akl_ = (m_Ykl_>=m_Tk_Rl_);
   Epsilon_= (m_Ykl_- (v_Tk_*v_Rl_.transpose()).prod(m_Akl_.cast<STK::Real>()) ).abs().sum()/dimprod_;
 
 }
 
 inline void BinaryLBModelequalepsilon::mStepCols()
 {
-  if(!Mparam_.fixedproportions_) { v_logRhol_=(v_Rl_/nbVar_).log();}
-
+  mSteplogRhol();
   m_Ykl_   = m_Vjk_.transpose()*m_Rjl_;
   m_Tk_Rl_ = v_Tk_*v_Rl_.transpose()/2.0;
-  for ( int k = 0; k < Mparam_.nbrowclust_; ++k)
-  {
-    for ( int l = 0; l < Mparam_.nbcolclust_; ++l)
-    {
-      m_Akl_(k,l) = (m_Ykl_(k,l)>=m_Tk_Rl_(k,l)) ? 1 : 0;
-    }
-  }
+  m_Akl_ = (m_Ykl_>=m_Tk_Rl_);
   Epsilon_= (m_Ykl_- (v_Tk_*v_Rl_.transpose()).prod(m_Akl_.cast<STK::Real>()) ).abs().sum()/dimprod_;
 
 }
+
+inline void BinaryLBModelequalepsilon::computeUil()
+{
+  m_Ykl_ = (m_Akl_.cast<STK::Real>()*(-Epsilon_+1)+(-m_Akl_.cast<STK::Real>()+1)*Epsilon_)*dimprod_;
+  m_Uil_ = m_Dataij_.cast<STK::Real>()*m_Rjl_;
+}
+
+inline void BinaryLBModelequalepsilon::computeVjk()
+{ m_Vjk_=m_Dataij_.cast<STK::Real>().transpose()*m_Tik_;}
+
 
 
 

@@ -28,37 +28,61 @@
 
 #include "ContinuousLBModelequalsigma.h"
 #include <exception>
-ContinuousLBModelequalsigma::ContinuousLBModelequalsigma( MatrixReal const& m_Dataij,ModelParameters const& Mparam)
-                           : ICoClustModel(Mparam)
-                           , m_Dataij_(m_Dataij)
+ContinuousLBModelequalsigma::ContinuousLBModelequalsigma( MatrixReal const& m_Dataij
+                                                        , ModelParameters const& Mparam
+                                                        )
+                                                        : ICoClustModel(Mparam)
+                                                        , m_Dataij_(m_Dataij)
+                                                        , m_ClusterDataij_(Mparam_.nbRow_, Mparam_.nbCol_)
+                                                        , m_Dataij2_(m_Dataij_.square())
+                                                        , m_Mukl_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
+                                                        , Sigma2_(1.)
+                                                        , Sigma2temp_(1.)
+                                                        , m_Muklold1_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
+                                                        , m_Muklold2_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
+                                                        , m_Mukltemp_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
+                                                        , m_Vjk2_(Mparam_.nbCol_, Mparam_.nbrowclust_)
+                                                        , m_Uil2_(Mparam_.nbRow_, Mparam_.nbcolclust_)
 {}
 
-ContinuousLBModelequalsigma::ContinuousLBModelequalsigma(MatrixReal const& m_Dataij,VectorInt const & rowlabels,
-                                                         VectorInt const & collabels,ModelParameters const& Mparam)
-                           : ICoClustModel(Mparam,rowlabels,collabels)
-                           , m_Dataij_(m_Dataij)
+ContinuousLBModelequalsigma::ContinuousLBModelequalsigma( MatrixReal const& m_Dataij
+                                                        , VectorInt const & rowlabels
+                                                        , VectorInt const & collabels
+                                                        , ModelParameters const& Mparam
+                                                        )
+                                                        : ICoClustModel(Mparam,rowlabels,collabels)
+                                                        , m_Dataij_(m_Dataij)
+                                                        , m_ClusterDataij_(Mparam_.nbRow_, Mparam_.nbCol_)
+                                                        , m_Dataij2_(m_Dataij_.square())
+                                                        , m_Mukl_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
+                                                        , Sigma2_(1.)
+                                                        , Sigma2temp_(1.)
+                                                        , m_Muklold1_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
+                                                        , m_Muklold2_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
+                                                        , m_Mukltemp_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
+                                                        , m_Vjk2_(Mparam_.nbCol_, Mparam_.nbrowclust_)
+                                                        , m_Uil2_(Mparam_.nbRow_, Mparam_.nbcolclust_)
 {}
 
 void ContinuousLBModelequalsigma::logSumRows(MatrixReal & m_sumik)
 {
-//  std::cout << m_Mukl_.square().cols() << "\n";
-//  std::cout << v_Rl_.rows() << "\n";
-  m_sumik = STK::Const::VectorX(nbSample_)
+  m_sumik = STK::Const::VectorX (Mparam_.nbRow_)
             * (v_logPiek_- (0.5*(m_Mukl_.square()*v_Rl_))/Sigma2_).transpose()
-          + (m_Uil1_*m_Mukl_.transpose())/Sigma2_ ;
+          + (m_Uil_*m_Mukl_.transpose())/Sigma2_ ;
 }
 
 void ContinuousLBModelequalsigma::logSumCols(MatrixReal & m_sumjl)
 {
-  m_sumjl = STK::Const::VectorX(nbVar_)
+  m_sumjl = STK::Const::VectorX(Mparam_.nbCol_)
             * (v_logRhol_.transpose() - (0.5*v_Tk_.transpose()*m_Mukl_.square())/Sigma2_)
-          + (m_Vjk1_*m_Mukl_)/Sigma2_ ;
+          + (m_Vjk_*m_Mukl_)/Sigma2_ ;
 }
+
+
 bool ContinuousLBModelequalsigma::emRows()
 {
   //Initialization
-  m_Uil1_ = m_Dataij_*m_Rjl_;
-  m_Uil2_ = m_Dataij2_*m_Rjl_;
+  computeUil();
   for ( int itr = 0; itr < Mparam_.nbiterations_int_; ++itr)
   {
     if(!eStepRows()) return false;
@@ -72,12 +96,28 @@ bool ContinuousLBModelequalsigma::emRows()
   return true;
 }
 
+bool ContinuousLBModelequalsigma::cemRows()
+{
+  //Initialization
+  computeUil();
+  for ( int itr = 0; itr < Mparam_.nbiterations_int_; ++itr)
+  {
+    if(!ceStepRows()) return false;
+    //M-step
+    m_Muklold2_ = m_Mukl_;
+    mStepRows();
+    //Termination check
+    if ((((m_Mukl_-m_Muklold2_)/m_Mukl_).abs().sum())<Mparam_.epsilon_int_)
+    { break;}
+
+  }
+  return true;
+}
+
 bool ContinuousLBModelequalsigma::semRows()
 {
   //Initialization
-  m_Uil1_ = m_Dataij_*m_Rjl_;
-  m_Uil2_ = m_Dataij2_*m_Rjl_;
-
+  computeUil();
   if(!seStepRows()) return false;
   //M-step
   mStepRows();
@@ -87,9 +127,7 @@ bool ContinuousLBModelequalsigma::semRows()
 bool ContinuousLBModelequalsigma::emCols()
 {
   //Initialization
-  m_Vjk1_ = m_Dataij_.transpose()*m_Tik_;
-  m_Vjk2_ = m_Dataij2_.transpose()*m_Tik_;
-
+  computeVjk();
   for ( int itr = 0; itr < Mparam_.nbiterations_int_; ++itr)
   {
     if(!eStepCols()) return false;
@@ -106,41 +144,17 @@ bool ContinuousLBModelequalsigma::emCols()
 bool ContinuousLBModelequalsigma::semCols()
 {
   //Initialization
-  m_Vjk1_ = m_Dataij_.transpose()*m_Tik_;
-  m_Vjk2_ = m_Dataij2_.transpose()*m_Tik_;
-
+  computeVjk();
   if(!seStepCols()) return false;
   //M-step
   mStepCols();
   return true;
 }
 
-bool ContinuousLBModelequalsigma::cemRows()
-{
-  //Initialization
-  m_Uil1_ = m_Dataij_*m_Rjl_;
-  m_Uil2_ = m_Dataij2_*m_Rjl_;
-
-  for ( int itr = 0; itr < Mparam_.nbiterations_int_; ++itr)
-  {
-    if(!ceStepRows()) return false;
-    //M-step
-    m_Muklold2_ = m_Mukl_;
-    mStepRows();
-    //Termination check
-    if ((((m_Mukl_-m_Muklold2_)/m_Mukl_).abs().sum())<Mparam_.epsilon_int_)
-    { break;}
-
-  }
-  return true;
-}
-
 bool ContinuousLBModelequalsigma::cemCols()
 {
   //Initialization
-  m_Vjk1_ = m_Dataij_.transpose()*m_Tik_;
-  m_Vjk2_ = m_Dataij2_.transpose()*m_Tik_;
-
+  computeVjk();
   for ( int itr = 0; itr < Mparam_.nbiterations_int_; ++itr)
   {
     if(!ceStepCols()) return false;
@@ -172,6 +186,11 @@ bool ContinuousLBModelequalsigma::GibbsCols()
   return false;
 }
 
+bool ContinuousLBModelequalsigma::initStopCriteria()
+{
+  return((((m_Mukl_-m_Mukltemp_)/m_Mukl_).abs().sum())<Mparam_.initepsilon_);
+}
+
 void ContinuousLBModelequalsigma::parameterStopCriteria()
 {
   if((((m_Mukl_-m_Muklold1_)/m_Mukl_).abs().sum())<Mparam_.epsilon_)
@@ -183,7 +202,7 @@ void ContinuousLBModelequalsigma::parameterStopCriteria()
   }
 }
 
-STK::Real ContinuousLBModelequalsigma::estimateLikelihood()
+STK::Real ContinuousLBModelequalsigma::computeLnLikelihood()
 {
   likelihood_ = -(dimprod_/2)*(1+std::log(Sigma2_))
               + v_Tk_.dot(v_logPiek_)
@@ -200,193 +219,6 @@ int ContinuousLBModelequalsigma::nbFreeParameters() const
   return Mparam_.nbcolclust_*Mparam_.nbrowclust_ + 1;
 }
 
-// Initialization using CEM algo
-bool ContinuousLBModelequalsigma::cemInitStep()
-{
-#ifdef COVERBOSE
-  std::cout<<"Running Initialization.."<<"\n";
-#endif
-  if (initCEMCols())
-  {
-    v_logPiek_ = std::log(1.0/Mparam_.nbrowclust_)*(STK::Const::VectorX(Mparam_.nbrowclust_));
-    v_logRhol_ = std::log(1.0/Mparam_.nbcolclust_)*(STK::Const::VectorX(Mparam_.nbcolclust_));
-    m_Dataij2_ = m_Dataij_.square();
-    m_Uil1_.resize(nbSample_,Mparam_.nbcolclust_) = 0;
-    m_Uil2_.resize(nbSample_,Mparam_.nbcolclust_) = 0;
-    m_Vjk1_.resize(nbVar_,Mparam_.nbrowclust_) = 0;
-    m_Vjk2_.resize(nbVar_,Mparam_.nbrowclust_) = 0;
-    v_Tk_.resize(Mparam_.nbrowclust_) = 0;
-    m_Tik_.resize(nbSample_,Mparam_.nbrowclust_) = 0;
-    //m_Mukl2_ = m_Mukl_.square();
-    m_Muklold1_ = m_Mukl_;
-    m_Muklold2_.resize(Mparam_.nbrowclust_,Mparam_.nbcolclust_) = 0;
-#ifdef COVERBOSE
-      std::cout<<"ContinuousLBModelequalsigma::cemInitStep. Initialization done with success."<<std::endl;
-      consoleOut();
-#endif
-
-    return true;
-  }
-  return false;
-}
-
-// Initialization using EM algo
-bool ContinuousLBModelequalsigma::emInitStep()
-{
-#ifdef COVERBOSE
-  std::cout<<"Running Initialization.."<<"\n";
-#endif
-  if (initEMCols())
-  {
-    v_logPiek_ = std::log(1.0/Mparam_.nbrowclust_)*(STK::Const::VectorX(Mparam_.nbrowclust_));
-    v_logRhol_ = std::log(1.0/Mparam_.nbcolclust_)*(STK::Const::VectorX(Mparam_.nbcolclust_));
-    m_Dataij2_ = m_Dataij_.square();
-    m_Uil1_.resize(nbSample_,Mparam_.nbcolclust_) = 0;
-    m_Uil2_.resize(nbSample_,Mparam_.nbcolclust_) = 0;
-    m_Vjk1_.resize(nbVar_,Mparam_.nbrowclust_) = 0;
-    m_Vjk2_.resize(nbVar_,Mparam_.nbrowclust_) = 0;
-    v_Tk_.resize(Mparam_.nbrowclust_) = 0;
-    m_Tik_.resize(nbSample_,Mparam_.nbrowclust_) = 0;
-    //m_Mukl2_ = m_Mukl_.square();
-    m_Muklold1_ = m_Mukl_;
-    m_Muklold2_.resize(Mparam_.nbrowclust_,Mparam_.nbcolclust_) = 0;
-#ifdef COVERBOSE
-      std::cout<<"ContinuousLBModelequalsigma::emInitStep. Initialization done with success."<<std::endl;
-      consoleOut();
-#endif
-
-    return true;
-  }
-  return false;
-}
-
-// Private initialization  functions
-
-bool ContinuousLBModelequalsigma::initCEMCols()
-{
-  //Temporary variables
-  MatrixReal m_Vjk(nbVar_,Mparam_.nbrowclust_);
-  MatrixReal m_Vkj(Mparam_.nbrowclust_,nbVar_);
-  MatrixReal m_Djl(nbVar_,Mparam_.nbcolclust_);
-  MatrixReal m_Mulk(Mparam_.nbcolclust_,Mparam_.nbrowclust_);
-  PointReal  p_Mul2(Mparam_.nbcolclust_);
-  MatrixReal m_Rlk(Mparam_.nbcolclust_,Mparam_.nbrowclust_);
-  int minIndex;
-  STK::Real W1 = RealMax , W1_old;
-
-  //Private members initialization
-  m_Rjl_.resize(nbVar_,Mparam_.nbcolclust_) = 0;
-  std::pair<int,int> Label_pair;
-  for ( int j=0;j< (int)knownLabelsCols_.size();j++ )
-  {
-    Label_pair = knownLabelsCols_[j];
-    m_Rjl_(Label_pair.first,Label_pair.second)=1;
-  }
-  Sigma2_ = 1.0;
-  //Initializations
-  selectRandomRowsFromData(m_Vkj);
-  m_Vjk = m_Vkj.transpose();
-  VectorReal v_Vj2 = STK::sumByRow(m_Vjk.square());
-  generateRandomMean(m_Vjk,m_Mulk);
-  for ( int itr = 0; itr < Mparam_.nbiterations_int_; ++itr)
-  {
-    p_Mul2 = ( STK::sumByRow(m_Mulk.square()) ).transpose();
-    m_Djl = v_Vj2*STK::Const::Point<STK::Real>(Mparam_.nbcolclust_)
-          + STK::Const::VectorX(nbVar_) * p_Mul2 - 2*(m_Vjk*m_Mulk.transpose());
-    for ( int j=0;j< (int)UnknownLabelsCols_.size();j++)
-    {
-      m_Djl.row(UnknownLabelsCols_[j]).minElt(minIndex);
-      m_Rjl_.row(UnknownLabelsCols_[j]).setZeros();
-      m_Rjl_(UnknownLabelsCols_[j],minIndex)=1;
-    }
-    // check empty class
-    if( (empty_cluster_ = finalizeStepCols()) )
-    {
-      Error_msg_  = "In ContinuousLBModelequalsigma::initCEMCols(). Class size too small while estimating model.\n";
-#ifdef COVERBOSE
-      std::cout << Error_msg_;
-#endif
-      return false;
-    }
-    // M step
-    m_Mulk = (m_Rjl_.transpose()*m_Vjk)/(v_Rl_*STK::Const::Point<STK::Real>(Mparam_.nbrowclust_));
-    //Check for termination
-    W1_old = W1;
-    W1 = (m_Rjl_.prod(m_Djl)).sum();
-    //Initialization of model parameters
-    m_Mukl_ = m_Mulk.transpose();
-    if (std::abs((W1-W1_old)/W1)<Mparam_.initepsilon_)
-    { break;}
-  }
-  return true;
-
-}
-
-bool ContinuousLBModelequalsigma::initEMCols()
-{
-  //Temporary variables
-  MatrixReal m_Vjk(nbVar_,Mparam_.nbrowclust_);
-  MatrixReal m_Vkj(Mparam_.nbrowclust_,nbVar_);
-  MatrixReal m_Djl(nbVar_,Mparam_.nbcolclust_);
-  MatrixReal m_Mulk(Mparam_.nbcolclust_,Mparam_.nbrowclust_);
-  PointReal  p_Mul2(Mparam_.nbcolclust_);
-  MatrixReal m_Rlk(Mparam_.nbcolclust_,Mparam_.nbrowclust_);
-  int minIndex;
-  STK::Real W1 = RealMax , W1_old;
-
-  //Private members initialization
-  m_Rjl_.resize(nbVar_,Mparam_.nbcolclust_) = 0;
-  std::pair<int,int> Label_pair;
-  for ( int j=0;j< (int)knownLabelsCols_.size();j++ )
-  {
-    Label_pair = knownLabelsCols_[j];
-    m_Rjl_(Label_pair.first,Label_pair.second)=1;
-  }
-  Sigma2_ = 1.0;
-  //Initializations
-  selectRandomRowsFromData(m_Vkj);
-  m_Vjk = m_Vkj.transpose();
-  VectorReal v_Vj2 = STK::sumByRow(m_Vjk.square());
-  generateRandomMean(m_Vjk,m_Mulk);
-  for ( int itr = 0; itr < Mparam_.nbiterations_int_; ++itr)
-  {
-    p_Mul2 = ( STK::sumByRow(m_Mulk.square()) ).transpose();
-    m_Djl = v_Vj2*STK::Const::Point<STK::Real>(Mparam_.nbcolclust_)
-          + STK::Const::VectorX(nbVar_) * p_Mul2 - 2*(m_Vjk*m_Mulk.transpose());
-    m_Rjl_ = (m_Djl-STK::maxByRow(m_Djl)*STK::Const::PointX(Mparam_.nbcolclust_)).exp();
-    m_Rjl_ /= (STK::sumByRow(m_Rjl_)*STK::Const::PointX(Mparam_.nbcolclust_));
-    for ( int j=0;j< (int)UnknownLabelsCols_.size();j++)
-    {
-      m_Djl.row(UnknownLabelsCols_[j]).minElt(minIndex);
-      m_Rjl_.row(UnknownLabelsCols_[j]).setZeros();
-      m_Rjl_(UnknownLabelsCols_[j],minIndex)=1;
-    }
-    // check empty class
-    if( (empty_cluster_ = finalizeStepCols()) )
-    {
-      Error_msg_  = "In ContinuousLBModelequalsigma::initCEMCols(). Class size too small while estimating model.\n";
-#ifdef COVERBOSE
-      std::cout << Error_msg_;
-#endif
-      return false;
-    }
-    // M step
-    m_Mulk = (m_Rjl_.transpose()*m_Vjk)/(v_Rl_*STK::Const::Point<STK::Real>(Mparam_.nbrowclust_));
-    //Check for termination
-    W1_old = W1;
-    W1 = (m_Rjl_.prod(m_Djl)).sum();
-    //Initialization of model parameters
-    m_Mukl_ = m_Mulk.transpose();
-    if (std::abs((W1-W1_old)/W1)<Mparam_.initepsilon_)
-    { break;}
-  }
-  return true;
-
-}
-
-void ContinuousLBModelequalsigma::finalizeOutput()
-{ commonFinalizeOutput();}
-
 void ContinuousLBModelequalsigma::consoleOut()
 {
 #ifndef COVERBOSE
@@ -394,79 +226,55 @@ void ContinuousLBModelequalsigma::consoleOut()
         v_Piek_.transpose()<<"\nRhol: "<<v_Rhol_.transpose()<<std::endl;
 #endif
 }
-void ContinuousLBModelequalsigma::selectRandomRowsFromData(MatrixReal& _m_kj)
-{
-  VectorInt v_temp= randSample(nbSample_,Mparam_.nbrowclust_);
-  for ( int k = 0; k < Mparam_.nbrowclust_; ++k)
-  { _m_kj.row(k) = m_Dataij_.row(v_temp[k]);}
-}
-
-void ContinuousLBModelequalsigma::generateRandomMean(const MatrixReal & m_jk, MatrixReal & mean_lk)
-{
-  VectorInt v_temp= randSample(nbVar_,Mparam_.nbcolclust_);
-  for ( int l = 0; l < Mparam_.nbcolclust_; ++l)
-  { mean_lk.row(l) = m_jk.row(v_temp[l]);}
-}
-
 MatrixReal const& ContinuousLBModelequalsigma::arrangedDataClusters()
 {
   arrangedDataCluster<MatrixReal>(m_ClusterDataij_,m_Dataij_);
   return m_ClusterDataij_;
 }
 
-void ContinuousLBModelequalsigma::modifyThetaStart()
+void ContinuousLBModelequalsigma::saveThetaInit()
 {
-  m_Muklstart_ = m_Mukl_;
-  Sigma2start_ = Sigma2_;
-  v_logPiekstart_ = v_logPiek_;
-  v_logRholstart_ = v_logRhol_;
-
-  m_Rjlstart_ = m_Rjl_;
+  m_Mukltemp_ = m_Mukl_;
+  Sigma2temp_ = Sigma2_;
 }
 
-void ContinuousLBModelequalsigma::copyThetaStart()
+void ContinuousLBModelequalsigma::modifyTheta()
 {
-  m_Mukl_ = m_Muklstart_;
-  Sigma2_ = Sigma2start_;
-  v_logPiek_ = v_logPiekstart_;
-  v_logRhol_ = v_logRholstart_;
+  m_Mukltemp_ = m_Mukl_;
+  Sigma2temp_ = Sigma2_;
 
-  m_Rjl_ = m_Rjlstart_;
+  v_logPiektemp_ = v_logPiek_;
+  v_logRholtemp_ = v_logRhol_;
 
-  //initialization
-  v_Rl_ = STK::sum(m_Rjl_);
-}
+  m_Rjltemp_ = m_Rjl_;
+  m_Tiktemp_ = m_Tik_;
 
-void ContinuousLBModelequalsigma::copyThetaMax()
-{
-  m_Mukl_ = m_Muklmax_;
-  Sigma2_ = Sigma2max_;
-  v_logPiek_ = v_logPiekmax_;
-  v_logRhol_ = v_logRholmax_;
-
-  m_Tik_ = m_Tikmax_;
-  m_Rjl_ = m_Rjlmax_;
-  likelihood_ = Lmax_;
-}
-
-void ContinuousLBModelequalsigma::modifyThetaMax()
-{
-  m_Muklmax_ = m_Mukl_;
-  Sigma2max_ = Sigma2_;
-  v_logPiekmax_ = v_logPiek_;
-  v_logRholmax_ = v_logRhol_;
-
-  m_Rjlmax_ = m_Rjl_;
-  m_Tikmax_ = m_Tik_;
   Lmax_ = likelihood_;
+}
+
+void ContinuousLBModelequalsigma::copyTheta()
+{
+  m_Mukl_ = m_Mukltemp_;
+  Sigma2_ = Sigma2temp_;
+
+  v_logPiek_ = v_logPiektemp_;
+  v_logRhol_ = v_logRholtemp_;
+
+  m_Rjl_ = m_Rjltemp_;
+  m_Tik_ = m_Tiktemp_;
+
+  commonFinalizeOutput();
+
+  commonFinalizeOutput();
+  likelihood_ = computeLnLikelihood();
 }
 
 void ContinuousLBModelequalsigma::mStepFull()
 {
   if(!Mparam_.fixedproportions_)
   {
-    v_logRhol_=(v_Rl_/nbVar_).log();
-    v_logPiek_=(v_Tk_/nbSample_).log();
+    v_logRhol_=(v_Rl_/Mparam_.nbCol_).log();
+    v_logPiek_=(v_Tk_/Mparam_.nbRow_).log();
   }
 
   m_Mukl_ = (m_Tik_.transpose()*m_Dataij_.cast<STK::Real>()*m_Rjl_)/(v_Tk_*(v_Rl_.transpose()));

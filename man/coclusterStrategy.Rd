@@ -6,20 +6,18 @@
 \alias{strategy-class}
 \title{Strategy function}
 \usage{
-coclusterStrategy(algo = "BEM", initmethod = character(),
+coclusterStrategy(algo = "BEM", initmethod = "emInitStep",
   stopcriteria = "Parameter", nbiterationsxem = 50,
-  nbiterationsXEM = 500, nbinititerations = 10, initepsilon = 0.01,
-  nbiterations_int = 5, epsilon_int = 0.01, epsilonxem = 1e-04,
-  epsilonXEM = 1e-10, nbtry = 2, nbxem = 5)
+  nbiterationsXEM = 500, nbinitmax = 100, nbinititerations = 10,
+  initepsilon = 0.01, nbiterations_int = 5, epsilon_int = 0.01,
+  epsilonxem = 1e-04, epsilonXEM = 1e-10, nbtry = 2, nbxem = 5)
 }
 \arguments{
 \item{algo}{The valid values for this parameter are "BEM" (Default), "BCEM",
 "BSEM" and "BGibbs" (only for Binary model).}
 
 \item{initmethod}{Method to initialize model parameters. The valid values are
-"cemInitStep", "emInitStep" and "randomInit". For now only one kind of
-initialization exists for every model currently available in the package.
-Hence default value for initialization is set according to the model.}
+"cemInitStep", "emInitStep" and "randomInit".}
 
 \item{stopcriteria}{It specifies the stopping criteria. It can be based on
 either relative change in parameters (preffered due to computation reasons)
@@ -31,6 +29,8 @@ Default value is 50.}
 
 \item{nbiterationsXEM}{Number of EM iterations used during XEM step.
 Default value is 500.}
+
+\item{nbinitmax}{Maximal number initialization to try. Default value is 100.}
 
 \item{nbinititerations}{Number of Global iterations used in initialization
 step. Default value is 10.}
@@ -68,6 +68,7 @@ This class contains all the input parameters to run coclustering.
 \item{algo: }{Algorithm to be use for co-clustering.}
 \item{stopcriteria: }{Stopping criteria used to stop the algorithm.}
 \item{initmethod: }{Method to initialize model parameters.}
+\item{nbinitmax: }{Maximal number of initialization to try (if reached estimation failed)}
 \item{nbinititerations: }{Number of global iterations while running initialization.}
 \item{initepsilon: }{Tolerance value used while initialization.}
 \item{nbiterations_int: }{Number of iterations for internal E-step.}

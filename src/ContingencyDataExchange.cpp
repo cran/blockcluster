@@ -91,8 +91,8 @@ void ContingencyDataExchange::dataInput(Rcpp::S4 & obj)
   STK::RMatrix<STK::Real> data(SEXP(obj.slot("data")));
   m_Dataij_ = data;
   //convertMatrix(data,m_Dataij_);
-  Mparam_.nbrowdata_ = m_Dataij_.sizeRows();
-  Mparam_.nbcoldata_ = m_Dataij_.sizeCols();
+  Mparam_.nbRow_ = m_Dataij_.sizeRows();
+  Mparam_.nbCol_ = m_Dataij_.sizeCols();
   if(strategy_.Model_ == pik_rhol_known_||strategy_.Model_ == pi_rho_known_ )
   {
     v_Mui_ = STK::RVector<STK::Real>(SEXP(obj.slot("datamui")));

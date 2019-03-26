@@ -38,13 +38,21 @@
 class ContinuousLBModel: public ICoClustModel
 {
   public:
-    ContinuousLBModel( MatrixReal const& m_Dataij,ModelParameters const& Mparam);
-    ContinuousLBModel(MatrixReal const& m_Dataij,VectorInt const & rowlabels,
-                       VectorInt const & collabels,ModelParameters const& Mparam);
+    ContinuousLBModel( MatrixReal const& m_Dataij
+                     , ModelParameters const& Mparam
+                     );
+    ContinuousLBModel( MatrixReal const& m_Dataij
+                     , VectorInt const & rowlabels
+                     , VectorInt const & collabels
+                     , ModelParameters const& Mparam
+                     );
     virtual ~ContinuousLBModel(){};
     virtual ContinuousLBModel* clone(){return new ContinuousLBModel(*this);}
-    virtual void logSumRows(MatrixReal & _m_sum);
-    virtual void logSumCols(MatrixReal & _m_sum);
+
+    virtual void logSumRows(MatrixReal & m_sum);
+    virtual void logSumCols(MatrixReal & m_sum);
+
+  public:
     virtual void mStepFull();
     virtual bool emRows();
     virtual bool cemRows();
@@ -54,16 +62,16 @@ class ContinuousLBModel: public ICoClustModel
     virtual bool semCols();
     virtual bool GibbsRows();
     virtual bool GibbsCols();
+
+    virtual STK::Real computeLnLikelihood();
+    virtual bool initStopCriteria();
     virtual void parameterStopCriteria();
-    virtual STK::Real estimateLikelihood();
-    virtual bool cemInitStep();
-    virtual bool emInitStep();
-    virtual void finalizeOutput();
     virtual void consoleOut();
-    virtual void modifyThetaStart();
-    virtual void copyThetaStart();
-    virtual void copyThetaMax();
-    virtual void modifyThetaMax();
+
+    virtual void saveThetaInit();
+    virtual void modifyTheta();
+    virtual void copyTheta();
+
     MatrixReal const& arrangedDataClusters();
     /** @return the number of free parameters of the distribution of a block.*/
     virtual int nbFreeParameters() const;
@@ -77,19 +85,18 @@ class ContinuousLBModel: public ICoClustModel
     MatrixReal const& m_Dataij_;
     MatrixReal m_ClusterDataij_;
     MatrixReal m_Dataij2_;
-    MatrixReal m_Mukl_, m_Sigma2kl_, m_Muklstart_, m_Muklmax_,m_Sigma2klstart_,m_Sigma2klmax_;
-    MatrixReal m_Muklold1_,m_Muklold2_;
-    MatrixReal m_Vjk1_,m_Vjk2_;
-    MatrixReal m_Uil1_,m_Uil2_;
+    MatrixReal m_Mukl_;
+    MatrixReal m_Sigma2kl_, m_Sigma2kltemp_;
+    MatrixReal m_Muklold1_,m_Muklold2_, m_Mukltemp_;
+    MatrixReal m_Vjk2_, m_Uil2_;
 
     //M-steps
-    void mStepRows();
-    void mStepCols();
-    //Internal steps during initialization
-    bool initCEMCols();
-    bool initEMCols();
-    void selectRandomRowsFromData(MatrixReal &);
-    void generateRandomMean(const MatrixReal & , MatrixReal &);
+    virtual void mStepRows();
+    virtual void mStepCols();
+    /** Compute m_Vjk_ array for all models */
+    virtual void computeVjk();
+    /** Compute m_Uil_ array for all models */
+    virtual void computeUil();
 };
 
 inline MatrixReal const& ContinuousLBModel::mean() const
@@ -100,20 +107,30 @@ inline MatrixReal const& ContinuousLBModel::sigma2() const
 
 inline void ContinuousLBModel::mStepRows()
 {
-  if(!Mparam_.fixedproportions_) { v_logRhol_=(v_Rl_/nbVar_).log();}
-
+  mSteplogPiek();
   MatrixReal m_trkl = v_Tk_*v_Rl_.transpose();
-  m_Mukl_           = (m_Tik_.transpose()*m_Uil1_)/m_trkl;
+  m_Mukl_           = (m_Tik_.transpose()*m_Uil_)/m_trkl;
   m_Sigma2kl_       = (m_Tik_.transpose()*m_Uil2_)/m_trkl - m_Mukl_.square();
 }
 
 inline void ContinuousLBModel::mStepCols()
 {
-  if(!Mparam_.fixedproportions_) { v_logRhol_=(v_Rl_/nbVar_).log();}
-
+  mSteplogRhol();
   MatrixReal m_trkl = v_Tk_*v_Rl_.transpose();
-  m_Mukl_           = (m_Vjk1_.transpose()*m_Rjl_)/m_trkl;
-  m_Sigma2kl_       = ((m_Vjk2_.transpose()*m_Rjl_)/m_trkl) - m_Mukl_.square();
+  m_Mukl_           = (m_Vjk_.transpose()*m_Rjl_)/m_trkl;
+  m_Sigma2kl_       = (m_Vjk2_.transpose()*m_Rjl_)/m_trkl - m_Mukl_.square();
+}
+
+inline void ContinuousLBModel::computeUil()
+{
+  m_Uil_ = m_Dataij_*m_Rjl_;
+  m_Uil2_ = m_Dataij2_*m_Rjl_;
+}
+
+inline void ContinuousLBModel::computeVjk()
+{
+  m_Vjk_ = m_Dataij_.transpose()*m_Tik_;
+  m_Vjk2_ = m_Dataij2_.transpose()*m_Tik_;
 }
 
 #endif /* CONTINUOUSLBMODEL_H_ */

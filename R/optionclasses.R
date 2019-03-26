@@ -216,7 +216,7 @@ setMethod(
 		definition = function(x,i,j,drop) {
 			switch(EXPR=i,
 					"data"={return (x@data)},
-          			"coclusterdata"={return (x@coclusterdata)},
+          "coclusterdata"={return (x@coclusterdata)},
 					"datatype"={return (x@datatype)},
           "semisupervised"={return (x@semisupervised)},
 					"model"={return (x@model)},
@@ -247,9 +247,9 @@ setMethod(
 		definition = function(x,i,j,drop) {
 			switch(EXPR=i,
 					"data"={return (x@data)},
-			    	"coclusterdata"={return (x@coclusterdata)},
-          			"datatype"={return (x@datatype)},
-			    	"semisupervised"={return (x@semisupervised)},
+			    "coclusterdata"={return (x@coclusterdata)},
+          "datatype"={return (x@datatype)},
+			    "semisupervised"={return (x@semisupervised)},
 					"model"={return (x@model)},
 					"strategy"={return (x@strategy)},
 					"message"={return (x@message)},
@@ -277,9 +277,9 @@ setMethod(
 		definition = function(x,i,j,drop) {
 			switch(EXPR=i,
 					"data"={return (x@data)},
-			   	    "coclusterdata"={return (x@coclusterdata)},
+			   	"coclusterdata"={return (x@coclusterdata)},
 					"datatype"={return (x@datatype)},
-			        "semisupervised"={return (x@semisupervised)},
+			    "semisupervised"={return (x@semisupervised)},
 					"model"={return (x@model)},
 					"strategy"={return (x@strategy)},
 					"message"={return (x@message)},

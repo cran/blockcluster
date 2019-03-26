@@ -53,7 +53,8 @@ class BinaryLBModel : public ICoClustModel
      * */
     BinaryLBModel( MatrixBinary const&  m_Dataij
                  , ModelParameters const& Mparam
-                 , int a=1,int b=1);
+                 , STK::Real a=1, STK::Real b=1
+                 );
     /**Constructor for unsupervised co-clustering
      * @param m_Dataij a constant reference on the data set.
      * @param rowlabels various labels for rows (-1  for unknown row label)
@@ -65,32 +66,42 @@ class BinaryLBModel : public ICoClustModel
                  , VectorInt const& rowlabels
                  , VectorInt const& collabels
                  , ModelParameters const& Mparam
-                 , int a=1,int b=1);
+                 , STK::Real a=1, STK::Real b=1
+                 );
 
     /** cloning */
-    virtual BinaryLBModel* clone(){return new BinaryLBModel(*this);}
+    inline virtual BinaryLBModel* clone(){return new BinaryLBModel(*this);}
+
     virtual void logSumRows(MatrixReal & _m_sik);
     virtual void logSumCols(MatrixReal & _m_sjl);
+
+//    virtual bool cemInitStep();
+//    virtual bool emInitStep();
+//    virtual bool randomInitStep();
+
     virtual void mStepFull();
+
     virtual bool emRows();
     virtual bool cemRows();
+    virtual bool semRows();
+    virtual bool GibbsRows();
+
     virtual bool emCols();
     virtual bool cemCols();
-    virtual bool semRows();
     virtual bool semCols();
-    virtual bool GibbsRows();
     virtual bool GibbsCols();
+
+    virtual STK::Real computeLnLikelihood();
+    virtual bool initStopCriteria();
     virtual void parameterStopCriteria();
-    virtual bool cemInitStep();
-    virtual bool emInitStep();
-    virtual void finalizeOutput();
     virtual STK::Real iclCriteriaValue();
+    virtual void finalizeOutput();
     virtual void consoleOut();
-    virtual void modifyThetaStart();
-    virtual void copyThetaStart();
-    virtual void copyThetaMax();
-    virtual void modifyThetaMax();
-    virtual STK::Real estimateLikelihood();
+
+    virtual void saveThetaInit();
+    virtual void copyTheta();
+    virtual void modifyTheta();
+
     /** @return the number of free parameters of the distribution of a block.*/
     virtual int nbFreeParameters() const;
 
@@ -109,38 +120,41 @@ class BinaryLBModel : public ICoClustModel
 
   protected:
     //Variables involved in Bernouilli model
-    int a_,b_;//hyper-parameters
+    STK::Real a_,b_;//hyper-parameters
     MatrixBinary const&  m_Dataij_;
     MatrixBinary m_ClusterDataij_;
-    MatrixReal m_Vjk_;
-    MatrixReal m_Uil_;
-    MatrixReal m_Alphakl_, m_Alphaklold_, m_Alphakl1_, m_Alphakl1old_,m_Alphaklmax_,m_Alphaklstart_;
+    MatrixReal m_Alphakl_, m_Alphaklold_;
+    MatrixReal m_Alphakl1_, m_Alphakl1old_;
+    MatrixReal m_Alphakltemp_;
     MatrixBinary m_akl_;
-    MatrixReal m_epsilonkl_,m_epsilonklstart_,m_epsilonklmax_;
+    MatrixReal m_epsilonkl_, m_epsilonkltemp_;
 
-    void mStepRows();
-    void mStepCols();
+    virtual void mStepRows();
+    virtual void mStepCols();
+    /** compute logRhol during the m-step */
+    virtual void mSteplogRhol();
+    /** compute logPiek during the m-step */
+    virtual void mSteplogPiek();
 
     void mGibbsStepRows();
     void mGibbsStepCols();
 
-    // Functions used to operate on data in intermediate steps when running the Initialization
-    bool initCEMRows();
-    bool initCEMCols();
-    bool initEMRows();
-    bool initEMCols();
-    void initBernoulliLogSumRows(MatrixReal & m_sum);
-    void initBernoulliLogSumCols(MatrixReal & m_sum);
-    void selectRandomColsFromData(MatrixReal& m,int col);
-    void generateRandomBernoulliParameterRows(MatrixReal& m, int cols);
-    void generateRandomBernoulliParameterCols(MatrixReal& m);
+    /** Compute m_Vjk_ array for all models */
+    virtual void computeVjk();
+    /** Compute m_Uil_ array for all models */
+    virtual void computeUil();
 };
-
 
 inline MatrixBinary const&  BinaryLBModel::mean() const
 { return m_akl_;}
 
 inline MatrixReal const& BinaryLBModel::dispersion() const
 { return m_epsilonkl_;}
+
+inline void BinaryLBModel::computeUil()
+{ m_Uil_ = m_Dataij_.cast<STK::Real>()*m_Rjl_;}
+
+inline void BinaryLBModel::computeVjk()
+{ m_Vjk_ = m_Dataij_.cast<STK::Real>().transpose()*m_Tik_;}
 
 #endif /* BinaryLBModel_H_ */

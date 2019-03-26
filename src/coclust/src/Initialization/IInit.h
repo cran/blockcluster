@@ -29,23 +29,26 @@
 #ifndef IINIT_H_
 #define IINIT_H_
 
-/** @brief This is an interface class for initialization algorithms. It have only one abstract function IInit::run which
- * when called, initialize the various model parameters by calling the corresponding Initialization function
- * declared in IModel. Every initialization algorithm must derive from this abstract class
+#include "../Models/ICoClustModel.h"
+
+/** @brief This is an interface class for initialization algorithms.
+ * It have only one abstract function IInit::run which when called, initialize
+ * the various model parameters by calling the corresponding Initialization function
+ * declared in IModel.
+ * Every initialization algorithm must derive from this abstract class
  * and provide implementation for IInit::run method.
  */
-#include "../Models/ICoClustModel.h"
 class IInit
 {
   protected:
     /** constructor */
-    IInit(){};
+    IInit():p_Model_(0) {};
+    // pointer on model
     ICoClustModel * p_Model_;
   public:
     /** Interface for running initialization */
     virtual bool run() = 0;
-    /*
-     * Refer IInit::p_Model_ to the instantiated model class inside CoClustermain.cpp
+    /** Refer IInit::p_Model_ to the instantiated model class inside CoClustermain.cpp
      */
     void setModel(ICoClustModel * model);
     /** Virtual Destructor*/
@@ -53,7 +56,5 @@ class IInit
 };
 
 inline void IInit::setModel(ICoClustModel * model)
-{
-  p_Model_ = model;
-}
+{ p_Model_ = model;}
 #endif /* IINIT_H_ */

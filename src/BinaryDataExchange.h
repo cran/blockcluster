@@ -30,7 +30,7 @@
  **/
 
 /** @file BinaryCoClust.h
- *  @brief 
+ *  @brief
  **/
 
 #ifndef BinaryDataExchange_H_
@@ -45,14 +45,14 @@
 class BinaryDataExchange: public IDataExchange
 {
   public:
-    BinaryDataExchange(){};
+    BinaryDataExchange(): a_(1), b_(1) {};
     virtual void dataOutput(Rcpp::S4& obj,ICoClustModel*,bool);
     virtual void dataInput(Rcpp::S4 & obj);
     virtual void instantiateModel(ICoClustModel*& model);
     inline MatrixBinary const& GetData() const{return m_Dataij_;}
     ~BinaryDataExchange(){};
   protected:
-    int a_,b_;//hyperparameters
+    STK::Real a_,b_;//hyperparameters
     MatrixBinary m_Dataij_;
 };
 

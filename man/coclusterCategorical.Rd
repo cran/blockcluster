@@ -21,10 +21,10 @@ Provide -1 for unknown row class.}
 \item{collabels}{Integer Vector specifying the class of columns.
 The class number starts from zero. Provide -1 for unknown column class.}
 
-\item{model}{This is the name of model. The following models exists for various types of data:
+\item{model}{This is the name of model. The following models exists for categorical data:
 \tabular{rlll}{
     pik_rhol_multi \tab categorical \tab unequal \tab unequal \cr
-    pi_rho_multi \tab categorical \tab equal \tab unequal \cr
+    pi_rho_multi  \tab categorical \tab equal \tab unequal \cr
 }}
 
 \item{nbcocluster}{Integer vector specifying the number of row and column clusters respectively.}

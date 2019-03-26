@@ -93,12 +93,10 @@ coclusterBinary<-function( data, semisupervised = FALSE
     { stop("collabels length does not match number of columns in data (also  ensure to put -1 in unknown labels)")}
   }
   #check for number of coclusters
-	if(missing(nbcocluster))
-	{ stop("Mention number of CoClusters.")}
-	if(dimData[1]<nbcocluster[1])
-  { stop("Number of Row clusters exceeds numbers of rows.")}
-	if(dimData[2]<nbcocluster[2])
-  { stop("Number of Column clusters exceeds numbers of columns.")}
+	if(missing(nbcocluster))     { stop("Mention number of CoClusters.")}
+	if(dimData[1]<nbcocluster[1]){ stop("Number of Row clusters exceeds numbers of rows.")}
+	if(dimData[2]<nbcocluster[2]){ stop("Number of Column clusters exceeds numbers of columns.")}
+  if(nbcocluster[1]<1 || nbcocluster[2]<1) { stop("Number of cluster must be at least 1.")}
   
 	#check for Algorithm name (and make it compatible with version 1)
 	if(strategy@algo=="XEMStrategy")
@@ -132,13 +130,12 @@ coclusterBinary<-function( data, semisupervised = FALSE
 		}
 	}
   # checking for strategy
-	if(length(strategy@initmethod)==0)
-	{strategy@initmethod = "emInitStep"}
-	else
-	{
-    if(strategy@initmethod!="cemInitStep" && strategy@initmethod!="emInitStep")
-			stop("In coclusterBinary. Incorrect initialization method, valid method(s) are: cemInitStep, emInitStep")
-	}
+	if(length(strategy@initmethod)==0){ strategy@initmethod = "emInitStep"}
+  ## else
+  ## {
+  ##   if(strategy@initmethod!="cemInitStep" && strategy@initmethod!="emInitStep")
+  ##     stop("In coclusterBinary. Incorrect initialization method, valid method(s) are: cemInitStep, emInitStep")
+  ## }
 	# checking for hyperparameters
   if ((a <=0)||(b<=0)) { stop("hyper-parameters must be positive")}
   #strategy@hyperparam = c(a,b);

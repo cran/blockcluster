@@ -39,8 +39,9 @@
 class IStrategy
 {
   public:
-    /** Constructor*/
-    inline IStrategy(StrategyParameters const& Aparam)
+    /** copy constructor*/
+    inline IStrategy( StrategyParameters const& Aparam)
+                    : p_Model_(0), p_Init_(0),p_Algo_(0)
     {
       strategyParam_ = Aparam;
     }

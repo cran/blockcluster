@@ -29,12 +29,12 @@
 #ifndef EMINIT_H_
 #define EMINIT_H_
 
-/** @brief This class provides functionalities for EM initialization. It is  derived from IInit
- * abstract class.
- *
- */
 #include "IInit.h"
 
+/** @brief This class provides functionalities for EM initialization.
+ * It is  derived from IInit
+ * abstract class.
+ */
 class emInit: public IInit
 {
   public:

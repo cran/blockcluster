@@ -52,8 +52,8 @@ std::ostream& operator<< (std::ostream& os, ModelParameters const& param)
   //other input options, self explanatory
   os << "* nbrowclust_       = " << param.nbrowclust_ << std::endl;
   os << "* nbcolclust_       = " << param.nbcolclust_ << std::endl;
-  os << "* nbrowdata_        = " << param.nbrowdata_  << std::endl;
-  os << "* nbcoldata_        = " << param.nbcoldata_  << std::endl;
+  os << "*Mparam_.nbRow_        = " << param.nbRow_  << std::endl;
+  os << "* Mparam_.nbCol_        = " << param.nbCol_  << std::endl;
   os << "****************************************" << std::endl;
 
   //proportion
@@ -126,6 +126,8 @@ void InputParameters::ReadFromOptionFile( std::string optionfilename)
       = S_Init[rw.p_page("InputOptions")->option("Initialization").get(
                                                                        STK::String())];
 
+  strategyParam_.nbinitmax_
+      = rw.p_page("InputOptions")->option("nbinitmax").get(STK::Integer());
   strategyParam_.nbtry_
       = rw.p_page("InputOptions")->option("nbtry").get(STK::Integer());
   strategyParam_.nbxem_

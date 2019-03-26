@@ -56,7 +56,7 @@ void XStrategyAlgo::writeVector(int it, MatrixReal classes, std::string type)
 
 bool XStrategyAlgo::run()
 {
-#ifdef COVERBOSE
+#ifdef COVERBOSE_CONTINGENCY
   std::cout<<"Entering XStrategy::run()"<<"\n";
 #endif
   STK::Real Lmax = -RealMax, L1 = -RealMax, Lcurrent;
@@ -67,12 +67,13 @@ bool XStrategyAlgo::run()
   {
     non_empty = false;
     L1 = -RealMax;
+
     //set espilon to eps_xem
     p_Model_->setEpsilon(p_Model_->modelParameters().eps_xem_);
     for (int ixem = 0; ixem < strategyParam_.nbxem_; ++ixem)
     {
       p_Model_->setEmptyCluster(true);
-      for (int ntry_empty = 0; ntry_empty<100; ntry_empty++)
+      for (int ntry_empty = 0; ntry_empty<strategyParam_.nbinitmax_; ntry_empty++)
       {
         if (p_Init_->run())
         {
@@ -87,13 +88,28 @@ bool XStrategyAlgo::run()
             else { break;} // algo divergence
           }
         }
-        if (!p_Model_->isEmptyCluster()) break;
+#ifdef COVERBOSE_CONTINGENCY
+        else
+        {
+      std::cout<<"In XStrategy::run(). itry=" << itry <<"\n";
+      std::cout<<"In XStrategy::run(). ntry_empty=" << ntry_empty <<"\n";
+      std::cout<<"Initialization failed.\n";
+        }
+#endif
+        if (!p_Model_->isEmptyCluster()) break; // we find a non-degenerated model
       }
       // all initialization failed
-      if(!isinitialized) return false;
+      if(!isinitialized || p_Model_->isEmptyCluster())
+      {
+#ifdef COVERBOSE_CONTINGENCY
+      std::cout<<"In XStrategy::run(). itry=" << itry <<"\n";
+      std::cout<<"All Initialization failed.\n";
+#endif
+        return false;
+      }
       // compute current likelihood
-      Lcurrent = p_Model_->estimateLikelihood();
-#ifdef COVERBOSE
+      Lcurrent = p_Model_->computeLnLikelihood();
+#ifdef COVERBOSE_CONTINGENCY
       std::cout<<"In XStrategy::run(). ixem =" << ixem <<"\n";
       std::cout<<"Initialization terminated. Lcurrent =" << Lcurrent <<"\n";
       if (p_Model_->isEmptyCluster())
@@ -103,53 +119,52 @@ bool XStrategyAlgo::run()
       if (Lcurrent>=L1)
       {
         non_empty = true;
-#ifdef COVERBOSE
+#ifdef COVERBOSE_CONTINGENCY
         std::cout<<"In XStrategy::run(). ixem =" << ixem <<"\n";
         p_Model_->consoleOut();
         std::cout<<"L1=" << L1 << "\n";
 #endif
         L1 = Lcurrent;
-        p_Model_->modifyThetaStart();
+        p_Model_->modifyTheta();
       }
     } // ixem
-    if(non_empty) // there is a theta start available
+    if (!non_empty) continue;
+
+    //set epsilon to esp_XEM
+    p_Model_->setEpsilon(p_Model_->modelParameters().eps_XEM_);
+    p_Model_->copyTheta();
+    p_Model_->modifyTheta(); // initialize Theta max values to start values
+    for ( int itr = 0; itr < strategyParam_.nbiter_XEM_; ++itr)
     {
-      //set epsilon to esp_XEM
-      p_Model_->setEpsilon(p_Model_->modelParameters().eps_XEM_);
-      p_Model_->copyThetaStart();
-      for ( int itr = 0; itr < strategyParam_.nbiter_XEM_; ++itr)
+      if(p_Algo_->run())
       {
-        if(p_Algo_->run())
-        {
-          (p_Model_->*strategyParam_.Stop_Criteria)();
-          if (p_Model_->stopAlgo()) { break;}
-        }
-        else { break;}
+        (p_Model_->*strategyParam_.Stop_Criteria)();
+        if (p_Model_->stopAlgo()) { break;}
       }
+      else { break;}
     }
-    else { continue;}
-    Lcurrent = p_Model_->estimateLikelihood();
+    Lcurrent = p_Model_->computeLnLikelihood();
     if(!p_Model_->isEmptyCluster()&&Lcurrent>Lmax)
     {
       Lmax = Lcurrent;
-      p_Model_->modifyThetaMax();
+      p_Model_->modifyTheta();
     }
   } // iTry
-  // look at the value of lmax
+  // look at the value of Lmax
   if(Lmax > -RealMax)
   {
-    p_Model_->copyThetaMax();
+    p_Model_->copyTheta();
     p_Model_->finalizeOutput();
-#ifdef COVERBOSE
+#ifdef COVERBOSE_CONTINGENCY
     std::cout << "XStrategy::run() over.\n";
     std::cout << "Lmax=" << Lmax << "\n";
     p_Model_->consoleOut();
 #endif
-    return true;
+    return !p_Model_->isEmptyCluster();
   }
   else
   {
-#ifdef COVERBOSE
+#ifdef COVERBOSE_CONTINGENCY
     std::cout<<"XStrategy::run() over. All  try fails\n";
 #endif
     return false;

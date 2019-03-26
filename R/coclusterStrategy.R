@@ -13,9 +13,8 @@
 #' value or relative change in pseudo log-likelihood. Valid criterion values are
 #' "Parameter" and "Likelihood". Default criteria is "Parameter".
 #' @param initmethod Method to initialize model parameters. The valid values are
-#' "cemInitStep", "emInitStep" and "randomInit". For now only one kind of
-#' initialization exists for every model currently available in the package.
-#' Hence default value for initialization is set according to the model.
+#' "cemInitStep", "emInitStep" and "randomInit".
+#' @param nbinitmax Maximal number initialization to try. Default value is 100.
 #' @param nbinititerations Number of Global iterations used in initialization
 #' step. Default value is 10.
 #' @param initepsilon Tolerance value used while initialization. Default value
@@ -41,15 +40,30 @@
 #' strategy<-coclusterStrategy()
 #' summary(strategy)
 #' 
-coclusterStrategy<-function(algo = "BEM",initmethod=character(),stopcriteria = "Parameter",  
-		nbiterationsxem = 50, nbiterationsXEM = 500,nbinititerations = 10, initepsilon = 1e-2, nbiterations_int = 5,
-		epsilon_int = 1e-2, epsilonxem = 1e-4,epsilonXEM =1e-10, nbtry = 2, nbxem = 5)
+coclusterStrategy<-function( algo             = "BEM"
+                           , initmethod       = "emInitStep"
+                           , stopcriteria     = "Parameter"
+                           , nbiterationsxem  = 50
+                           , nbiterationsXEM  = 500
+                           , nbinitmax        = 100
+                           , nbinititerations = 10
+                           , initepsilon      = 1e-2
+                           , nbiterations_int = 5
+                           , epsilon_int = 1e-2
+                           , epsilonxem  = 1e-4
+                           , epsilonXEM =1e-10
+                           , nbtry = 2
+                           , nbxem = 5)
 { 
 	#create and return object of class strategy
-	new("strategy",algo = algo,initmethod = initmethod,stopcriteria = stopcriteria, 
-			nbinititerations = nbinititerations,initepsilon = initepsilon, nbiterations_int = nbiterations_int, 
-			epsilonxem = epsilonxem,epsilonXEM = epsilonXEM, epsilon_int = epsilon_int, 
-			nbtry = nbtry,nbxem = nbxem,nbiterationsxem = nbiterationsxem, nbiterationsXEM = nbiterationsXEM
+	new( "strategy", algo = algo, nbinitmax = nbinitmax
+     , initmethod = initmethod, stopcriteria = stopcriteria
+     , nbinititerations = nbinititerations, initepsilon = initepsilon
+     , nbiterations_int = nbiterations_int
+     , epsilonxem = epsilonxem, epsilonXEM = epsilonXEM
+     , epsilon_int = epsilon_int
+     , nbtry = nbtry, nbxem = nbxem, nbiterationsxem = nbiterationsxem
+     , nbiterationsXEM = nbiterationsXEM
      )
 }
 
@@ -61,6 +75,7 @@ coclusterStrategy<-function(algo = "BEM",initmethod=character(),stopcriteria = "
 #' \item{algo: }{Algorithm to be use for co-clustering.}
 #' \item{stopcriteria: }{Stopping criteria used to stop the algorithm.}
 #' \item{initmethod: }{Method to initialize model parameters.}
+#' \item{nbinitmax: }{Maximal number of initialization to try (if reached estimation failed)}
 #' \item{nbinititerations: }{Number of global iterations while running initialization.}
 #' \item{initepsilon: }{Tolerance value used while initialization.}
 #' \item{nbiterations_int: }{Number of iterations for internal E-step.}
@@ -81,34 +96,36 @@ coclusterStrategy<-function(algo = "BEM",initmethod=character(),stopcriteria = "
 setClass(
 		Class="strategy",
 		representation = representation(
-				algo = "character",
-				initmethod = "character",
-				stopcriteria = "character",
-				nbinititerations = "numeric",
-				initepsilon = "numeric",
+				algo             = "character",
+				initmethod       = "character",
+				stopcriteria     = "character",
+        nbinitmax        = "numeric",
+        nbinititerations = "numeric",
+				initepsilon      = "numeric",
 				nbiterations_int = "numeric",
-				epsilon_int = "numeric",
-				nbtry = "numeric",
-				nbxem = "numeric",
-				nbiterationsxem = "numeric",
-				nbiterationsXEM = "numeric",
-				epsilonxem = "numeric",
-				epsilonXEM = "numeric"
+				epsilon_int      = "numeric",
+				nbtry            = "numeric",
+				nbxem            = "numeric",
+				nbiterationsxem  = "numeric",
+				nbiterationsXEM  = "numeric",
+				epsilonxem       = "numeric",
+				epsilonXEM       = "numeric"
 		),
 		prototype = prototype(
-				algo = character(0),
-				stopcriteria = character(0),
-				initmethod = character(0),
+				algo             = character(0),
+				stopcriteria     = character(0),
+				initmethod       = character(0),
+        nbinitmax        = integer(0),
 				nbinititerations = integer(0),
-				initepsilon = numeric(0),
+				initepsilon      = numeric(0),
 				nbiterations_int = integer(0),
-				epsilon_int = numeric(0),
-				nbtry = integer(0),
-				nbxem = integer(0),
-				nbiterationsxem = integer(0),
-				nbiterationsXEM = integer(0),
-				epsilonxem = numeric(0),
-				epsilonXEM = numeric(0)
+				epsilon_int      = numeric(0),
+				nbtry            = integer(0),
+				nbxem            = integer(0),
+				nbiterationsxem  = integer(0),
+				nbiterationsXEM  = integer(0),
+				epsilonxem       = numeric(0),
+				epsilonXEM       = numeric(0)
 		)
 )
 			
@@ -120,19 +137,20 @@ setMethod(
 		signature = "strategy",
 		definition = function(x,i,j,drop) {
 			switch(EXPR=i,
-					"stopcriteria"={return (x@stopcriteria)}, 
-					"initmethod"={return (x@initmethod)},
-					"nbcocluster"={return (x@nbcocluster)}, 
-					"nbinititerations"={return (x@nbinititerations)},
-					"initepsilon" = {return (x@initepsilon)},
+					"stopcriteria"    ={return (x@stopcriteria)}, 
+					"initmethod"      ={return (x@initmethod)},
+					"nbcocluster"     ={return (x@nbcocluster)}, 
+          "nbinitmax"       ={return (x@nbinitmax)},
+          "nbinititerations"={return (x@nbinititerations)},
+					"initepsilon"     ={return (x@initepsilon)},
 					"nbiterations_int"={return (x@nbiterations_int)},  
-					"epsilon_int"={return (x@epsilon_int)},  
-					"nbtry"={return (x@nbtry)},
-					"nbxem"={return (x@nbxem)},
-					"nbiterationsxem"={return (x@nbiterationsxem)},
-					"nbiterationsXEM"={return (x@nbiterationsXEM)},
-					"epsilonxem"={return (x@epsilonxem)},
-					"epsilonXEM"={return (x@epsilonXEM)},
+					"epsilon_int"     ={return (x@epsilon_int)},  
+					"nbtry"           ={return (x@nbtry)},
+					"nbxem"           ={return (x@nbxem)},
+					"nbiterationsxem" ={return (x@nbiterationsxem)},
+					"nbiterationsXEM" ={return (x@nbiterationsXEM)},
+					"epsilonxem"      ={return (x@epsilonxem)},
+					"epsilonXEM"      ={return (x@epsilonXEM)},
 					stop("Invalid slot name.")
 			)			
 		}
@@ -150,6 +168,7 @@ setMethod(
       cat("\nStopping Criteria: ",object@stopcriteria)
       cat("\n\nVarious Iterations")
       cat("\n******************")
+      cat("\nMaximal number of initialization to try: ",object@nbinitmax)
       cat("\nNumber of global iterations while running initialization: ",object@nbinititerations)
       cat("\nNumber of iterations for internal E-step: ",object@nbiterations_int)
       cat("\nNumber of EM iterations used during xem: ",object@nbiterationsxem)

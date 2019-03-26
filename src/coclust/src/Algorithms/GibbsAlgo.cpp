@@ -31,22 +31,15 @@
 #include "GibbsAlgo.h"
 
 GibbsAlgo::GibbsAlgo()
-{
-  // TODO Auto-generated constructor stub
-
-}
+{}
 
 GibbsAlgo::~GibbsAlgo()
-{
-  // TODO Auto-generated destructor stub
-}
+{}
 
 bool GibbsAlgo::run()
 {
-  if (p_Model_->GibbsRows()) {
-    if (p_Model_->GibbsCols()) {
-      return true;
-    }
-  }
-  return false;
+  bool flag = true;
+  flag &= p_Model_->GibbsRows();
+  flag |= p_Model_->GibbsCols();
+  return flag;
 }

@@ -18,7 +18,7 @@ column labels if specified value is true. The default value is false.}
 
 \item{collabels}{Vector specifying the class of columns. The class number starts from zero. Provide -1 for unknown column class.}
 
-\item{model}{This is the name of model. The following models exists for various types of data:
+\item{model}{This is the name of model. The following models exists for Gaussian data:
 \tabular{rlll}{
     Model  \tab Data-type \tab Proportions \tab Dispersion/Variance \cr
     pik_rhol_sigma2kl(Default) \tab continuous \tab unequal \tab unequal \cr

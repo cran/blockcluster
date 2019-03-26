@@ -65,6 +65,7 @@ void IDataExchange::setInput(Rcpp::S4 & obj)
   strategy_.SemiSupervised = Rcpp::as<bool>(obj.slot("semisupervised"));
 
   //Get strategy parameters
+  strategyParam_.nbinitmax_  = Rcpp::as<int>(strategy.slot("nbinitmax"));
   strategyParam_.nbiter_xem_ = Rcpp::as<int>(strategy.slot("nbiterationsxem"));
   strategyParam_.nbiter_XEM_ = Rcpp::as<int>(strategy.slot("nbiterationsXEM"));
   strategyParam_.nbtry_      = Rcpp::as<int>(strategy.slot("nbtry"));

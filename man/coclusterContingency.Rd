@@ -20,7 +20,7 @@ specified value is true. The default value is false.}
 
 \item{collabels}{Integer Vector specifying the class of columns. The class number starts from zero. Provide -1 for unknown column class.}
 
-\item{model}{This is the name of model. The following models exists for various types of data:
+\item{model}{This is the name of model. The following models exists for Poisson data:
 \tabular{rlll}{
     pik_rhol_unknown(default) \tab contingency \tab unequal \tab N.A \cr
     pi_rho_unknown \tab contingency \tab equal \tab N.A \cr

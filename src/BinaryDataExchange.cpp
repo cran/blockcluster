@@ -95,12 +95,12 @@ void BinaryDataExchange::dataInput(Rcpp::S4 & obj)
 {
   STK::RMatrix<STK::Real> data(SEXP(obj.slot("data")));
   m_Dataij_ = data.cast<bool>();
-  Mparam_.nbrowdata_ = m_Dataij_.sizeRows();
-  Mparam_.nbcoldata_ = m_Dataij_.sizeCols();
+  Mparam_.nbRow_ = m_Dataij_.sizeRows();
+  Mparam_.nbCol_ = m_Dataij_.sizeCols();
   //Get Strategy
   //Rcpp::S4 strategy(obj.slot("strategy"));
   //get hyper-parameters
-  Rcpp::IntegerVector hyperparam(obj.slot("hyperparam"));
+  Rcpp::NumericVector hyperparam(obj.slot("hyperparam"));
   a_ = hyperparam(0);
   b_ = hyperparam(1);
 }

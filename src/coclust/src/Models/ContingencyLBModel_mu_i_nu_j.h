@@ -58,9 +58,16 @@ class ContingencyLBModel_mu_i_nu_j: public ICoClustModel
 
     /** cloning */
     virtual ContingencyLBModel_mu_i_nu_j* clone(){return new ContingencyLBModel_mu_i_nu_j(*this);}
-    virtual void logSumRows(MatrixReal & _m_sum);
-    virtual void logSumCols(MatrixReal & _m_sum);
+
+    virtual void logSumRows(MatrixReal & m_sum);
+    virtual void logSumCols(MatrixReal & m_sum);
+
+//    virtual bool cemInitStep();
+//    virtual bool emInitStep();
+//    virtual bool randomInitStep();
+
     virtual void mStepFull();
+
     virtual bool emRows();
     virtual bool cemRows();
     virtual bool emCols();
@@ -69,19 +76,19 @@ class ContingencyLBModel_mu_i_nu_j: public ICoClustModel
     virtual bool semCols();
     virtual bool GibbsRows();
     virtual bool GibbsCols();
+
+    virtual STK::Real computeLnLikelihood();
+    virtual bool initStopCriteria();
     virtual void parameterStopCriteria();
-    virtual STK::Real estimateLikelihood();
-    virtual bool randomInit();
-    virtual bool cemInitStep();
-    virtual bool emInitStep();
-    virtual void finalizeOutput();
     virtual void consoleOut();
-    virtual void modifyThetaStart();
-    virtual void copyThetaStart();
-    virtual void copyThetaMax();
-    virtual void modifyThetaMax();
+
+    virtual void saveThetaInit();
+    virtual void modifyTheta();
+    virtual void copyTheta();
+
     /** @return the number of free parameters of the distribution of a block.*/
     virtual int nbFreeParameters() const;
+
     MatrixReal const& arrangedDataClusters();
     /**Return Poisson Parameters ContingencyLBModel_mu_i_nu_j::m_Gammakl_*/
     MatrixReal const& gamma() const;
@@ -93,25 +100,22 @@ class ContingencyLBModel_mu_i_nu_j: public ICoClustModel
     VectorReal const& v_Mui_;
     VectorReal const& v_Nuj_;
     STK::Real DataSum_;
-    MatrixReal m_Vjk_;
-    MatrixReal m_Uil_;
-    MatrixReal m_Gammakl_, m_Gammaklold_, m_Gammakl1_, m_Gammakl1old_,m_Gammaklstart_,m_Gammaklmax_;
+    MatrixReal m_Gammakl_, m_Gammaklold_;
+    MatrixReal m_Gammakl1_, m_Gammakl1old_;
+    MatrixReal m_Gammakltemp_;
     VectorReal v_nul_;
     VectorReal v_muk_;
     VectorReal v_Ui_,v_Vj_;
     MatrixReal m_Ykl_;
 
     //M-steps
-    void mStepRows();
-    void mStepCols();
-    // Functions to be used for internal computation in model initialization
-    bool initCEMRows();
-    bool initCEMCols();
-    bool initEMRows();
-    bool initEMCols();
-    void selectRandomColsFromData(MatrixReal& m,int col);
-    void randomPoissonParameterRows(MatrixReal& m,int col);
-    void randomPoissonParameterCols(MatrixReal& m);
+    virtual void mStepRows();
+    virtual void mStepCols();
+
+    /** Compute m_Vjk_ array for all models */
+    virtual void computeVjk();
+    /** Compute m_Uil_ array for all models */
+    virtual void computeUil();
 };
 
 inline MatrixReal const& ContingencyLBModel_mu_i_nu_j::gamma() const
@@ -119,20 +123,29 @@ inline MatrixReal const& ContingencyLBModel_mu_i_nu_j::gamma() const
 
 inline void ContingencyLBModel_mu_i_nu_j::mStepRows()
 {
-  if(!Mparam_.fixedproportions_) { v_logPiek_=(v_Tk_/nbSample_).log();}
-
+  mSteplogPiek();
   m_Ykl_     = m_Tik_.transpose()*m_Uil_;
   m_Gammakl_ = m_Ykl_/(m_Tik_.transpose()*v_Mui_*v_nul_.transpose());
-  //m_Gammakl_ = m_Ykl_/(v_Tk_* v_Rl_.transpose());
 }
 
 inline void ContingencyLBModel_mu_i_nu_j::mStepCols()
 {
-  if(!Mparam_.fixedproportions_) { v_logRhol_=(v_Rl_/nbVar_).log();}
-
+  mSteplogRhol();
   m_Ykl_     = m_Vjk_.transpose()*m_Rjl_;
   m_Gammakl_ = m_Ykl_/(v_muk_*v_Nuj_.transpose()*m_Rjl_);
-  //m_Gammakl_ = m_Ykl_/(v_Tk_* v_Rl_.transpose());
 }
+
+inline void ContingencyLBModel_mu_i_nu_j::computeUil()
+{
+  m_Uil_= m_Dataij_*m_Rjl_;
+  v_nul_ = m_Rjl_.transpose()*v_Nuj_;
+}
+
+inline void ContingencyLBModel_mu_i_nu_j::computeVjk()
+{
+  m_Vjk_ = m_Dataij_.transpose()*m_Tik_;
+  v_muk_ = m_Tik_.transpose()*v_Mui_;
+}
+
 
 #endif /* CONTINGENCYLBMODEL_MU_I_NU_J_H_ */

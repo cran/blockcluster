@@ -39,7 +39,7 @@
 #include <STKpp.h>
 #endif
 
-class InputParameters;
+//class InputParameters;
 class ICoClustModel;
 /*
  * Macro definition for numeric limits
