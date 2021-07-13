@@ -239,7 +239,7 @@ class ICoClustModel
     VectorReal v_logPiek_, v_logRhol_;
     VectorReal v_logPiektemp_, v_logRholtemp_;
     /** Row and column classification matrices respectively*/
-    MatrixInt m_Zik_,m_Wjl_;
+    MatrixInteger m_Zik_,m_Wjl_;
     /**Row and column classification vector*/
     VectorInt v_Zi_, v_Wj_;
     /** Intermediary array for computing rows/columns eStep, ceStep and semStep */

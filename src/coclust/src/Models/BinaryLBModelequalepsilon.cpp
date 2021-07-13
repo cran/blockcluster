@@ -39,20 +39,21 @@ BinaryLBModelequalepsilon::BinaryLBModelequalepsilon( MatrixBinary const&  m_Dat
                                                     : ICoClustModel(Mparam)
                                                     , a_(a), b_(b)
                                                     , m_Dataij_(m_Dataij)
+                                                    , m_ClusterDataij_(m_Dataij) // resized in arrangedDataCluster
                                                     , m_Xjl_(STK::sumByCol(m_Dataij_.cast<STK::Real>()).transpose()*STK::Const::Point<STK::Real>(Mparam_.nbcolclust_))
                                                     , m_Xik_(STK::sumByRow(m_Dataij_.cast<STK::Real>())*STK::Const::Point<STK::Real>(Mparam_.nbrowclust_))
                                                     , m_Tk_Rl_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
-                                                    , m_Ukl_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
-                                                    , v_Ui_(Mparam_.nbRow_)
-                                                    , m_Ykl_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
-                                                    , m_Ykl_old2_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
-                                                    , m_Ykl_old1_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
+  //                                                  , m_Ukl_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
+  //                                                  , v_Ui_(Mparam_.nbRow_)
+                                                    , m_Ykl_(Mparam_.nbrowclust_, Mparam_.nbcolclust_, 0)
+                                                    , m_Ykl_old2_(Mparam_.nbrowclust_, Mparam_.nbcolclust_, 0)
+                                                    , m_Ykl_old1_(Mparam_.nbrowclust_, Mparam_.nbcolclust_, 0)
                                                     , m_Akl_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
                                                     , m_Akltemp_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
                                                     , Epsilon_(0)
                                                     , Epsilontemp_(0)
-                                                    , W1_(0),W1_old_(0)
-{};
+//                                                    , W1_(0),W1_old_(0)
+{}
 
 BinaryLBModelequalepsilon::BinaryLBModelequalepsilon( MatrixBinary const&  m_Dataij
                                                     , VectorInt const& rowlabels
@@ -63,11 +64,12 @@ BinaryLBModelequalepsilon::BinaryLBModelequalepsilon( MatrixBinary const&  m_Dat
                                                     : ICoClustModel(Mparam,rowlabels,collabels)
                                                     , a_(a), b_(b)
                                                     , m_Dataij_(m_Dataij)
+                                                    , m_ClusterDataij_(m_Dataij) // resized in arrangedDataCluster
                                                     , m_Xjl_(STK::sumByCol(m_Dataij_.cast<STK::Real>()).transpose()*STK::Const::Point<STK::Real>(Mparam_.nbcolclust_))
                                                     , m_Xik_(STK::sumByRow(m_Dataij_.cast<STK::Real>())*STK::Const::Point<STK::Real>(Mparam_.nbrowclust_))
                                                     , m_Tk_Rl_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
-                                                    , m_Ukl_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
-                                                    , v_Ui_(Mparam_.nbRow_)
+  //                                                  , m_Ukl_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
+  //                                                  , v_Ui_(Mparam_.nbRow_)
                                                     , m_Ykl_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
                                                     , m_Ykl_old2_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
                                                     , m_Ykl_old1_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
@@ -75,8 +77,8 @@ BinaryLBModelequalepsilon::BinaryLBModelequalepsilon( MatrixBinary const&  m_Dat
                                                     , m_Akltemp_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
                                                     , Epsilon_(0)
                                                     , Epsilontemp_(0)
-                                                    , W1_(0),W1_old_(0)
-{};
+//                                                    , W1_(0),W1_old_(0)
+{}
 
 //Compute Bernoulli log-sum for all rows
 void BinaryLBModelequalepsilon::logSumRows(MatrixReal & m_sum)
@@ -367,11 +369,11 @@ STK::Real BinaryLBModelequalepsilon::iclCriteriaValue(){
     criteria+= lgamma(a_+ (v_Wj_==l).count());
   }
 
-  STK::ArrayXXi temp0(Mparam_.nbrowclust_,Mparam_.nbcolclust_);
-  STK::ArrayXXi temp1(Mparam_.nbrowclust_,Mparam_.nbcolclust_);
+  MatrixReal temp0(Mparam_.nbrowclust_,Mparam_.nbcolclust_);
+  MatrixReal temp1(Mparam_.nbrowclust_,Mparam_.nbcolclust_);
   MatrixBinary m_tempdata = (m_Dataij_==0);
-  temp0 = (m_Zik_.transpose()*m_tempdata.cast<int>()*m_Wjl_)+b_;
-  temp1 = (m_Zik_.transpose()*m_Dataij_.cast<int>()*m_Wjl_)+b_;
+  temp0 = (m_Zik_.transpose()*m_tempdata.cast<int>()*m_Wjl_).cast<STK::Real>()+b_;
+  temp1 = (m_Zik_.transpose()*m_Dataij_.cast<int>()*m_Wjl_).cast<STK::Real>()+b_;
   for (int k = 0; k < Mparam_.nbrowclust_; ++k) {
     for (int l = 0; l < Mparam_.nbcolclust_; ++l)
     {

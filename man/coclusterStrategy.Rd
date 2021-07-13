@@ -6,11 +6,22 @@
 \alias{strategy-class}
 \title{Strategy function}
 \usage{
-coclusterStrategy(algo = "BEM", initmethod = "emInitStep",
-  stopcriteria = "Parameter", nbiterationsxem = 50,
-  nbiterationsXEM = 500, nbinitmax = 100, nbinititerations = 10,
-  initepsilon = 0.01, nbiterations_int = 5, epsilon_int = 0.01,
-  epsilonxem = 1e-04, epsilonXEM = 1e-10, nbtry = 2, nbxem = 5)
+coclusterStrategy(
+  algo = "BEM",
+  initmethod = "emInitStep",
+  stopcriteria = "Parameter",
+  nbiterationsxem = 50,
+  nbiterationsXEM = 500,
+  nbinitmax = 100,
+  nbinititerations = 10,
+  initepsilon = 0.01,
+  nbiterations_int = 5,
+  epsilon_int = 0.01,
+  epsilonxem = 1e-04,
+  epsilonXEM = 1e-10,
+  nbtry = 2,
+  nbxem = 5
+)
 }
 \arguments{
 \item{algo}{The valid values for this parameter are "BEM" (Default), "BCEM",

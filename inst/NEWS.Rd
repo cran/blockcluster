@@ -3,6 +3,11 @@
 \name{NEWS}
 \title{News for Package 'blockcluster'}
 
+\section{Changes in blockcluster version 4.5.0 (2021-07-10)}{
+  \itemize{
+    \item comply with valgrind and UBSAN check
+  }
+}
 \section{Changes in blockcluster version 4.2.7 (2018-10-03)}{
   \itemize{
     \item Small bug correction

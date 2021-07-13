@@ -41,11 +41,10 @@
 class XStrategyAlgo: public IStrategy
 {
   public:
-    XStrategyAlgo(StrategyParameters & Aparam)
-    :IStrategy(Aparam)
-    {};
+    XStrategyAlgo(StrategyParameters const& Aparam):IStrategy(Aparam) {}
     virtual bool run();
     virtual ~XStrategyAlgo(){};
+
   private:
     void writeVector(int it, MatrixReal classes, std::string type);
 };

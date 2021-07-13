@@ -4,10 +4,18 @@
 \alias{coclusterCategorical}
 \title{Co-Clustering function for categorical data-sets.}
 \usage{
-coclusterCategorical(data, semisupervised = FALSE,
-  rowlabels = integer(0), collabels = integer(0), model = NULL,
-  nbcocluster, strategy = coclusterStrategy(), a = 1, b = 1,
-  nbCore = 1)
+coclusterCategorical(
+  data,
+  semisupervised = FALSE,
+  rowlabels = integer(0),
+  collabels = integer(0),
+  model = NULL,
+  nbcocluster,
+  strategy = coclusterStrategy(),
+  a = 1,
+  b = 1,
+  nbCore = 1
+)
 }
 \arguments{
 \item{data}{Input data as matrix (or list containing data matrix.)}

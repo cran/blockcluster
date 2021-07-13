@@ -123,11 +123,11 @@ class BinaryLBModel : public ICoClustModel
     STK::Real a_,b_;//hyper-parameters
     MatrixBinary const&  m_Dataij_;
     MatrixBinary m_ClusterDataij_;
+    MatrixBinary m_akl_;
+    MatrixReal m_epsilonkl_;
     MatrixReal m_Alphakl_, m_Alphaklold_;
     MatrixReal m_Alphakl1_, m_Alphakl1old_;
     MatrixReal m_Alphakltemp_;
-    MatrixBinary m_akl_;
-    MatrixReal m_epsilonkl_, m_epsilonkltemp_;
 
     virtual void mStepRows();
     virtual void mStepCols();

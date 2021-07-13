@@ -53,7 +53,7 @@ class ICoClustModel;
 
 //Matrix containers
 typedef STK::CArrayXX MatrixReal;
-typedef STK::CArrayXXi MatrixInt;
+typedef STK::CArrayXXi MatrixInteger;
 typedef STK::CArray<bool, STK::UnknownSize, STK::UnknownSize> MatrixBinary;
 
 //Vector Containers

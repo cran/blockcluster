@@ -33,11 +33,11 @@
 class CategoricalLBModel:public ICoClustModel
 {
   public:
-    CategoricalLBModel( MatrixInt const& m_Dataij
+    CategoricalLBModel( MatrixInteger const& m_Dataij
                       , ModelParameters const& Mparam
                       , STK::Real a=1, STK::Real b=1
                       );
-    CategoricalLBModel( MatrixInt const& m_Dataij
+    CategoricalLBModel( MatrixInteger const& m_Dataij
                       , VectorInt const & rowlabels
                       , VectorInt const & collabels
                       , ModelParameters const& Mparam
@@ -72,7 +72,7 @@ class CategoricalLBModel:public ICoClustModel
     virtual void modifyTheta();
     virtual void copyTheta();
 
-    MatrixInt const& arrangedDataClusters();
+    MatrixInteger const& arrangedDataClusters();
     inline const std::vector<MatrixReal>& mean(){return m3_Alphahkl_;}
     /** @return the number of free parameters of the distribution of a block.*/
     virtual int nbFreeParameters() const;
@@ -82,8 +82,8 @@ class CategoricalLBModel:public ICoClustModel
   protected:
     /// hyper-parameters
     STK::Real a_,b_;
-    MatrixInt const& m_Dataij_;
-    MatrixInt m_ClusterDataij_;
+    MatrixInteger const& m_Dataij_;
+    MatrixInteger m_ClusterDataij_;
     /// Vector of the summed matrices
     VectorReal v_Ui_,v_Vj_;
     int r_; //number of categories

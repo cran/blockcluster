@@ -25,7 +25,7 @@
 #include <math.h>
 #include "CategoricalLBModel.h"
 
-CategoricalLBModel::CategoricalLBModel( MatrixInt const& m_Dataij
+CategoricalLBModel::CategoricalLBModel( MatrixInteger const& m_Dataij
                                       , ModelParameters const& Mparam
                                       , STK::Real a, STK::Real b
                                       )
@@ -40,7 +40,7 @@ CategoricalLBModel::CategoricalLBModel( MatrixInt const& m_Dataij
   initializeStorages();
 }
 
-CategoricalLBModel::CategoricalLBModel( MatrixInt const& m_Dataij
+CategoricalLBModel::CategoricalLBModel( MatrixInteger const& m_Dataij
                                       , VectorInt const & rowlabels
                                       , VectorInt const & collabels
                                       , ModelParameters const& Mparam
@@ -489,7 +489,7 @@ void CategoricalLBModel::consoleOut()
 #endif
 }
 
-const MatrixInt& CategoricalLBModel::arrangedDataClusters()
+const MatrixInteger& CategoricalLBModel::arrangedDataClusters()
 {
   arrangedDataCluster(m_ClusterDataij_,m_Dataij_);
   return m_ClusterDataij_;

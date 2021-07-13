@@ -4,9 +4,16 @@
 \alias{coclusterContinuous}
 \title{Co-Clustering function.}
 \usage{
-coclusterContinuous(data, semisupervised = FALSE,
-  rowlabels = integer(0), collabels = integer(0), model = NULL,
-  nbcocluster, strategy = coclusterStrategy(), nbCore = 1)
+coclusterContinuous(
+  data,
+  semisupervised = FALSE,
+  rowlabels = integer(0),
+  collabels = integer(0),
+  model = NULL,
+  nbcocluster,
+  strategy = coclusterStrategy(),
+  nbCore = 1
+)
 }
 \arguments{
 \item{data}{Input data as matrix (or list containing data matrix.)}

@@ -4,9 +4,18 @@
 \alias{coclusterBinary}
 \title{Co-Clustering function for Binary data.}
 \usage{
-coclusterBinary(data, semisupervised = FALSE, rowlabels = integer(0),
-  collabels = integer(0), model = NULL, nbcocluster,
-  strategy = coclusterStrategy(), a = 1, b = 1, nbCore = 1)
+coclusterBinary(
+  data,
+  semisupervised = FALSE,
+  rowlabels = integer(0),
+  collabels = integer(0),
+  model = NULL,
+  nbcocluster,
+  strategy = coclusterStrategy(),
+  a = 1,
+  b = 1,
+  nbCore = 1
+)
 }
 \arguments{
 \item{data}{Input data as matrix (or list containing data matrix)}

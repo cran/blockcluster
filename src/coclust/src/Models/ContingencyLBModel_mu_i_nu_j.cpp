@@ -37,20 +37,20 @@ ContingencyLBModel_mu_i_nu_j::ContingencyLBModel_mu_i_nu_j( MatrixReal const& m_
                                                           )
                                                           : ICoClustModel(Mparam)
                                                           , m_Dataij_(m_Dataij)
-                                                          , m_ClusterDataij_(Mparam_.nbRow_, Mparam_.nbCol_)
+                                                          , m_ClusterDataij_(m_Dataij)
                                                           , v_Mui_(v_Mui),v_Nuj_(v_Nuj)
                                                           , DataSum_(m_Dataij.sum())
-                                                          , m_Gammakl_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
-                                                          , m_Gammaklold_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
-                                                          , m_Gammakl1_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
-                                                          , m_Gammakl1old_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
-                                                          , m_Gammakltemp_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
-                                                          , v_nul_(Mparam_.nbcolclust_)
-                                                          , v_muk_(Mparam_.nbrowclust_)
-                                                          , v_Ui_(Mparam_.nbRow_)
-                                                          , v_Vj_(Mparam_.nbCol_)
-                                                          , m_Ykl_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
-{};
+                                                          , m_Gammakl_(Mparam_.nbrowclust_, Mparam_.nbcolclust_, 1.)
+                                                          , m_Gammaklold_(Mparam_.nbrowclust_, Mparam_.nbcolclust_, 1.)
+                                                          , m_Gammakl1_(Mparam_.nbrowclust_, Mparam_.nbcolclust_, 1.)
+                                                          , m_Gammakl1old_(Mparam_.nbrowclust_, Mparam_.nbcolclust_, 1.)
+                                                          , m_Gammakltemp_(Mparam_.nbrowclust_, Mparam_.nbcolclust_, 1.)
+                                                          , v_nul_(Mparam_.nbcolclust_, 0.)
+                                                          , v_muk_(Mparam_.nbrowclust_, 0.)
+                                                          , v_Ui_(Mparam_.nbRow_, 0.)
+                                                          , v_Vj_(Mparam_.nbCol_, 0.)
+                                                          , m_Ykl_()
+{}
 
 ContingencyLBModel_mu_i_nu_j::ContingencyLBModel_mu_i_nu_j( MatrixReal const& m_Dataij
                                                           , VectorInt const & rowlabels
@@ -73,8 +73,8 @@ ContingencyLBModel_mu_i_nu_j::ContingencyLBModel_mu_i_nu_j( MatrixReal const& m_
                                                           , v_muk_(Mparam_.nbrowclust_)
                                                           , v_Ui_(Mparam_.nbRow_)
                                                           , v_Vj_(Mparam_.nbCol_)
-                                                          , m_Ykl_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
-{};
+                                                          , m_Ykl_()
+{}
 
 void ContingencyLBModel_mu_i_nu_j::logSumRows(MatrixReal & m_ik)
 {
@@ -210,7 +210,7 @@ bool ContingencyLBModel_mu_i_nu_j::GibbsCols()
 
 STK::Real ContingencyLBModel_mu_i_nu_j::computeLnLikelihood()
 {
-  likelihood_ = (m_Ykl_.prod(m_Gammakl_.log()) ).sum() - DataSum_
+  likelihood_ = (m_Ykl_.prod( m_Gammakl_.log()) ).sum() //- DataSum_
 		        + v_Tk_.transpose()*v_logPiek_
 			      + v_Rl_.transpose()*v_logRhol_
 	          - (m_Tik_.prod((RealMin + m_Tik_).log()) ).sum()
@@ -287,6 +287,5 @@ void ContingencyLBModel_mu_i_nu_j::mStepFull()
     v_logRhol_=(v_Rl_/Mparam_.nbCol_).log();
     v_logPiek_=(v_Tk_/Mparam_.nbRow_).log();
   }
-  m_Ykl_     = m_Tik_.transpose()*m_Dataij_*m_Rjl_;
   m_Gammakl_ = m_Ykl_/((m_Tik_.transpose()*v_Mui_)*(v_Nuj_.transpose()*m_Rjl_));
 }

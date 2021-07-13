@@ -12,10 +12,10 @@ class CategoricalDataExchange: public IDataExchange
     virtual void dataOutput(Rcpp::S4& obj,ICoClustModel*,bool);
     virtual void dataInput(Rcpp::S4 & obj);
     virtual void instantiateModel(ICoClustModel*& model);
-    inline const MatrixInt& GetData() const {return m_Dataij_;}
+    inline const MatrixInteger& GetData() const {return m_Dataij_;}
     virtual ~CategoricalDataExchange(){};
   protected:
-    MatrixInt m_Dataij_;
+    MatrixInteger m_Dataij_;
     STK::Real a_,b_;
 };
 

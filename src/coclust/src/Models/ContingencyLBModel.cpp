@@ -33,22 +33,21 @@ ContingencyLBModel::ContingencyLBModel( MatrixReal const& m_Dataij
                                       )
                                       : ICoClustModel(Mparam)
                                       , m_Dataij_(m_Dataij)
-                                      , m_ClusterDataij_(Mparam_.nbRow_, Mparam_.nbCol_)
+                                      , m_ClusterDataij_(m_Dataij)
                                       , DataSum_(m_Dataij_.sum())
-                                      , m_Gammakl_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
-                                      , m_Gammaklold_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
-                                      , m_Gammakl1_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
-                                      , m_Gammakl1old_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
-                                      , m_Gammakltemp_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
-                                      , v_Ui_(Mparam_.nbRow_)
-                                      , v_Vj_(Mparam_.nbCol_)
-                                      , m_Ykl_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
+                                      , m_Gammakl_(Mparam_.nbrowclust_, Mparam_.nbcolclust_, 1.)
+                                      , m_Gammaklold_(Mparam_.nbrowclust_, Mparam_.nbcolclust_, 1.)
+                                      , m_Gammakl1_(Mparam_.nbrowclust_, Mparam_.nbcolclust_, 1.)
+                                      , m_Gammakl1old_(Mparam_.nbrowclust_, Mparam_.nbcolclust_, 1.)
+                                      , m_Gammakltemp_(Mparam_.nbrowclust_, Mparam_.nbcolclust_, 1.)
+                                      , v_Ui_(Mparam_.nbRow_, 0.)
+                                      , v_Vj_(Mparam_.nbCol_, 0.)
 {
 #ifdef COVERBOSE_CONTINGENCY
   std::cout << "ContingencyLBModel created with parameters:"<<std::endl;
   std::cout << Mparam_;
 #endif
-};
+}
 
 ContingencyLBModel::ContingencyLBModel( MatrixReal const& m_Dataij
                                       , VectorInt const& rowlabels
@@ -57,22 +56,21 @@ ContingencyLBModel::ContingencyLBModel( MatrixReal const& m_Dataij
                                       )
                                       : ICoClustModel(Mparam,rowlabels,collabels)
                                       , m_Dataij_(m_Dataij)
-                                      , m_ClusterDataij_(Mparam_.nbRow_, Mparam_.nbCol_)
+                                      , m_ClusterDataij_(m_Dataij)
                                       , DataSum_(m_Dataij_.sum())
-                                      , m_Gammakl_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
-                                      , m_Gammaklold_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
-                                      , m_Gammakl1_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
-                                      , m_Gammakl1old_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
-                                      , m_Gammakltemp_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
-                                      , v_Ui_(Mparam_.nbRow_)
-                                      , v_Vj_(Mparam_.nbCol_)
-                                      , m_Ykl_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
+                                      , m_Gammakl_(Mparam_.nbrowclust_, Mparam_.nbcolclust_, 1.)
+                                      , m_Gammaklold_(Mparam_.nbrowclust_, Mparam_.nbcolclust_, 1.)
+                                      , m_Gammakl1_(Mparam_.nbrowclust_, Mparam_.nbcolclust_, 1.)
+                                      , m_Gammakl1old_(Mparam_.nbrowclust_, Mparam_.nbcolclust_, 1.)
+                                      , m_Gammakltemp_(Mparam_.nbrowclust_, Mparam_.nbcolclust_, 1.)
+                                      , v_Ui_(Mparam_.nbRow_, 0.)
+                                      , v_Vj_(Mparam_.nbCol_, 0.)
 {
 #ifdef COVERBOSE_CONTINGENCY
   std::cout << "ContingencyLBModel created with parameters:"<<std::endl;
   std::cout << Mparam;
 #endif
-};
+}
 
 void ContingencyLBModel::logSumRows(MatrixReal & m_ik)
 {
@@ -199,11 +197,18 @@ bool ContingencyLBModel::GibbsCols()
 
 STK::Real ContingencyLBModel::computeLnLikelihood()
 {
-  likelihood_ = ( (m_Tik_.transpose()*m_Dataij_*m_Rjl_).prod((m_Gammakl_).log())
-                 - m_Gammakl_.prod(v_Tk_*v_Rl_.transpose())
-                ).sum()
+  MatrixReal m_Ykl_;
+
+  if (m_Tik_.sizeCols() < m_Rjl_.sizeCols())
+  { m_Ykl_     = (m_Tik_.transpose()*m_Dataij_)*m_Rjl_;}
+  else
+  { m_Ykl_     = m_Tik_.transpose()*(m_Dataij_*m_Rjl_);}
+
+
+  likelihood_ = ( m_Ykl_.prod(m_Gammakl_.log()) - m_Gammakl_.prod( v_Tk_*v_Rl_.transpose() ) ).sum()
               //- DataSum_
-              + v_Tk_.dot(v_logPiek_) + v_Rl_.dot(v_logRhol_)
+              + v_Tk_.dot(v_logPiek_)
+              + v_Rl_.dot(v_logRhol_)
               - (m_Tik_.prod( (RealMin + m_Tik_).log()) ).sum()
               - (m_Rjl_.prod( (RealMin + m_Rjl_).log()) ).sum();
   return likelihood_;
@@ -275,6 +280,7 @@ void ContingencyLBModel::mStepFull()
     v_logRhol_=(v_Rl_/Mparam_.nbCol_).log();
     v_logPiek_=(v_Tk_/Mparam_.nbRow_).log();
   }
+  MatrixReal m_Ykl_;
   // try some optimization
   if (m_Tik_.sizeCols() < m_Rjl_.sizeCols())
   { m_Ykl_     = (m_Tik_.transpose()*m_Dataij_)*m_Rjl_;}

@@ -3,7 +3,9 @@
 \name{gaussiandata}
 \alias{gaussiandata}
 \title{Simulated Gaussian Data-set}
-\format{A data matrix with 1000 rows and 100 columns.}
+\format{
+A data matrix with 1000 rows and 100 columns.
+}
 \description{
 It is a Continuous data-set simulated using Gaussian distribution. It consist of two clusters
 in rows and three clusters in columns.

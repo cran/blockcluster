@@ -2,9 +2,9 @@ Package: blockcluster
 Type: Package
 Title: Co-Clustering Package for Binary, Categorical, Contingency and
         Continuous Data-Sets
-Version: 4.4.3
+Version: 4.5.0
 Encoding: UTF-8
-Date: 2019-03-22
+Date: 2021-07-07
 Authors@R: c( person("Serge", "Iovleff", role = c("aut","cre"), email = "Serge.Iovleff@stkpp.org")
             , person("Parmeet", "Singh Bhatia", role = "aut", email = "bhatia.parmeet@gmail.com")
             , person("Josselin", "Demont", role = "ctb")
@@ -40,8 +40,8 @@ Collate: 'coclusterStrategy.R' 'RCocluster.R' 'optionclasses.R'
         'cocluster.R' 'coclusterBinary.R' 'coclusterCategorical.R'
         'coclusterContingency.R' 'coclusterContinuous.R' 'onattach.R'
 NeedsCompilation: yes
-Packaged: 2019-03-26 15:06:02 UTC; iovleff
-RoxygenNote: 6.1.1
+Packaged: 2021-07-10 19:29:51 UTC; iovleff
+RoxygenNote: 7.1.1
 Author: Serge Iovleff [aut, cre],
   Parmeet Singh Bhatia [aut],
   Josselin Demont [ctb],
@@ -52,4 +52,4 @@ Author: Serge Iovleff [aut, cre],
   Gilles Celeux [ctb]
 Maintainer: Serge Iovleff <Serge.Iovleff@stkpp.org>
 Repository: CRAN
-Date/Publication: 2019-03-26 18:00:02 UTC
+Date/Publication: 2021-07-13 12:00:12 UTC

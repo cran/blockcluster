@@ -60,7 +60,7 @@ std::ostream& operator<< (std::ostream& os, ModelParameters const& param)
   os << "* fixedproportions_ = " << param.fixedproportions_ << std::endl;
   os << "****************************************" << std::endl;
   return os;
-};
+}
 
 
 #ifdef STK_DMANAGER

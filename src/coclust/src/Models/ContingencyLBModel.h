@@ -91,7 +91,6 @@ class ContingencyLBModel: public ICoClustModel
     MatrixReal m_Gammakl1_, m_Gammakl1old_;
     MatrixReal m_Gammakltemp_;
     VectorReal v_Ui_,v_Vj_;
-    MatrixReal m_Ykl_;
 
     //M-steps
     virtual void mStepRows();

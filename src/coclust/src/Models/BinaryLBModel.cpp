@@ -41,15 +41,14 @@ BinaryLBModel::BinaryLBModel( MatrixBinary const&  m_Dataij
                             : ICoClustModel(Mparam)
                             , a_(a), b_(b)
                             , m_Dataij_(m_Dataij)
-                            , m_ClusterDataij_(Mparam_.nbRow_, Mparam_.nbCol_)
-                            , m_Alphakl_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
-                            , m_Alphaklold_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
-                            , m_Alphakl1_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
-                            , m_Alphakl1old_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
-                            , m_Alphakltemp_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
-                            , m_akl_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
-                            , m_epsilonkl_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
-                            , m_epsilonkltemp_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
+                            , m_ClusterDataij_(m_Dataij) // resized in arrangedDataCluster
+                            , m_akl_(Mparam_.nbrowclust_, Mparam_.nbcolclust_, false) // sized in finalizeOutput
+                            , m_epsilonkl_(Mparam_.nbrowclust_, Mparam_.nbcolclust_, 0.) // sized in finalizeOutput
+                            , m_Alphakl_(Mparam_.nbrowclust_, Mparam_.nbcolclust_, 0.5)
+                            , m_Alphaklold_(Mparam_.nbrowclust_, Mparam_.nbcolclust_, 0.5)
+                            , m_Alphakl1_(Mparam_.nbrowclust_, Mparam_.nbcolclust_, 0.5)
+                            , m_Alphakl1old_(Mparam_.nbrowclust_, Mparam_.nbcolclust_, 0.5)
+                            , m_Alphakltemp_(Mparam_.nbrowclust_, Mparam_.nbcolclust_, 0.5)
 {
 #ifdef COVERBOSE
   std::cout << "BinaryLBModel::BinaryLBModel done"<<std::endl;
@@ -68,15 +67,14 @@ BinaryLBModel::BinaryLBModel( MatrixBinary const& m_Dataij
                             : ICoClustModel(Mparam,rowlabels,collabels)
                             , a_(a), b_(b)
                             , m_Dataij_(m_Dataij)
-                            , m_ClusterDataij_(Mparam_.nbRow_, Mparam_.nbCol_)
-                            , m_Alphakl_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
-                            , m_Alphaklold_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
-                            , m_Alphakl1_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
-                            , m_Alphakl1old_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
-                            , m_Alphakltemp_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
-                            , m_akl_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
-                            , m_epsilonkl_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
-                            , m_epsilonkltemp_(Mparam_.nbrowclust_, Mparam_.nbcolclust_)
+                            , m_ClusterDataij_(m_Dataij) // resized in arrangedDataCluster
+                            , m_akl_(Mparam_.nbrowclust_, Mparam_.nbcolclust_, false) // sized in finalizeOutput
+                            , m_epsilonkl_(Mparam_.nbrowclust_, Mparam_.nbcolclust_, 0.) // sized in finalizeOutput
+                            , m_Alphakl_(Mparam_.nbrowclust_, Mparam_.nbcolclust_, 0.5)
+                            , m_Alphaklold_(Mparam_.nbrowclust_, Mparam_.nbcolclust_, 0.5)
+                            , m_Alphakl1_(Mparam_.nbrowclust_, Mparam_.nbcolclust_, 0.5)
+                            , m_Alphakl1old_(Mparam_.nbrowclust_, Mparam_.nbcolclust_, 0.5)
+                            , m_Alphakltemp_(Mparam_.nbrowclust_, Mparam_.nbcolclust_, 0.5)
 {
 #ifdef COVERBOSE
   std::cout << "BinaryLBModel::BinaryLBModel done"<<std::endl;
