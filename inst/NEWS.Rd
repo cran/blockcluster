@@ -3,9 +3,10 @@
 \name{NEWS}
 \title{News for Package 'blockcluster'}
 
-\section{Changes in blockcluster version 4.5.0 (2021-07-10)}{
+\section{Changes in blockcluster version 4.5 (2021-07-10)}{
   \itemize{
-    \item comply with valgrind and UBSAN check
+    \item Version 4.5.1: Modifying more files in order to comply with UBSAN check 
+    \item Version 4.5.0: Comply with valgrind and UBSAN check
   }
 }
 \section{Changes in blockcluster version 4.2.7 (2018-10-03)}{

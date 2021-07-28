@@ -211,12 +211,13 @@ void ContinuousLBModel::parameterStopCriteria()
 
 STK::Real ContinuousLBModel::computeLnLikelihood()
 {
-  likelihood_ = (-0.5*(dimprod_+v_Tk_.dot(m_Sigma2kl_.log()*v_Rl_))
-                 + v_Tk_.dot(v_logPiek_)
-                 + v_Rl_.dot(v_logRhol_)
-                 - (m_Tik_.prod( (RealMin + m_Tik_).log()) ).sum()
-                 - (m_Rjl_.prod( (RealMin + m_Rjl_).log()) ).sum()
-			     );
+  // fuzzy clustering criterion
+  likelihood_ = -0.5*(dimprod_+v_Tk_.dot(m_Sigma2kl_.log()*v_Rl_)) // \sum_{ijkl} t_{ik}r_{jl} \log(f_{kl}(x_{ij};\alpha))
+              + v_Tk_.dot(v_logPiek_) // \sum_{k} t_{.k}log(\pi_k)
+              + v_Rl_.dot(v_logRhol_) // \sum_{l} r_{.l}log(\rho_l)
+              - (m_Tik_.prod( (RealMin + m_Tik_).log()) ).sum() // entropy H(t)
+              - (m_Rjl_.prod( (RealMin + m_Rjl_).log()) ).sum() // entropy H(r)
+			        ;
   return likelihood_;
 }
 
