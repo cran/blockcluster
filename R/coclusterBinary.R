@@ -54,9 +54,11 @@ NULL
 #' plot(out)
 #' 
 coclusterBinary<-function( data, semisupervised = FALSE
-                         , rowlabels = integer(0), collabels = integer(0),
-                           model = NULL, nbcocluster, strategy = coclusterStrategy(), a=1, b=1
-											   , nbCore = 1) 
+                         , rowlabels = integer(0), collabels = integer(0)
+				         , model = NULL
+				         , nbcocluster
+				         , strategy = coclusterStrategy()
+				         , a=1, b=1, nbCore = 1) 
 {
 	#Check for data and get dimensions
 	if(missing(data)){ stop("Data is missing.")}

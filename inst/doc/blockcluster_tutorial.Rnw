@@ -3,31 +3,33 @@
 %\VignettePackage{blockcluster}
 
 \documentclass[a4paper,11pt]{article}
-\usepackage[utf8x]{inputenc}
-\usepackage{listings}
+\usepackage[utf8]{inputenc}
+
+\usepackage{amsfonts,amstext,amsmath,amssymb}
+
 \usepackage{graphicx}
+
 \usepackage{rotating}
 \usepackage{multirow}
-\usepackage{hyperref}
-\usepackage[toc,page]{appendix}
+
+%\usepackage[toc,page]{appendix}
 \usepackage{tikz}
 \usetikzlibrary{arrows}
 \usetikzlibrary{decorations.markings}
-\usepackage{amsfonts,amstext,amsmath,amssymb}
-\usepackage{array}
+%\usepackage{array}
 
-%% Bibliography
-%\usepackage{natbib}
-\usepackage{fullpage}
 \usepackage{color}
 \definecolor{dkgreen}{rgb}{0,0.6,0}
 \definecolor{gray}{rgb}{0.5,0.5,0.5}
 \definecolor{mauve}{rgb}{0.58,0,0.82}
-
 % une couleur par auteur lors de la redaction
 \newcommand{\cb}[1]{{\color{blue}{{\bf CB:} #1}}}
 \newcommand{\fl}[1]{{\color{red}{{\bf FL:} #1}}}
 
+\usepackage{fullpage}
+\usepackage{hyperref}
+
+\usepackage{listings}
 \lstset{
     language=R,
     basicstyle=\footnotesize\ttfamily,
@@ -213,7 +215,7 @@ and categorical data. This package  is unique from the point of view of
 generative models it implements (latent block models), the used algorithms
 (BEM, BCEM) and, apart from that, special attention has been given to design
 the library for handling very huge data sets in reasonable time. The R package
-is already available on CRAN at \url{http://cran.r-project.org/web/packages/blockcluster/index.html}.
+is already available on CRAN at \url{https://CRAN.R-project.org/package=blockcluster}.
 
 This aim of this tutorial is to elaborate the usage of R package {\bf
 blockcluster} and to familiarize its users with its various capabilities. The
@@ -644,7 +646,8 @@ plot(out, type = 'distribution')
 
 \section{Examples with real datasets}
 \label{sec:applications}
-This section  demonstrates the applicability of package on real data. Two examples are used: one for Image 
+This section  demonstrates the applicability of package on real data.
+Two examples are used: one for Image 
 segmentation and other for document (co-)clustering. 
 
 \subsection{Image segmentation}
@@ -655,7 +658,7 @@ interesting application of co-clustering (as pre-processing step) for segmenting
 Hence I run the {\bf blockcluster} package with Gaussian Family model {\bf pik\_rhol\_sigma2kl}  on image shown in Figure~\ref{fig:coclustersnake}.
 It can be clearly seen that the image got nicely segmented into snake and insect in two different blocks. 
 
-\begin{figure}[ht]
+\begin{figure}[h!]
 \centering
  \includegraphics[scale=.25]{figs/coclustersnake.jpg}
 \caption{Original and co-clustered (segmented) image.}
@@ -772,9 +775,10 @@ co-clustering (b).}
 \end{figure}
 
 \section{Remarks}
-This tutorial gives a brief introduction about the {\bf blockcluster} R package. It demonstrates the use of package using Binary data-set but the package can be used in similar fashion for other types of data namely {\bf Contingency}, {\bf Continuous} and {\bf Categorical}. Please note that this tutorial is based on version 4. If you have any
-questions, suggestions or remarks, do not hesitate to put it on public forum at
-\url{https://gforge.inria.fr/forum/forum.php?forum_id=11190&group_id=3679}.
+This tutorial gives a brief introduction about the {\bf blockcluster} R package. It demonstrates the use of package using Binary data-set but the package can be used in similar fashion for other types of data namely {\bf Contingency}, {\bf Continuous} and {\bf Categorical}.
+Please note that this tutorial is based on version 4.% If you have any
+%questions, suggestions or remarks, do not hesitate to put it on public forum at
+%\url{https://gforge.inria.fr/forum/forum.php?forum_id=11190&group_id=3679}.
 
 
 \bibliographystyle{plain}

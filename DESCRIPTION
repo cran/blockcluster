@@ -2,16 +2,16 @@ Package: blockcluster
 Type: Package
 Title: Co-Clustering Package for Binary, Categorical, Contingency and
         Continuous Data-Sets
-Version: 4.5.1
+Version: 4.5.2
 Encoding: UTF-8
-Date: 2021-07-15
+Date: 2022-12-23
 Authors@R: c( person("Serge", "Iovleff", role = c("aut","cre"), email = "Serge.Iovleff@stkpp.org")
             , person("Parmeet", "Singh Bhatia", role = "aut", email = "bhatia.parmeet@gmail.com")
             , person("Josselin", "Demont", role = "ctb")
-            , person("Vincent", "Brault", role = "ctb", email = "vincent.brault@imag.fr")
-            , person("Vincent", "Kubicki", role = "ctb", email = "vincent.kubicki@laposte.net")
+            , person("Vincent", "Brault", role = "ctb", email = "Vincent.Brault@univ-grenoble-alpes.fr")
+            , person("Vincent", "Kubicki", role = "ctb")
             , person("Gerard", "Goavert", role = "ctb")
-            , person("Christophe", "Biernacki", role = "ctb")
+            , person("Christophe", "Biernacki", role = "ctb", email = "Christophe.Biernacki@inria.fr")
             , person("Gilles", "Celeux", role = "ctb"))
 Copyright: Inria
 Description: Simultaneous clustering of rows and columns, usually designated by
@@ -29,8 +29,7 @@ Description: Simultaneous clustering of rows and columns, usually designated by
     and many more. More information about the project and comprehensive tutorial
     can be found on the link mentioned in URL.
 License: GPL (>= 3)
-URL: https://gforge.inria.fr/projects/cocluster/
-BugReports: https://gforge.inria.fr/forum/forum.php?forum_id=11190&group_id=3679
+URL: https://gitlab.inria.fr/iovleff/blockcluster
 LazyLoad: yes
 Depends: R (>= 3.0.2), rtkore (>= 1.5.5)
 Imports: methods
@@ -40,8 +39,8 @@ Collate: 'coclusterStrategy.R' 'RCocluster.R' 'optionclasses.R'
         'cocluster.R' 'coclusterBinary.R' 'coclusterCategorical.R'
         'coclusterContingency.R' 'coclusterContinuous.R' 'onattach.R'
 NeedsCompilation: yes
-Packaged: 2021-07-15 20:59:42 UTC; iovleff
-RoxygenNote: 7.1.1
+Packaged: 2022-12-23 08:30:22 UTC; iovleff
+RoxygenNote: 7.1.2
 Author: Serge Iovleff [aut, cre],
   Parmeet Singh Bhatia [aut],
   Josselin Demont [ctb],
@@ -52,4 +51,4 @@ Author: Serge Iovleff [aut, cre],
   Gilles Celeux [ctb]
 Maintainer: Serge Iovleff <Serge.Iovleff@stkpp.org>
 Repository: CRAN
-Date/Publication: 2021-07-28 11:20:09 UTC
+Date/Publication: 2023-01-08 14:20:02 UTC
