@@ -160,6 +160,7 @@ class ICoClustModel
 
     /** Estimate likelihood value*/
     virtual STK::Real computeLnLikelihood() = 0;
+    /*************End of Pure virtual functions***********************/
 
     /** Interface for finalizing the output. This function will allow the model to finalize
      * all the output parameters after the algorithm terminates. Do nothing by default.
@@ -177,6 +178,15 @@ class ICoClustModel
      */
     virtual void likelihoodStopCriteria();
 
+    /** Call of the stop criteria method selected by the user.
+     *
+     * This function will set the ICoClustModel::stopAlgo_ parameter to either
+     * true or false depending on whether the change
+     * in Likelihood is less than Mparam_.epsilon_ or not respectively.
+     *
+     * @see StopCriteria
+     */
+    void stopCriteria(StopCriteria const& criteria);
     //common computation getter/setter functions
     /** @return ModelParameters */
     ModelParameters const& modelParameters() const;

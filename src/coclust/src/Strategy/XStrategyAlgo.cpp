@@ -82,7 +82,8 @@ bool XStrategyAlgo::run()
           {
             if(p_Algo_->run()) // run initial algorithm was successful
             {
-              (p_Model_->*strategyParam_.Stop_Criteria)();
+              p_Model_->stopCriteria(strategyParam_.stop_criteria_);
+//              (p_Model_->*strategyParam_.Stop_Criteria)();
               if (p_Model_->stopAlgo()) { break;} // algo convergence
             }
             else { break;} // algo divergence
@@ -138,7 +139,8 @@ bool XStrategyAlgo::run()
     {
       if(p_Algo_->run())
       {
-        (p_Model_->*strategyParam_.Stop_Criteria)();
+        p_Model_->stopCriteria(strategyParam_.stop_criteria_);
+//        (p_Model_->*strategyParam_.Stop_Criteria)();
         if (p_Model_->stopAlgo()) { break;}
       }
       else { break;}

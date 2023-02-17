@@ -1,4 +1,4 @@
-a1a3401f19295437828539a527e8e0a2 *DESCRIPTION
+ad764fec76b4a0f050d354f02fd64515 *DESCRIPTION
 d2c43bd5245f5633fdb87133c34fd013 *NAMESPACE
 40d3de334a0b255973a6af8db131cb0a *R/RCocluster.R
 1792e005a118af17c2272801e6a047da *R/cocluster.R
@@ -20,7 +20,7 @@ e9467fa4ba200a82f7ce519c731d02ac *data/contingencydataunknown.rda
 4bcfd075f676e43658eed34ee21c7454 *inst/NEWS.Rd
 a81f5a54513981a02d880f18feba529a *inst/doc/blockcluster_tutorial.R
 7b0e36d7073a2709c349a85dad0ddd94 *inst/doc/blockcluster_tutorial.Rnw
-45ff04338609159b4ac1e1ea4495ad45 *inst/doc/blockcluster_tutorial.pdf
+cd7009b984ce1cc0571824140a35d08c *inst/doc/blockcluster_tutorial.pdf
 62bb5fe0b5ce63ee013c9a5cef0e7152 *man/BinaryOptions-class.Rd
 f063cbd6b15b14e0a0bb517abc32347f *man/CategoricalOptions-class.Rd
 9e4502ae1e30ff03e782e62847bc1969 *man/CommonOptions-class.Rd
@@ -50,7 +50,7 @@ f8cef95059fbdc0b0e5eb9015e40d49e *src/CategoricalDataExchange.h
 82c918a2216ed449ecee51b5dfc69b3a *src/ContingencyDataExchange.h
 baf1b6d08b99608c43cb831e54fc2ddf *src/ContinuousDataExchange.cpp
 f72e89bfba91bf0459f14e517355ff86 *src/ContinuousDataExchange.h
-01a4bcd1060c445e9c570ef756bb3bbd *src/IDataExchange.cpp
+0a84a3f1a24905254dc7cbd9a6ece90d *src/IDataExchange.cpp
 2863b17c32a07aa35a41d2ee6d6ecde0 *src/IDataExchange.h
 758e0384c05a9440d322f765d9708e38 *src/Makevars
 f89f292ddfb08281f5c9db3d6d7bd483 *src/Makevars.win
@@ -75,8 +75,8 @@ e9d2c287c6d29a998ccbc146f4f25cce *src/coclust/src/Algorithms/SEMAlgo.h
 558f176f201b2f04cfaf310bb9577102 *src/coclust/src/Initialization/EMInit.h
 083187f27975b5739c30354751653eda *src/coclust/src/Initialization/IInit.h
 fc4a93c2f9deb3da26064f776638da06 *src/coclust/src/Initialization/RandomInit.h
-1a9702d5dfd31a228fd48dab11040ed9 *src/coclust/src/InputParameters/InputParameters.cpp
-10de97c72cbfc82ef50179a09473bb85 *src/coclust/src/InputParameters/InputParameters.h
+b9cd15ee4570b168d72491de2204eedb *src/coclust/src/InputParameters/InputParameters.cpp
+bca97e3e9de6f727cd1f456d6c29f417 *src/coclust/src/InputParameters/InputParameters.h
 7ea8ac1e983afcb27a0147a0fb95ae44 *src/coclust/src/Models/BinaryLBModel.cpp
 f439d307ac2ab12e75e0ae2d76cab484 *src/coclust/src/Models/BinaryLBModel.h
 52399ac357ceafea36e284b9d0e36b62 *src/coclust/src/Models/BinaryLBModelequalepsilon.cpp
@@ -91,10 +91,10 @@ f93fd17f115842ac215c057f0ca9a469 *src/coclust/src/Models/ContingencyLBModel_mu_i
 fde7642f619824e2d8963699f242d7db *src/coclust/src/Models/ContinuousLBModel.h
 5d86fffee90cd1ae63190c841630c955 *src/coclust/src/Models/ContinuousLBModelequalsigma.cpp
 3ff8122aa7b4068eab3d5ab8c491455c *src/coclust/src/Models/ContinuousLBModelequalsigma.h
-24d0276a589e2af66414de0072ad94b2 *src/coclust/src/Models/ICoClustModel.cpp
-09da5cf243cb9601b2e5672c9e53cb7b *src/coclust/src/Models/ICoClustModel.h
-9a1ac7f869d4bda5167f5d6daf9a4160 *src/coclust/src/Strategy/IStrategy.h
-e6cb82c6250ce6cd4da56319399ac548 *src/coclust/src/Strategy/XStrategyAlgo.cpp
+34911a61fb9636d097ef56bf96b3ba7f *src/coclust/src/Models/ICoClustModel.cpp
+a169b9155991ce99f6a82dbc575bdf36 *src/coclust/src/Models/ICoClustModel.h
+14843e6cda5dd954622a03f5c44a4612 *src/coclust/src/Strategy/IStrategy.h
+dfce5f55ccbbc793513d7d11003ec457 *src/coclust/src/Strategy/XStrategyAlgo.cpp
 92a34b392323d7066f3f97031f4d1ec8 *src/coclust/src/Strategy/XStrategyAlgo.h
 4ef859a75c4e98ac777e3f314ce04f8e *src/coclust/src/Strategy/XStrategyforSEMAlgo.cpp
 03cf774e030d5fa742bfb4435382989e *src/coclust/src/Strategy/XStrategyforSEMAlgo.h

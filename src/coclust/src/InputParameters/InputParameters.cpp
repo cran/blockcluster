@@ -109,22 +109,17 @@ void InputParameters::ReadFromOptionFile( std::string optionfilename)
   rw.addPage(ip_page);
   rw.read(optionfilename);
   strategy_.DataType_
-      = S_DataType[rw.p_page("InputOptions")->option("DataType").get(
-                                                                     STK::String())];
+      = S_DataType[rw.p_page("InputOptions")->option("DataType").get(STK::String())];
   strategy_.Algo_
-      = S_Algorithm[rw.p_page("InputOptions")->option("Algorithm").get(
-                                                                       STK::String())];
+      = S_Algorithm[rw.p_page("InputOptions")->option("Algorithm").get(STK::String())];
   strategy_.Model_
-      = S_Model[rw.p_page("InputOptions")->option("ModelName").get(
-                                                                   STK::String())];
+      = S_Model[rw.p_page("InputOptions")->option("ModelName").get(STK::String())];
   strategy_.stopcriteria_
-      = S_StopCriteria[rw.p_page("InputOptions")->option("StopCriteria").get(
-                                                                             STK::String())];
+      = S_StopCriteria[rw.p_page("InputOptions")->option("StopCriteria").get(STK::String())];
   strategy_.SemiSupervised
       = rw.p_page("InputOptions")->option("semisupervised").get(STK::Integer());
   strategy_.Init_
-      = S_Init[rw.p_page("InputOptions")->option("Initialization").get(
-                                                                       STK::String())];
+      = S_Init[rw.p_page("InputOptions")->option("Initialization").get(STK::String())];
 
   strategyParam_.nbinitmax_
       = rw.p_page("InputOptions")->option("nbinitmax").get(STK::Integer());
@@ -133,26 +128,22 @@ void InputParameters::ReadFromOptionFile( std::string optionfilename)
   strategyParam_.nbxem_
       = rw.p_page("InputOptions")->option("nbxem").get(STK::Integer());
   strategyParam_.nbiter_xem_
-      = rw.p_page("InputOptions")->option("nbiterations_xemstart").get(
-                                                                       STK::Integer());
+      = rw.p_page("InputOptions")->option("nbiterations_xemstart").get(STK::Integer());
   strategyParam_.nbiter_XEM_
-      = rw.p_page("InputOptions")->option("nbiterations_xem").get(
-                                                                  STK::Integer());
+      = rw.p_page("InputOptions")->option("nbiterations_xem").get(STK::Integer());
 
   Mparam_.eps_xem_
       = rw.p_page("InputOptions")->option("epsilon_xemstart").get(STK::Real());
   Mparam_.eps_XEM_
       = rw.p_page("InputOptions")->option("epsilon_xem").get(STK::Real());
   Mparam_.nbinititerations_
-      = rw.p_page("InputOptions")->option("nbinititerations").get(
-                                                                  STK::Integer());
+      = rw.p_page("InputOptions")->option("nbinititerations").get(STK::Integer());
   Mparam_.initepsilon_
       = rw.p_page("InputOptions")->option("initepsilon").get(STK::Real());
   Mparam_.epsilon_int_
       = rw.p_page("InputOptions")->option("epsilon_int").get(STK::Real());
   Mparam_.nbiterations_int_
-      = rw.p_page("InputOptions")->option("nbiterations_int").get(
-                                                                  STK::Integer());
+      = rw.p_page("InputOptions")->option("nbiterations_int").get(STK::Integer());
   Mparam_.nbrowclust_
       = rw.p_page("InputOptions")->option("nbrowclust").get(STK::Integer());
   Mparam_.nbcolclust_
@@ -161,8 +152,7 @@ void InputParameters::ReadFromOptionFile( std::string optionfilename)
   datafilename_
       = rw.p_page("InputOptions")->option("DataFileName").get(STK::String());
   optionalfilenames_
-      = rw.p_page("InputOptions")->option("OptionalFileNames").get(std::list<
-          std::string>());
+      = rw.p_page("InputOptions")->option("OptionalFileNames").get(std::list<std::string>());
 
   //set fixproportions
   switch (strategy_.Model_)
@@ -215,17 +205,18 @@ void InputParameters::ReadFromOptionFile( std::string optionfilename)
   }
 
   // Set stopping-criteria
-  switch (strategy_.stopcriteria_)
-  {
-    case parameter_:
-      strategyParam_.Stop_Criteria = &ICoClustModel::parameterStopCriteria;
-      break;
-    case likelihood_:
-      strategyParam_.Stop_Criteria = &ICoClustModel::likelihoodStopCriteria;
-    default:
-      strategyParam_.Stop_Criteria = &ICoClustModel::parameterStopCriteria;
-      break;
-  }
+  strategyParam_.Stop_Criteria_ = strategy_.stopcriteria_;
+//  switch (strategy_.stopcriteria_)
+//  {
+//    case parameter_:
+//      strategyParam_.Stop_Criteria = &ICoClustModel::parameterStopCriteria;
+//      break;
+//    case likelihood_:
+//      strategyParam_.Stop_Criteria = &ICoClustModel::likelihoodStopCriteria;
+//    default:
+//      strategyParam_.Stop_Criteria = &ICoClustModel::parameterStopCriteria;
+//      break;
+//  }
 
   //rw.write(std::cout);
 }

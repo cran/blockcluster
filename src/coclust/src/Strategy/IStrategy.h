@@ -62,6 +62,8 @@ class IStrategy
     ICoClustModel * p_Model_; /**<Pointer to Model to be run.*/
     IInit * p_Init_; /**Pointer to initialization to be run*/
     IAlgo * p_Algo_; /**Pointer to algorithm to be run*/
+    StopCriteria criteria_;
+
     StrategyParameters strategyParam_;
 };
 

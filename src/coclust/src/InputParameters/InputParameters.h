@@ -44,8 +44,12 @@ struct StrategyParameters
     int nbxem_;
     int nbiter_xem_;
     int nbiter_XEM_;
-    //member function pointers
-    StopCriteria_poiter Stop_Criteria;
+
+    // stop criteria
+    StopCriteria stop_criteria_;
+
+    //member function pointers removed in v4.4.6 due to gcc-usban issue
+    //StopCriteria_poiter Stop_Criteria;
 };
 
 /**

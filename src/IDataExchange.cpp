@@ -79,18 +79,21 @@ void IDataExchange::setInput(Rcpp::S4 & obj)
   }
 
   // Set stopping-criteria
-  switch (strategy_.stopcriteria_)
-  {
-    case parameter_:
-      strategyParam_.Stop_Criteria = &ICoClustModel::parameterStopCriteria;
-      break;
-    case likelihood_:
-      strategyParam_.Stop_Criteria = &ICoClustModel::likelihoodStopCriteria;
-      break;
-    default:
-      strategyParam_.Stop_Criteria = &ICoClustModel::parameterStopCriteria;
-      break;
-  }
+  strategyParam_.stop_criteria_ = strategy_.stopcriteria_;
+
+  //member function pointers removed in v4.4.6 due to gcc-usban issue
+//  switch (strategy_.stopcriteria_)
+//  {
+//    case parameter_:
+//      strategyParam_.Stop_Criteria = &ICoClustModel::parameterStopCriteria;
+//      break;
+//    case likelihood_:
+//      strategyParam_.Stop_Criteria = &ICoClustModel::likelihoodStopCriteria;
+//      break;
+//    default:
+//      strategyParam_.Stop_Criteria = &ICoClustModel::parameterStopCriteria;
+//      break;
+//  }
   //Set various  model parameters
 
   //get various iterations

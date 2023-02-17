@@ -419,6 +419,20 @@ void ICoClustModel::likelihoodStopCriteria()
             ? true : false;
 }
 
+void ICoClustModel::stopCriteria(StopCriteria const& criteria)
+{
+  switch (criteria) {
+    case StopCriteria::parameter_:
+      parameterStopCriteria();
+      break;
+    case StopCriteria::likelihood_:
+      likelihoodStopCriteria();
+      break;
+    default:
+      break;
+  }
+}
+
 STK::Real ICoClustModel::iclCriteriaValue()
 {
 
