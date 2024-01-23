@@ -30,11 +30,21 @@
  **/
 
 /** @file Rcoclustermain.h
- *  @brief 
+ *  @brief
  **/
 #ifndef COCLUSTMAIN_H
 
+#include <Rinternals.h> // for SEXP
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 SEXP CoClustmain(SEXP robj, SEXP nbCore);
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 #endif /* COCLUSTMAIN_H*/
 

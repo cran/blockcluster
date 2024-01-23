@@ -16,7 +16,7 @@ $(LIB): $(OBJS)
 .PHONY: clean
 
 clean:
-	@-rm $(OBJS)
+	$(RM) $(OBJS)
 
 clean_all:
-	@-rm $(OBJS) $(LIB)
+	$(RM) $(OBJS) $(LIB)

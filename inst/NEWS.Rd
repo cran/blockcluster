@@ -3,6 +3,12 @@
 \name{NEWS}
 \title{News for Package 'blockcluster'}
 
+\section{Changes in blockcluster version 4.5.4 (2024-01-23)}{
+  \itemize{
+    \item Suppressing members function from code 
+    \item Modify Makevars in order to compile blockcluster on (devel) windows platform
+  }
+}
 \section{Changes in blockcluster version 4.5 (2021-07-10)}{
   \itemize{
     \item Version 4.5.1: Modifying more files in order to comply with UBSAN check 

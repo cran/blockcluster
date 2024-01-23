@@ -1,2 +1,3 @@
 #!/bin/sh
 cd src/coclust; make clean_all
+rm src/*.o src/blockcluster.so src/blockcluster.dll
