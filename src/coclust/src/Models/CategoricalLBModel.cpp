@@ -474,7 +474,7 @@ STK::Real CategoricalLBModel::iclCriteriaValue()
 
 void CategoricalLBModel::consoleOut()
 {
-#ifdef COVERBOSE
+#ifndef RPACKAGE
   std::cout<<"Output Model parameters\n";
   std::cout<<"\npie_k:"<<v_Piek_<<"\nrho_l:"<<v_Rhol_<<"\n";
   for (int h = 0; h < r_; ++h)

@@ -229,7 +229,7 @@ void BinaryLBModel::finalizeOutput()
 
 void BinaryLBModel::consoleOut()
 {
-#ifdef COVERBOSE
+#ifndef RPACKAGE
   std::cout <<"Model parameters:\n"
             <<"Alphakl:\n" << m_Alphakl_
             <<"\nlog(piek): "<< v_logPiek_.transpose()

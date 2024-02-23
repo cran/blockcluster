@@ -35,6 +35,7 @@
 
 void XStrategyAlgo::writeVector(int it, MatrixReal classes, std::string type)
 {
+#ifndef RPACKAGE
   std::ostringstream stream;
   stream << "data/" << it << "-" << type << ".txt";
   std::string str = stream.str();
@@ -52,6 +53,7 @@ void XStrategyAlgo::writeVector(int it, MatrixReal classes, std::string type)
     }
     o_file << maxInd << std::endl;
   }
+#endif
 }
 
 bool XStrategyAlgo::run()

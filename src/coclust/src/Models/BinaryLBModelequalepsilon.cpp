@@ -228,7 +228,7 @@ int BinaryLBModelequalepsilon::nbFreeParameters() const
 
 void BinaryLBModelequalepsilon::consoleOut()
 {
-#ifdef COVERBOSE
+#ifndef RPACKAGE
   std::cout<<"Output Model parameter:"<<"\nakl:\n"<<m_Akl_<<"\nepsilon:\n"<<Epsilon_<<"\npiek: "<<
       v_Piek_.transpose()<<"\nRhol: "<<v_Rhol_.transpose()<<std::endl;
   std::cout<<"ICL: "<<iclCriteriaValue()<<"\n";

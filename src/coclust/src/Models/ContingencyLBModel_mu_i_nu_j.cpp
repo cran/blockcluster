@@ -235,7 +235,7 @@ void ContingencyLBModel_mu_i_nu_j::parameterStopCriteria()
 
 void ContingencyLBModel_mu_i_nu_j::consoleOut()
 {
-#ifndef COVERBOSE
+#ifndef RPACKAGE
   std::cout<<"Output Model parameter:"<<"\ngammakl:\n"<<m_Gammakl_<<"\npiek: "<<
       v_Piek_.transpose()<<"\nRhol: "<<v_Rhol_.transpose()<<std::endl;
 #endif

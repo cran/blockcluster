@@ -221,7 +221,7 @@ int ContinuousLBModelequalsigma::nbFreeParameters() const
 
 void ContinuousLBModelequalsigma::consoleOut()
 {
-#ifndef COVERBOSE
+#ifndef RPACKAGE
     std::cout<<"Output Model parameter:"<<"\nBlock Mean:\n"<<m_Mukl_<<"\nBlock Sigma:\n"<<Sigma2_<<"\npiek: "<<
         v_Piek_.transpose()<<"\nRhol: "<<v_Rhol_.transpose()<<std::endl;
 #endif

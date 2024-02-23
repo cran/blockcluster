@@ -228,7 +228,7 @@ void ContingencyLBModel::parameterStopCriteria()
 
 void ContingencyLBModel::consoleOut()
 {
-#ifdef COVERBOSE_CONTINGENCY
+#ifndef RPACKAGE
   std::cout<< "Output Model parameter:\ngammakl:\n" << m_Gammakl_
            << "v_Tk_: "      << v_Tk_.transpose()
            << "v_Rl_: "      << v_Rl_.transpose()

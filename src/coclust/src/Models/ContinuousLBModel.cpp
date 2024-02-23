@@ -228,7 +228,7 @@ int ContinuousLBModel::nbFreeParameters() const
 
 void ContinuousLBModel::consoleOut()
 {
-#ifndef COVERBOSE
+#ifndef RPACKAGE
     std::cout<<"Output Model parameter:"<<"\nBlock Mean:\n"<<m_Mukl_<<"\nBlock Sigma:\n"<<m_Sigma2kl_<<"\npiek: "<<
         v_Piek_.transpose()<<"\nRhol: "<<v_Rhol_.transpose()<<std::endl;
 #endif

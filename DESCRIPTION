@@ -2,7 +2,7 @@ Package: blockcluster
 Type: Package
 Title: Co-Clustering Package for Binary, Categorical, Contingency and
         Continuous Data-Sets
-Version: 4.5.4
+Version: 4.5.5
 Encoding: UTF-8
 Date: 2024-01-23
 Authors@R: c( person("Serge", "Iovleff", role = c("aut","cre"), email = "Serge.Iovleff@stkpp.org")
@@ -31,15 +31,15 @@ Description: Simultaneous clustering of rows and columns, usually designated by
 License: GPL (>= 3)
 URL: https://gitlab.inria.fr/iovleff/blockcluster
 LazyLoad: yes
-Depends: R (>= 3.0.2), rtkore (>= 1.5.5)
+Depends: R (>= 4.1.0), rtkore (>= 1.6.10)
 Imports: methods
-LinkingTo: Rcpp
+LinkingTo: Rcpp, rtkore (>= 1.6.10)
 SystemRequirements: GNU make
 Collate: 'coclusterStrategy.R' 'RCocluster.R' 'optionclasses.R'
         'cocluster.R' 'coclusterBinary.R' 'coclusterCategorical.R'
         'coclusterContingency.R' 'coclusterContinuous.R' 'onattach.R'
 NeedsCompilation: yes
-Packaged: 2024-01-23 12:12:34 UTC; iovleff
+Packaged: 2024-01-26 08:19:07 UTC; iovleff
 RoxygenNote: 7.1.2
 Author: Serge Iovleff [aut, cre],
   Parmeet Singh Bhatia [aut],
@@ -51,4 +51,4 @@ Author: Serge Iovleff [aut, cre],
   Gilles Celeux [ctb]
 Maintainer: Serge Iovleff <Serge.Iovleff@stkpp.org>
 Repository: CRAN
-Date/Publication: 2024-01-23 13:02:56 UTC
+Date/Publication: 2024-02-23 13:40:02 UTC
